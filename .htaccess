@@ -25,6 +25,11 @@
   RewriteRule ^(about|menu|booking|events|branch|ai-data)/?$ frontend/$1.php [L,QSA]
 </IfModule>
 
+# Force PHP processing on rewritten URLs
+<FilesMatch "^(about|menu|booking|events|branch|ai-data)$">
+  ForceType application/x-httpd-php
+</FilesMatch>
+
 <IfModule mod_deflate.c>
   # Compress HTML, CSS, JavaScript, Text, XML and fonts
   AddOutputFilterByType DEFLATE application/javascript
