@@ -19,8 +19,12 @@
   RewriteRule ^asmaraadmin/(.+)$ backend/admin/$1.php [L,QSA]
 
   # ── Static Assets: Serve directly from frontend/ directory ──
+  # For assets in subfolders (e.g. css/style.css, images/pic.jpg)
   RewriteCond %{REQUEST_URI} \.(css|js|jpg|jpeg|png|gif|svg|webp|mp4|webm|woff|woff2|ttf|eot|ico)$ [NC]
   RewriteRule ^(css|js|images|logo|hero-videos)/(.*)$ frontend/$1/$2 [L]
+
+  # For assets directly in the root (e.g. /style.css, /main.js, /favicon.ico)
+  RewriteRule ^(style\.css|main\.js|favicon\.ico)$ frontend/$1 [L]
 
   # ── Clean URL rewrites to frontend/*.php ──
   RewriteRule ^$ frontend/index.php [L]
