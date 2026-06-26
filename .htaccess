@@ -12,13 +12,10 @@
   RewriteRule ^asmaraadmin/?$ backend/admin/login.php [L,QSA]
   RewriteRule ^asmaraadmin/(.+)$ backend/admin/$1.php [L,QSA]
 
-  # ── Static Assets: Serve directly from frontend/ directory if they exist there ──
-  RewriteCond %{DOCUMENT_ROOT}/frontend/$1 -f
+  # ── Static Assets: Serve directly from frontend/ directory ──
   RewriteRule ^(css|js|images|logo|hero-videos)/(.*)$ frontend/$1/$2 [L]
 
   # ── Clean URL rewrites to frontend/*.php ──
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^$ frontend/index.php [L]
 
   RewriteCond %{REQUEST_FILENAME} !-f
