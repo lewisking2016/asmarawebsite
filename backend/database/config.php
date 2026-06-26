@@ -5,7 +5,7 @@
  */
 
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'asmara_restaurant');
-define('DB_USER', 'asmara_user');
-define('DB_PASS', 'asmara123456');
+define('DB_NAME', 'asmaraco_demo_asmara');
+define('DB_USER', 'asmaraco_asmarauser');
+define('DB_PASS', 'demo_asmara');
 define('DB_CHARSET', 'utf8mb4');
