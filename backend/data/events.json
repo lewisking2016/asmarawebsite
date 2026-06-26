@@ -1,0 +1,14 @@
+[
+    {
+        "id": "evt_6a3e6f2e28146",
+        "title": "East Africa Day ",
+        "description": "is one of the most exciting and vibrant restaurant events in East Africa. Dont Miss out ",
+        "category": "social",
+        "capacity": 40,
+        "price_per_person": 2500,
+        "venue": "westlands",
+        "services": "East African Meals",
+        "created_at": "2026-06-26 14:23:10",
+        "status": "active"
+    }
+]

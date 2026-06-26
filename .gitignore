@@ -1,0 +1,12 @@
+node_modules/
+scripts/
+package.json
+package-lock.json
+START_WEBSITE.md
+SKILL.md
+.git/
+asmara_deploy.zip
+
+# Ignore unoptimized images under frontend/images/
+frontend/images/*
+!frontend/images/optimized/

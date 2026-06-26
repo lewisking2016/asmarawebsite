@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# AI Crawlers data endpoint
+Sitemap: https://asmara.co.ke/frontend/ai-data.php
+
+Sitemap: https://asmara.co.ke/sitemap.xml
