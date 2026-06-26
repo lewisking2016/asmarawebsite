@@ -42,6 +42,7 @@ function nav_aria_current($target, $currentPage) {
   
   <!-- Canonical Tag -->
   <link rel="canonical" href="<?php echo htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8'); ?>">
+  <link rel="icon" type="image/png" href="/favicon.ico">
   
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">
