@@ -19,6 +19,11 @@
   RewriteRule ^asmaraadmin/(.+)$ backend/admin/$1.php [L,QSA]
 
   # ── Static Assets: Serve directly from frontend/ directory ──
+  # Serve admin dashboard assets from backend/admin/ if requested under asmaraadmin
+  RewriteCond %{REQUEST_URI} ^/asmaraadmin/.*\.(css|js|jpg|jpeg|png|gif|svg|webp)$ [NC]
+  RewriteRule ^asmaraadmin/(.+)$ backend/admin/$1 [L]
+
+  # For assets in subfolders (e.g. css/style.css, images/pic.jpg)
   RewriteCond %{REQUEST_URI} \.(css|js|jpg|jpeg|png|gif|svg|webp|mp4|webm|woff|woff2|ttf|eot|ico)$ [NC]
   RewriteRule ^(css|js|images|logo|hero-videos)/(.*)$ frontend/$1/$2 [L]
 
