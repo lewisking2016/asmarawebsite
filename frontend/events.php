@@ -44,7 +44,7 @@ $pageSchema = [
   "@type" => "ItemList",
   "name" => "Asmara Restaurant Events List",
   "description" => "Upcoming events at Asmara Restaurant",
-  "url" => "https://asmara.co.ke/events.php",
+  "url" => "https://asmara.co.ke/events",
   "itemListElement" => $schemaEvents
 ];
 include 'header.php'; 
@@ -181,7 +181,7 @@ include 'header.php';
 
             <!-- Event Footer -->
             <div style="padding: var(--space-md); border-top: 1px solid #e5e5e5; display: flex; gap: var(--space-sm);">
-              <a href="booking.php" class="btn btn-primary" style="flex: 1; text-align: center; text-decoration: none; padding: var(--space-sm) var(--space-md); background: #ed174b; color: white; border-radius: 6px; font-weight: 600; transition: all 0.3s ease;">
+              <a href="/booking" class="btn btn-primary" style="flex: 1; text-align: center; text-decoration: none; padding: var(--space-sm) var(--space-md); background: #ed174b; color: white; border-radius: 6px; font-weight: 600; transition: all 0.3s ease;">
                 Reserve Now
               </a>
               <button class="btn btn-secondary" onclick="shareEvent('<?php echo htmlspecialchars($event['title']); ?>', '<?php echo htmlspecialchars($event['description']); ?>')" style="flex: 1; padding: var(--space-sm) var(--space-md); background: #f5f5f5; color: #333; border: 1px solid #e5e5e5; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
@@ -203,7 +203,7 @@ include 'header.php';
           <p style="color: var(--color-text-muted); margin-bottom: var(--space-lg); max-width: 500px; margin-left: auto; margin-right: auto;">
             Check back soon for upcoming corporate events, celebrations, and catering services. In the meantime, contact us to plan your special occasion.
           </p>
-          <a href="booking.php" class="btn btn-primary" style="display: inline-block; padding: var(--space-sm) var(--space-lg); background: #ed174b; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
+          <a href="/booking" class="btn btn-primary" style="display: inline-block; padding: var(--space-sm) var(--space-lg); background: #ed174b; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
             Make a Reservation
           </a>
         </div>

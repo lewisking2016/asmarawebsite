@@ -74,8 +74,8 @@ $branchImageMap = [
           Since 2009, Asmara has served calm, well-run dining rooms<br class="hero-break"> across Westlands, Karen, Lavington, and Pangani.
         </p>
         <div class="hero-actions">
-          <a href="booking.php" class="btn btn-primary" id="heroBtnBook">Reserve a Table</a>
-          <a href="menu.php" class="btn btn-outline" id="heroBtnMenu">View Menu</a>
+          <a href="/booking" class="btn btn-primary" id="heroBtnBook">Reserve a Table</a>
+          <a href="/menu" class="btn btn-outline" id="heroBtnMenu">View Menu</a>
         </div>
       </div>
     </div>
@@ -171,7 +171,7 @@ $branchImageMap = [
               <li><strong>Phone:</strong> <?php echo htmlspecialchars($b['phone']); ?></li>
             </ul>
             <div class="branch-card-actions">
-              <a href="branch.php?branch=<?php echo $slug; ?>" class="btn btn-outline-dark">View More</a>
+              <a href="/branch?branch=<?php echo $slug; ?>" class="btn btn-outline-dark">View More</a>
             </div>
           </div>
         </div>
@@ -226,7 +226,7 @@ $branchImageMap = [
 
       <div style="text-align: center; padding: var(--space-lg); background: rgba(237, 23, 75, 0.04); border-radius: var(--radius-md); border: 1px solid rgba(237, 23, 75, 0.08);">
         <p style="color: var(--color-text-muted-dark); margin-bottom: var(--space-sm); font-size: 0.95rem;">Ready to plan your event?</p>
-        <a href="booking.php" class="btn btn-primary">Contact Us for Events</a>
+        <a href="/booking" class="btn btn-primary">Contact Us for Events</a>
       </div>
     </div>
   </section>

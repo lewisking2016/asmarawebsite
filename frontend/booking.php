@@ -10,7 +10,7 @@ $pageSchema = [
   "@type" => "WebPage",
   "name" => "Reservation - Asmara Restaurant",
   "description" => "Book a table at Asmara Restaurant in Nairobi.",
-  "url" => "https://asmara.co.ke/booking.php"
+  "url" => "https://asmara.co.ke/booking"
 ];
 include 'header.php'; 
 ?>

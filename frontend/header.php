@@ -2,6 +2,15 @@
 require_once __DIR__ . '/../backend/database/BranchRepository.php';
 $currentPage = basename($_SERVER['PHP_SELF']);
 
+// Map clean URL paths to page identifiers for active-link highlighting
+$cleanPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+$cleanPath = rtrim($cleanPath, '/');
+if ($cleanPath === '' || $cleanPath === '/frontend/index.php') $currentPage = 'index.php';
+elseif ($cleanPath === '/about') $currentPage = 'about.php';
+elseif ($cleanPath === '/menu') $currentPage = 'menu.php';
+elseif ($cleanPath === '/booking') $currentPage = 'booking.php';
+elseif ($cleanPath === '/events') $currentPage = 'events.php';
+
 // SEO Defaults
 $siteName = "Asmara Restaurant";
 $defaultTitle = "Asmara Restaurant - Premium Eritrean & Continental Dining in Nairobi";
@@ -104,23 +113,23 @@ function nav_aria_current($target, $currentPage) {
   <!-- Floating Glassmorphic Header Navigation -->
   <header>
     <div class="navbar">
-      <a href="index.php" class="logo" id="navLogo" aria-label="Asmara Restaurant home">
+      <a href="/" class="logo" id="navLogo" aria-label="Asmara Restaurant home">
         <img src="logo/asmara%20logo.png" alt="Asmara Restaurant" class="logo-image">
       </a>
 
       <nav class="desktop-nav-shell" aria-label="Main Navigation">
         <ul class="nav-links">
-          <li><a href="index.php" id="linkHome" class="<?php echo nav_class('index.php', $currentPage); ?>" <?php echo nav_aria_current('index.php', $currentPage); ?>>Home</a></li>
-          <li><a href="about.php" id="linkAbout" class="<?php echo nav_class('about.php', $currentPage); ?>" <?php echo nav_aria_current('about.php', $currentPage); ?>>Our Story</a></li>
-          <li><a href="index.php#branches" id="linkBranches">Branches</a></li>
-          <li><a href="events.php" id="linkEvents" class="<?php echo nav_class('events.php', $currentPage); ?>" <?php echo nav_aria_current('events.php', $currentPage); ?>>Events</a></li>
-          <li><a href="menu.php" id="linkMenu" class="<?php echo nav_class('menu.php', $currentPage); ?>" <?php echo nav_aria_current('menu.php', $currentPage); ?>>Menu</a></li>
-          <li><a href="booking.php" id="linkBooking" class="<?php echo nav_class('booking.php', $currentPage); ?>" <?php echo nav_aria_current('booking.php', $currentPage); ?>>Reservation</a></li>
+          <li><a href="/" id="linkHome" class="<?php echo nav_class('index.php', $currentPage); ?>" <?php echo nav_aria_current('index.php', $currentPage); ?>>Home</a></li>
+          <li><a href="/about" id="linkAbout" class="<?php echo nav_class('about.php', $currentPage); ?>" <?php echo nav_aria_current('about.php', $currentPage); ?>>Our Story</a></li>
+          <li><a href="/#branches" id="linkBranches">Branches</a></li>
+          <li><a href="/events" id="linkEvents" class="<?php echo nav_class('events.php', $currentPage); ?>" <?php echo nav_aria_current('events.php', $currentPage); ?>>Events</a></li>
+          <li><a href="/menu" id="linkMenu" class="<?php echo nav_class('menu.php', $currentPage); ?>" <?php echo nav_aria_current('menu.php', $currentPage); ?>>Menu</a></li>
+          <li><a href="/booking" id="linkBooking" class="<?php echo nav_class('booking.php', $currentPage); ?>" <?php echo nav_aria_current('booking.php', $currentPage); ?>>Reservation</a></li>
         </ul>
       </nav>
 
       <div class="nav-actions">
-        <a href="booking.php" class="btn btn-primary btn-sm <?php echo nav_class('booking.php', $currentPage); ?>" id="btnHeaderReserve" <?php echo nav_aria_current('booking.php', $currentPage); ?>>Reservation</a>
+        <a href="/booking" class="btn btn-primary btn-sm <?php echo nav_class('booking.php', $currentPage); ?>" id="btnHeaderReserve" <?php echo nav_aria_current('booking.php', $currentPage); ?>>Reservation</a>
       </div>
 
       <button class="mobile-toggle" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="mobileDrawer" id="btnMobileToggle">
@@ -149,12 +158,12 @@ function nav_aria_current($target, $currentPage) {
 
       <nav aria-label="Mobile Navigation">
         <ul class="mobile-nav-links">
-          <li><a href="index.php" id="mobileLinkHome" class="<?php echo nav_class('index.php', $currentPage); ?>" <?php echo nav_aria_current('index.php', $currentPage); ?>>Home</a></li>
-          <li><a href="about.php" id="mobileLinkAbout" class="<?php echo nav_class('about.php', $currentPage); ?>" <?php echo nav_aria_current('about.php', $currentPage); ?>>Our Story</a></li>
-          <li><a href="index.php#branches" id="mobileLinkBranches">Branches</a></li>
-          <li><a href="events.php" id="mobileLinkEvents" class="<?php echo nav_class('events.php', $currentPage); ?>" <?php echo nav_aria_current('events.php', $currentPage); ?>>Events</a></li>
-          <li><a href="menu.php" id="mobileLinkMenu" class="<?php echo nav_class('menu.php', $currentPage); ?>" <?php echo nav_aria_current('menu.php', $currentPage); ?>>Menu</a></li>
-          <li><a href="booking.php" id="mobileLinkBooking" class="<?php echo nav_class('booking.php', $currentPage); ?>" <?php echo nav_aria_current('booking.php', $currentPage); ?>>Reservation</a></li>
+          <li><a href="/" id="mobileLinkHome" class="<?php echo nav_class('index.php', $currentPage); ?>" <?php echo nav_aria_current('index.php', $currentPage); ?>>Home</a></li>
+          <li><a href="/about" id="mobileLinkAbout" class="<?php echo nav_class('about.php', $currentPage); ?>" <?php echo nav_aria_current('about.php', $currentPage); ?>>Our Story</a></li>
+          <li><a href="/#branches" id="mobileLinkBranches">Branches</a></li>
+          <li><a href="/events" id="mobileLinkEvents" class="<?php echo nav_class('events.php', $currentPage); ?>" <?php echo nav_aria_current('events.php', $currentPage); ?>>Events</a></li>
+          <li><a href="/menu" id="mobileLinkMenu" class="<?php echo nav_class('menu.php', $currentPage); ?>" <?php echo nav_aria_current('menu.php', $currentPage); ?>>Menu</a></li>
+          <li><a href="/booking" id="mobileLinkBooking" class="<?php echo nav_class('booking.php', $currentPage); ?>" <?php echo nav_aria_current('booking.php', $currentPage); ?>>Reservation</a></li>
         </ul>
       </nav>
 
@@ -164,6 +173,6 @@ function nav_aria_current($target, $currentPage) {
         <p>Best for same-day table requests and direct branch questions.</p>
       </div>
 
-      <a href="booking.php" class="btn btn-primary mobile-nav-cta <?php echo nav_class('booking.php', $currentPage); ?>" id="mobileBtnReserve" <?php echo nav_aria_current('booking.php', $currentPage); ?>>Reserve a Table</a>
+      <a href="/booking" class="btn btn-primary mobile-nav-cta <?php echo nav_class('booking.php', $currentPage); ?>" id="mobileBtnReserve" <?php echo nav_aria_current('booking.php', $currentPage); ?>>Reserve a Table</a>
     </div>
   </div>

@@ -2,7 +2,7 @@
   <footer>
     <div class="container grid grid-4">
       <div class="footer-column">
-        <a href="index.php" class="logo logo-footer" style="margin-bottom: var(--space-xs);" aria-label="Asmara Restaurant home">
+        <a href="/" class="logo logo-footer" style="margin-bottom: var(--space-xs);" aria-label="Asmara Restaurant home">
           <img src="logo/asmara%20logo.png" alt="Asmara Restaurant" class="logo-image">
         </a>
         <p>
@@ -28,11 +28,11 @@
       <div class="footer-column">
         <h4>Explore</h4>
         <ul class="footer-links">
-          <li><a href="menu.php">Our Menu</a></li>
-          <li><a href="booking.php">Reservation</a></li>
-          <li><a href="index.php#branches">Suburbs Map</a></li>
-          <li><a href="about.php">Our Story</a></li>
-          <li><a href="index.php#events">Events</a></li>
+          <li><a href="/menu">Our Menu</a></li>
+          <li><a href="/booking">Reservation</a></li>
+          <li><a href="/#branches">Suburbs Map</a></li>
+          <li><a href="/about">Our Story</a></li>
+          <li><a href="/#events">Events</a></li>
         </ul>
       </div>
       <div class="footer-column">

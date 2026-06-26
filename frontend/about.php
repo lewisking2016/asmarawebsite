@@ -6,7 +6,7 @@ $pageSchema = [
   "@type" => "AboutPage",
   "name" => "About Asmara Restaurant",
   "description" => "Learn about Asmara Restaurants, established in 2009. We offer unique dining experiences infusing Eritrean culture and culinary excellence in an afro-contemporary setting.",
-  "url" => "https://asmara.co.ke/about.php"
+  "url" => "https://asmara.co.ke/about"
 ];
 include 'header.php'; 
 ?>

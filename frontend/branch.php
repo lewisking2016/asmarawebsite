@@ -68,7 +68,7 @@ $pageSchema = [
   "@type" => "Restaurant",
   "name" => $branch['title'],
   "description" => implode(' ', $branch['long_description']),
-  "url" => "https://asmara.co.ke/branch.php?branch=" . $branchKey,
+  "url" => "https://asmara.co.ke/branch?branch=" . $branchKey,
   "telephone" => htmlspecialchars($branch['phone']),
   "servesCuisine" => ["Eritrean", "Ethiopian", "African", "Continental"],
   "keywords" => $branch['keywords'],
@@ -223,7 +223,7 @@ include 'header.php';
       </div>
 
       <div style="text-align: center; margin-top: var(--space-xl);">
-        <a href="menu.php" class="btn btn-outline-dark" style="padding: 12px 28px;">View Full Menu</a>
+        <a href="/menu" class="btn btn-outline-dark" style="padding: 12px 28px;">View Full Menu</a>
       </div>
     </div>
   </section>
@@ -268,7 +268,7 @@ include 'header.php';
             </div>
           </div>
           <div style="padding: var(--space-md); border-top: 1px solid #eee;">
-            <a href="booking.php" class="btn btn-primary btn-sm" style="width: 100%; text-align: center; text-decoration: none; display: block; box-sizing: border-box;">Book Event Space</a>
+            <a href="/booking" class="btn btn-primary btn-sm" style="width: 100%; text-align: center; text-decoration: none; display: block; box-sizing: border-box;">Book Event Space</a>
           </div>
         </div>
         <?php endforeach; ?>
@@ -300,7 +300,7 @@ include 'header.php';
         <p style="color: var(--color-text-muted-light); margin-bottom: var(--space-md);">
           Secure your spot easily online or call the branch directly for immediate assistance.
         </p>
-        <a href="booking.php" class="btn btn-primary" style="font-size: 1.1rem; padding: 14px 32px;">Book A Table</a>
+        <a href="/booking" class="btn btn-primary" style="font-size: 1.1rem; padding: 14px 32px;">Book A Table</a>
       </div>
     </div>
   </section>
