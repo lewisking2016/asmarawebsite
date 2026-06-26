@@ -2,38 +2,28 @@
   RewriteEngine On
   RewriteBase /
 
-  # Force HTTPS (uncomment for production)
-  # RewriteCond %{HTTPS} off
-  # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-  # ── Security: Block direct /frontend/ access ──
-  # Redirect anyone hitting /frontend/... back to the clean URL
-  RewriteCond %{THE_REQUEST} \s/frontend/ [NC]
+  # ── Security: Redirect direct access to /frontend/ directory to clean URLs ──
+  RewriteCond %{THE_REQUEST} \s/frontend/index\.php [NC]
   RewriteRule ^frontend/index\.php$ / [R=301,L]
+  RewriteCond %{THE_REQUEST} \s/frontend/([a-zA-Z0-9-]+)\.php [NC]
   RewriteRule ^frontend/(.+)\.php$ /$1 [R=301,L]
 
-  # ── Admin panel ──
+  # ── Admin Panel ──
   RewriteRule ^asmaraadmin/?$ backend/admin/login.php [L,QSA]
   RewriteRule ^asmaraadmin/(.+)$ backend/admin/$1.php [L,QSA]
 
-  # ── Static assets: serve CSS, JS, images, fonts, video from frontend/ ──
-  RewriteCond %{REQUEST_URI} \.(css|js|jpg|jpeg|png|gif|svg|webp|mp4|webm|woff|woff2|ttf|eot|ico)$ [NC]
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteRule ^(.+)$ frontend/$1 [L]
+  # ── Static Assets: Serve directly from frontend/ directory if they exist there ──
+  RewriteCond %{DOCUMENT_ROOT}/frontend/$1 -f
+  RewriteRule ^(css|js|images|logo|hero-videos)/(.*)$ frontend/$1/$2 [L]
 
-  # ── Clean page routes → frontend/*.php ──
-  # Home
+  # ── Clean URL rewrites to frontend/*.php ──
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^$ frontend/index.php [L]
 
-  # Named pages
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^(about|menu|booking|events|branch|ai-data)/?$ frontend/$1.php [L,QSA]
-
-  # Catch-all fallback to home
-  RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule ^(.*)$ frontend/index.php [L,QSA]
 </IfModule>
 
 <IfModule mod_deflate.c>
