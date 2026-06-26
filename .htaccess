@@ -13,11 +13,13 @@
   RewriteRule ^asmaraadmin/(.+)$ backend/admin/$1.php [L,QSA]
 
   # ── Static Assets: Serve directly from frontend/ directory ──
+  RewriteCond %{REQUEST_URI} \.(css|js|jpg|jpeg|png|gif|svg|webp|mp4|webm|woff|woff2|ttf|eot|ico)$ [NC]
   RewriteRule ^(css|js|images|logo|hero-videos)/(.*)$ frontend/$1/$2 [L]
 
   # ── Clean URL rewrites to frontend/*.php ──
   RewriteRule ^$ frontend/index.php [L]
 
+  # If a clean URL is requested, map it directly to frontend/
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteRule ^(about|menu|booking|events|branch|ai-data)/?$ frontend/$1.php [L,QSA]
