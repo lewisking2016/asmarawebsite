@@ -46,7 +46,7 @@ function gallery_size_class($index) {
 }
 
 $heroVideos = [
-  ['src' => 'hero-videos/grill-dishes.mp4', 'label' => 'Grill dishes'],
+  ['src' => 'hero-videos/grill-dishes-web.mp4', 'label' => 'Grill dishes'],
 ];
 
 $galleryFeaturedPath = 'images/optimized/Lavington-2.jpg';
@@ -61,7 +61,7 @@ $branchImageMap = [
   <section class="hero hero-video-minimal panel-dark">
     <div class="hero-video-minimal-media" aria-hidden="true">
       <video class="hero-video-minimal-player" autoplay muted loop playsinline preload="auto" poster="<?php echo htmlspecialchars(asset_url('hero-videos/posters/grill-dishes.jpg'), ENT_QUOTES, 'UTF-8'); ?>">
-        <source src="<?php echo htmlspecialchars(asset_url('hero-videos/grill-dishes.mp4'), ENT_QUOTES, 'UTF-8'); ?>" type="video/mp4">
+        <source src="<?php echo htmlspecialchars(asset_url('hero-videos/grill-dishes-web.mp4'), ENT_QUOTES, 'UTF-8'); ?>" type="video/mp4">
       </video>
       <div class="hero-video-minimal-overlay"></div>
     </div>
