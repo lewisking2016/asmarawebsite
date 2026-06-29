@@ -30,7 +30,7 @@
   # Map root-level assets to frontend/ folder
   RewriteRule ^style\.css$ frontend/style.css [L]
   RewriteRule ^main\.js$ frontend/main.js [L]
-  RewriteRule ^favicon\.ico$ frontend/logo/asmara\ logo.png [L]
+  RewriteRule ^favicon\.ico$ frontend/logo/asmara_favicon.png [L]
 
   # ── Clean URL rewrites to frontend/*.php ──
   RewriteRule ^$ frontend/index.php [L]

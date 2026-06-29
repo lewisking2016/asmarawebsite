@@ -40,9 +40,8 @@ function nav_aria_current($target, $currentPage) {
   <meta name="description" content="<?php echo htmlspecialchars($pageDescription, ENT_QUOTES, 'UTF-8'); ?>">
   <meta name="keywords" content="<?php echo htmlspecialchars($pageKeywords, ENT_QUOTES, 'UTF-8'); ?>">
   
-  <!-- Canonical Tag -->
   <link rel="canonical" href="<?php echo htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8'); ?>">
-  <link rel="icon" type="image/png" href="/favicon.ico">
+  <link rel="icon" type="image/png" href="logo/asmara_favicon.png">
   
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">

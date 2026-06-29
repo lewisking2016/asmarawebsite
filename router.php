@@ -17,6 +17,10 @@ $request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 // Remove leading slash
 $request_uri = ltrim($request_uri, '/');
 
+if ($request_uri === 'favicon.ico') {
+    $request_uri = 'logo/asmara_favicon.png';
+}
+
 // Handle /asmaraadmin alias for security
 if (strpos($request_uri, 'asmaraadmin') === 0) {
     // /asmaraadmin -> /backend/admin/login.php
@@ -73,7 +77,7 @@ if (strpos($request_uri, 'asmaraadmin') === 0) {
 }
 
 // Check if this is a static file request (in frontend folder)
-$static_extensions = array('css', 'js', 'jpg', 'jpeg', 'png', 'gif', 'svg', 'mp4', 'webm', 'woff', 'woff2', 'ttf', 'eot');
+$static_extensions = array('css', 'js', 'jpg', 'jpeg', 'png', 'gif', 'svg', 'mp4', 'webm', 'woff', 'woff2', 'ttf', 'eot', 'ico', 'webp');
 $file_ext = pathinfo($request_uri, PATHINFO_EXTENSION);
 
 if (in_array($file_ext, $static_extensions)) {

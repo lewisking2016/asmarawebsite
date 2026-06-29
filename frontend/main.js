@@ -18,6 +18,7 @@ function initializeAll() {
   initNewsletterForm();
   initTypingAnimation();
   initAnchorScroll();
+  initHeroVideo();
 }
 
 // Execute immediately if DOM is ready, or wait for DOMContentLoaded
@@ -821,4 +822,21 @@ function initNewsletterForm() {
     });
   });
 }
+
+/**
+ * 21. Hero Background Video Autoplay Recovery
+ */
+function initHeroVideo() {
+  const video = document.querySelector('.hero-video-minimal-player');
+  if (!video) return;
+
+  // Attempt play immediately in case autoplay was restricted
+  const playPromise = video.play();
+  if (playPromise !== undefined) {
+    playPromise.catch(error => {
+      console.warn('Hero video autoplay prevented or deferred:', error);
+    });
+  }
+}
+
 
