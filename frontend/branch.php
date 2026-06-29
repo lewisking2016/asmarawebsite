@@ -261,9 +261,10 @@ include 'header.php';
       <div class="grid grid-3">
         <?php foreach ($branchEvents as $event): ?>
         <div class="card event-card reveal-on-scroll slide-up" style="overflow: hidden; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); background: var(--color-surface-light, #ffffff);">
-          <?php if (!empty($event['image'])): ?>
+          <?php $eventImageUrl = asmara_event_image_url($event); ?>
+          <?php if (!empty($eventImageUrl)): ?>
             <div style="aspect-ratio: 16/10; overflow: hidden; background: #f5f5f5;">
-              <img src="<?= htmlspecialchars($event['image']) ?>" alt="<?= htmlspecialchars($event['title'] ?? 'Event image') ?>" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+              <img src="<?= htmlspecialchars($eventImageUrl) ?>" alt="<?= htmlspecialchars($event['title'] ?? 'Event image') ?>" style="width: 100%; height: 100%; object-fit: cover; display: block;">
             </div>
           <?php endif; ?>
           <div style="background: linear-gradient(135deg, #ed174b 0%, #c41140 100%); color: white; padding: var(--space-md);">

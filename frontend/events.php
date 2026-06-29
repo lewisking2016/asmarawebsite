@@ -116,9 +116,10 @@ include 'header.php';
           <div class="<?php echo $classNames; ?>" style="overflow: hidden; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s ease;">
             
             <!-- Event Header Card -->
-          <?php if (!empty($event['image'])): ?>
+          <?php $eventImageUrl = asmara_event_image_url($event); ?>
+          <?php if (!empty($eventImageUrl)): ?>
           <div style="height: 220px; overflow: hidden; background: #f5f5f5;">
-            <img src="<?php echo htmlspecialchars($event['image']); ?>" alt="<?php echo htmlspecialchars($event['title'] ?? 'Event image'); ?>" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+            <img src="<?php echo htmlspecialchars($eventImageUrl); ?>" alt="<?php echo htmlspecialchars($event['title'] ?? 'Event image'); ?>" style="width: 100%; height: 100%; object-fit: cover; display: block;">
           </div>
           <?php endif; ?>
             <div style="background: linear-gradient(135deg, #ed174b 0%, #c41140 100%); color: white; padding: var(--space-md); position: relative; overflow: hidden;">

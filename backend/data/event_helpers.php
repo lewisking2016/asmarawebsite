@@ -67,3 +67,26 @@ if (!function_exists('asmara_event_date_label')) {
         return $eventDate->format('F j, Y');
     }
 }
+
+if (!function_exists('asmara_event_image_url')) {
+    function asmara_event_image_url(array $event) {
+        $url = trim((string)($event['image'] ?? ''));
+        if ($url === '') {
+            return '';
+        }
+
+        if (strpos($url, '/backend/uploads/events/') === 0 || strpos($url, '/frontend/images/') === 0) {
+            return $url;
+        }
+
+        if (strpos($url, '../backend/uploads/events/') === 0) {
+            return '/' . ltrim(substr($url, 3), '/');
+        }
+
+        if (strpos($url, 'backend/uploads/events/') === 0) {
+            return '/' . ltrim($url, '/');
+        }
+
+        return $url[0] === '/' ? $url : '/' . ltrim($url, '/');
+    }
+}

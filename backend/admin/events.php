@@ -189,7 +189,20 @@ if ($action === 'edit' && isset($_GET['id'])) {
                             <div class="form-row">
                             <div class="form-group">
                                 <label>Event Image</label>
-                                <input type="file" name="image" accept="image/*">
+                                <div style="display:grid; gap:12px;">
+                                    <div id="event-image-preview" style="aspect-ratio: 16/9; overflow:hidden; border-radius:12px; border:1px solid var(--color-border); background:#f8fafc; display:flex; align-items:center; justify-content:center;">
+                                        <?php $editEventImageUrl = !empty($edit_event) ? asmara_event_image_url($edit_event) : ''; ?>
+                                        <?php if (!empty($editEventImageUrl)): ?>
+                                            <img src="<?php echo htmlspecialchars($editEventImageUrl); ?>" alt="Current event image" style="width:100%; height:100%; object-fit:cover; display:block;">
+                                        <?php else: ?>
+                                            <div style="text-align:center; color:var(--color-text-muted); padding:16px;">
+                                                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" style="margin-bottom:8px;"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 15l-5-5-4 4-7-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                                <div>No image selected yet</div>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <input type="file" name="image" id="event-image-input" accept="image/*">
+                                </div>
                                 <p style="font-size:12px; color:var(--color-text-muted); margin-top:8px;">Upload a JPG, PNG, GIF, or WebP image for the event card.</p>
                             </div>
                                 <div class="form-group">
@@ -311,10 +324,16 @@ if ($action === 'edit' && isset($_GET['id'])) {
                         <div class="items-display-wrapper">
                             <div class="events-grid card-view-mode" id="eventsDisplayGrid">
                                 <?php foreach ($events as $event): ?>
+                                    <?php $eventImageUrl = asmara_event_image_url($event); ?>
                                     <div class="event-card-premium" 
                                          data-category="<?php echo htmlspecialchars($event['category']); ?>"
                                          data-title="<?php echo htmlspecialchars(strtolower($event['title'])); ?>">
                                         <div class="event-card-header">
+                                            <?php if (!empty($eventImageUrl)): ?>
+                                                <div style="width:100%; height:180px; overflow:hidden; border-radius:12px; margin-bottom:12px; background:#f8fafc;">
+                                                    <img src="<?php echo htmlspecialchars($eventImageUrl); ?>" alt="<?php echo htmlspecialchars($event['title'] ?? 'Event image'); ?>" style="width:100%; height:100%; object-fit:cover; display:block;">
+                                                </div>
+                                            <?php endif; ?>
                                             <div class="event-card-icon">
                                                 <?php
                                                 $icon = '🎉';
@@ -407,6 +426,33 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                 btnList.classList.remove('active');
                             }
                         }
+                    </script>
+
+                    <script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const input = document.getElementById('event-image-input');
+                            const preview = document.getElementById('event-image-preview');
+                            if (!input || !preview) return;
+
+                            input.addEventListener('change', function() {
+                                const file = this.files && this.files[0];
+                                if (!file) return;
+
+                                const reader = new FileReader();
+                                reader.onload = function(e) {
+                                    preview.innerHTML = '';
+                                    const img = document.createElement('img');
+                                    img.src = e.target.result;
+                                    img.alt = 'Selected event image preview';
+                                    img.style.width = '100%';
+                                    img.style.height = '100%';
+                                    img.style.objectFit = 'cover';
+                                    img.style.display = 'block';
+                                    preview.appendChild(img);
+                                };
+                                reader.readAsDataURL(file);
+                            });
+                        });
                     </script>
 
                 <?php endif; ?>

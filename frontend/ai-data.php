@@ -78,7 +78,7 @@ if (file_exists($eventsFile)) {
                 'price_per_person' => (float)($evt['price_per_person'] ?? 0),
                 'services' => is_array($evt['services'] ?? '') ? $evt['services'] : explode(',', $evt['services'] ?? ''),
                 'event_date' => $evt['event_date'] ?? '',
-                'image' => $evt['image'] ?? ''
+                'image' => asmara_event_image_url($evt)
             ];
         }
     }
