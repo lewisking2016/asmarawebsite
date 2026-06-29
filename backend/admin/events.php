@@ -73,9 +73,9 @@ if (file_exists($eventsFile)) {
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action_type = $_POST['action_type'] ?? '';
-    $uploadedImage = save_event_image_upload('image');
 
     if ($action_type === 'create') {
+        $uploadedImage = save_event_image_upload('image');
         $newEvent = [
             'id' => uniqid('evt_'),
             'title' => $_POST['title'] ?? '',
