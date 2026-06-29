@@ -84,7 +84,7 @@ $branchImageMap = [
   <!-- Brief Asmara Intro -->
   <section id="about-intro" class="asmara-intro panel-light" style="border-top: 1px solid var(--color-border-light); border-bottom: 1px solid var(--color-border-light);">
     <div class="container asmara-intro-compact reveal-on-scroll slide-up">
-      <span class="subtitle">Asmara in Brief</span>
+      <span class="subtitle">Welcome to Asmara Restaurants</span>
       <h2 style="color: var(--color-text-dark);">Four Nairobi locations, one standard</h2>
       <p class="asmara-intro-lead">
         Asmara keeps the focus on good food, steady service, and a clean dining environment built for everyday business lunches and relaxed dinners.
@@ -168,7 +168,7 @@ $branchImageMap = [
             <p class="branch-summary"><?php echo htmlspecialchars($summary); ?></p>
             <ul class="branch-info-list">
               <li><strong>Location:</strong> <?php echo htmlspecialchars($b['address']); ?></li>
-              <li><strong>Phone:</strong> <?php echo htmlspecialchars($b['phone']); ?></li>
+              <li><strong>Phone:</strong> <?php echo htmlspecialchars(format_phone($b['phone'])); ?></li>
             </ul>
             <div class="branch-card-actions">
               <a href="/branch?branch=<?php echo $slug; ?>" class="btn btn-outline-dark">View More</a>

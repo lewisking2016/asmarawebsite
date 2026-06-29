@@ -216,7 +216,7 @@ include 'header.php';
           Contact us directly to discuss custom event packages and special arrangements for your unique celebration.
         </p>
         <a href="tel:+254713610707" class="btn btn-primary" style="display: inline-block; padding: var(--space-sm) var(--space-lg); background: #ed174b; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
-          Call Us: +254 713 610 707
+          Call Us: <?php echo format_phone('+254713610707'); ?>
         </a>
       </div>
 

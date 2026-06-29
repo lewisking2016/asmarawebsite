@@ -36,7 +36,7 @@ include 'header.php';
           <p style="color: var(--color-text-muted-dark); margin-bottom: var(--space-sm);">Call the branch that best fits your plans.</p>
           <ul class="booking-contact-list">
             <?php foreach ($dbBranches as $b): ?>
-              <li><strong><?php echo htmlspecialchars($b['name']); ?></strong> <?php echo htmlspecialchars($b['phone']); ?></li>
+              <li><strong><?php echo htmlspecialchars($b['name']); ?></strong> <?php echo htmlspecialchars(format_phone($b['phone'])); ?></li>
             <?php endforeach; ?>
           </ul>
         </div>
@@ -194,7 +194,7 @@ include 'header.php';
               </div>
               <div class="modern-input-group">
                 <label class="modern-input-label" for="phone">Phone Number *</label>
-                <input type="tel" id="phone" class="modern-input-field" placeholder="E.g. +254 722 000 000" autocomplete="tel" required>
+                <input type="tel" id="phone" class="modern-input-field" placeholder="E.g. +254 (0) 722 000 000" autocomplete="tel" required>
               </div>
             </div>
 

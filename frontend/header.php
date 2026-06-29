@@ -30,6 +30,23 @@ function nav_class($target, $currentPage) {
 function nav_aria_current($target, $currentPage) {
   return $currentPage === $target ? 'aria-current="page"' : '';
 }
+
+if (!function_exists('format_phone')) {
+  function format_phone($phone) {
+    if (empty($phone)) return '';
+    $digits = preg_replace('/\D/', '', $phone);
+    if (strpos($digits, '254') === 0) {
+      $digits = substr($digits, 3);
+    }
+    if (strpos($digits, '0') === 0) {
+      $digits = substr($digits, 1);
+    }
+    if (strlen($digits) === 9) {
+      return '+254 (0) ' . substr($digits, 0, 3) . ' ' . substr($digits, 3, 3) . ' ' . substr($digits, 6, 3);
+    }
+    return $phone;
+  }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -97,7 +114,10 @@ function nav_aria_current($target, $currentPage) {
         ];
       }, (new BranchRepository())->getAll()),
       "sameAs" => [
-        // Add social links here if available
+        "https://www.instagram.com/asmararestaurantskenya",
+        "https://www.facebook.com/AsmaraRestaurantsKenya/",
+        "https://ke.linkedin.com/company/asmara-restaurants-kenya",
+        "https://www.tiktok.com/@asmararestaurantskenya"
       ]
     ];
   ?>
@@ -124,7 +144,6 @@ function nav_aria_current($target, $currentPage) {
           <li><a href="/#branches" id="linkBranches">Branches</a></li>
           <li><a href="/events" id="linkEvents" class="<?php echo nav_class('events.php', $currentPage); ?>" <?php echo nav_aria_current('events.php', $currentPage); ?>>Events</a></li>
           <li><a href="/menu" id="linkMenu" class="<?php echo nav_class('menu.php', $currentPage); ?>" <?php echo nav_aria_current('menu.php', $currentPage); ?>>Menu</a></li>
-          <li><a href="/booking" id="linkBooking" class="<?php echo nav_class('booking.php', $currentPage); ?>" <?php echo nav_aria_current('booking.php', $currentPage); ?>>Reservation</a></li>
         </ul>
       </nav>
 
@@ -163,13 +182,12 @@ function nav_aria_current($target, $currentPage) {
           <li><a href="/#branches" id="mobileLinkBranches">Branches</a></li>
           <li><a href="/events" id="mobileLinkEvents" class="<?php echo nav_class('events.php', $currentPage); ?>" <?php echo nav_aria_current('events.php', $currentPage); ?>>Events</a></li>
           <li><a href="/menu" id="mobileLinkMenu" class="<?php echo nav_class('menu.php', $currentPage); ?>" <?php echo nav_aria_current('menu.php', $currentPage); ?>>Menu</a></li>
-          <li><a href="/booking" id="mobileLinkBooking" class="<?php echo nav_class('booking.php', $currentPage); ?>" <?php echo nav_aria_current('booking.php', $currentPage); ?>>Reservation</a></li>
         </ul>
       </nav>
 
       <div class="mobile-nav-card">
         <span class="mobile-nav-card-label">Quick contact</span>
-        <a href="tel:+254713610707">+254 713 610 707</a>
+        <a href="tel:+254713610707"><?php echo format_phone('+254713610707'); ?></a>
         <p>Best for same-day table requests and direct branch questions.</p>
       </div>
 

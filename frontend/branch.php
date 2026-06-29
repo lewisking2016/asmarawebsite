@@ -122,7 +122,7 @@ include 'header.php';
           </div>
           <div class="fact-card">
             <span class="fact-label">Phone</span>
-            <span class="fact-value"><?= htmlspecialchars($branch['phone']) ?></span>
+            <span class="fact-value"><?= htmlspecialchars(format_phone($branch['phone'])) ?></span>
           </div>
           <div class="fact-card">
             <span class="fact-label">Email</span>
@@ -290,7 +290,7 @@ include 'header.php';
         <div class="booking-side-card" style="margin-top: var(--space-md);">
           <ul class="booking-contact-list">
             <li><strong>Location:</strong> <?= htmlspecialchars($branch['address']) ?></li>
-            <li><strong>Phone:</strong> <?= htmlspecialchars($branch['phone']) ?></li>
+            <li><strong>Phone:</strong> <?= htmlspecialchars(format_phone($branch['phone'])) ?></li>
             <li><strong>Email:</strong> <?= htmlspecialchars($branch['email']) ?></li>
           </ul>
         </div>
