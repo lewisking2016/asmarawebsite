@@ -2917,16 +2917,58 @@ footer h4 {
 .success-overlay {
   position: absolute;
   inset: 0;
-  background-color: rgba(18, 11, 6, 0.86);
+  background: rgba(255, 255, 255, 0.96);
+  color: var(--color-text-dark);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: var(--space-lg);
-  border-radius: 14px;
+  gap: var(--space-sm);
+  padding: var(--space-xl);
+  border-radius: 18px;
+  border: 1px solid rgba(30, 21, 13, 0.08);
+  box-shadow: 0 28px 60px rgba(30, 21, 13, 0.14);
   z-index: 10;
   text-align: center;
+  overflow: hidden;
   animation: fadeIn 0.4s var(--transition-normal) forwards;
+}
+
+.success-overlay::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at top left, rgba(237, 23, 75, 0.08), transparent 40%),
+    radial-gradient(circle at bottom right, rgba(255, 210, 0, 0.12), transparent 42%);
+  pointer-events: none;
+}
+
+.success-overlay > * {
+  position: relative;
+  z-index: 1;
+}
+
+.success-overlay h3 {
+  color: var(--color-text-dark) !important;
+  font-family: var(--font-heading);
+  margin: 0;
+}
+
+.success-overlay p {
+  color: var(--color-text-muted-dark) !important;
+}
+
+.success-overlay .btn-outline {
+  background: linear-gradient(180deg, #f32357 0%, var(--color-primary) 100%);
+  color: #ffffff !important;
+  border-color: transparent;
+  box-shadow: 0 14px 28px rgba(237, 23, 75, 0.24);
+}
+
+.success-overlay .btn-outline:hover {
+  background: linear-gradient(180deg, #ff2d64 0%, var(--color-primary) 100%);
+  color: #ffffff !important;
 }
 
 @keyframes fadeIn {

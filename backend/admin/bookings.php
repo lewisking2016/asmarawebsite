@@ -30,26 +30,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $message = 'Please enter a cancellation reason before cancelling the reservation.';
             $message_type = 'error';
         } else {
-        $booking_detail = $bookingRepo->getById($booking_id);
-        $bookingRepo->updateStatus($booking_id, $status);
-        Auth::logActivity(Auth::getCurrentUserId(), 'updated', 'bookings', $booking_id);
-        $message = 'Booking status updated successfully!';
-        if ($booking_detail && in_array($status, ['confirmed', 'cancelled', 'completed'], true)) {
-            $emailSent = asmara_send_booking_status_email($booking_detail, $status, $cancellation_reason);
-            $salesSent = asmara_send_booking_status_to_sales($booking_detail, $status, $cancellation_reason);
-            if ($emailSent) {
-                $message .= ' Email sent to the guest.';
-            } else {
-                $message .= ' Status updated, but the email could not be sent.';
+            $booking_detail = $bookingRepo->getById($booking_id);
+            $bookingRepo->updateStatus($booking_id, $status);
+            Auth::logActivity(Auth::getCurrentUserId(), 'updated', 'bookings', $booking_id);
+            $message = 'Booking status updated successfully!';
+            if ($booking_detail && in_array($status, ['confirmed', 'cancelled', 'completed'], true)) {
+                $emailSent = asmara_send_booking_status_email($booking_detail, $status, $cancellation_reason);
+                $salesSent = asmara_send_booking_status_to_sales($booking_detail, $status, $cancellation_reason);
+                if ($emailSent) {
+                    $message .= ' Email sent to the guest.';
+                } else {
+                    $message .= ' Status updated, but the email could not be sent.';
+                }
+                if ($salesSent) {
+                    $message .= ' Sales has been notified.';
+                } else {
+                    $message .= ' Sales notification could not be sent.';
+                }
             }
-            if ($salesSent) {
-                $message .= ' Sales has been notified.';
-            } else {
-                $message .= ' Sales notification could not be sent.';
-            }
-        }
-        $message_type = 'success';
-        $action = 'list';
+            $message_type = 'success';
+            $action = 'list';
         }
     }
 }
@@ -254,26 +254,6 @@ if ($view_id && $action === 'view') {
                     <?php endif; ?>
 
                     <script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            const statusSelect = document.getElementById('booking-status-select');
-                            const reasonWrap = document.getElementById('cancellation-reason-wrap');
-                            const reasonField = document.getElementById('cancellation-reason');
-
-                            if (statusSelect && reasonWrap && reasonField) {
-                                const syncReasonField = () => {
-                                    const showReason = statusSelect.value === 'cancelled';
-                                    reasonWrap.style.display = showReason ? 'block' : 'none';
-                                    reasonField.required = showReason;
-                                    if (!showReason) {
-                                        reasonField.value = '';
-                                    }
-                                };
-
-                                statusSelect.addEventListener('change', syncReasonField);
-                                syncReasonField();
-                            }
-                        });
-
                         function filterBookings() {
                             const searchVal = document.getElementById('booking-search-input').value.toLowerCase();
                             const statusVal = document.getElementById('status-select-filter').value;
@@ -297,5 +277,27 @@ if ($view_id && $action === 'view') {
 
                 <?php endif; ?>
             </div>
+
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    const statusSelect = document.getElementById('booking-status-select');
+                    const reasonWrap = document.getElementById('cancellation-reason-wrap');
+                    const reasonField = document.getElementById('cancellation-reason');
+
+                    if (statusSelect && reasonWrap && reasonField) {
+                        const syncReasonField = () => {
+                            const showReason = statusSelect.value === 'cancelled';
+                            reasonWrap.style.display = showReason ? 'block' : 'none';
+                            reasonField.required = showReason;
+                            if (!showReason) {
+                                reasonField.value = '';
+                            }
+                        };
+
+                        statusSelect.addEventListener('change', syncReasonField);
+                        syncReasonField();
+                    }
+                });
+            </script>
 
 <?php include 'footer.php'; ?>
