@@ -68,7 +68,7 @@ $branchImageMap = [
 
     <div class="container hero-video-minimal-shell">
       <div class="hero-video-minimal-copy reveal-on-scroll slide-up">
-        <span class="hero-tagline">Asmara Restaurants</span>
+        <span class="hero-tagline" style="color: #ffffff;">Asmara Restaurants</span>
         <h1>Elegant Eritrean<br>dining in Nairobi</h1>
         <p>
           Since 2009, Asmara has served calm, well-run dining rooms<br class="hero-break"> across Westlands, Karen, Lavington, and Pangani.
