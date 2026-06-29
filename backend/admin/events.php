@@ -37,10 +37,16 @@ function save_event_image_upload($fieldName, $existingPath = '') {
     $filename = uniqid('event_') . '.' . $extension;
     $destination = $uploadDir . '/' . $filename;
 
-    if (!move_uploaded_file($_FILES[$fieldName]['tmp_name'], $destination)) {
+    $moved = move_uploaded_file($_FILES[$fieldName]['tmp_name'], $destination);
+    if (!$moved && is_file($_FILES[$fieldName]['tmp_name'])) {
+        $moved = copy($_FILES[$fieldName]['tmp_name'], $destination);
+    }
+
+    if (!$moved) {
         return $existingPath;
     }
 
+    @chmod($destination, 0644);
     return '/backend/uploads/events/' . $filename;
 }
 
