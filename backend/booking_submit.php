@@ -74,6 +74,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'date' => $booking_date,
                         'time' => $booking_time
                     ];
+
+                    // Send email notification to management
+                    $notifyEmails = ['semhar@asmara.co.ke', 'sales@asmara.co.ke'];
+                    $branchDisplay = $newBooking['branch_name'] ?? $branch_name;
+                    $confCode = $newBooking['confirmation_code'];
+
+                    $subject = "New Reservation: {$guest_name} — {$branchDisplay} ({$confCode})";
+
+                    $body  = "<html><body style='font-family: Arial, sans-serif; color: #333;'>";
+                    $body .= "<h2 style='color: #ed174b;'>New Reservation Received</h2>";
+                    $body .= "<table style='border-collapse: collapse; width: 100%; max-width: 500px;'>";
+                    $body .= "<tr><td style='padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;'>Confirmation Code</td><td style='padding: 8px; border-bottom: 1px solid #eee;'>{$confCode}</td></tr>";
+                    $body .= "<tr><td style='padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;'>Guest Name</td><td style='padding: 8px; border-bottom: 1px solid #eee;'>{$guest_name}</td></tr>";
+                    $body .= "<tr><td style='padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;'>Email</td><td style='padding: 8px; border-bottom: 1px solid #eee;'>{$email}</td></tr>";
+                    $body .= "<tr><td style='padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;'>Phone</td><td style='padding: 8px; border-bottom: 1px solid #eee;'>{$phone}</td></tr>";
+                    $body .= "<tr><td style='padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;'>Branch</td><td style='padding: 8px; border-bottom: 1px solid #eee;'>{$branchDisplay}</td></tr>";
+                    $body .= "<tr><td style='padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;'>Date</td><td style='padding: 8px; border-bottom: 1px solid #eee;'>{$booking_date}</td></tr>";
+                    $body .= "<tr><td style='padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;'>Time</td><td style='padding: 8px; border-bottom: 1px solid #eee;'>{$booking_time}</td></tr>";
+                    $body .= "<tr><td style='padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;'>Guests</td><td style='padding: 8px; border-bottom: 1px solid #eee;'>{$guest_count}</td></tr>";
+                    if (!empty($special_requests)) {
+                        $body .= "<tr><td style='padding: 8px; border-bottom: 1px solid #eee; font-weight: bold;'>Special Requests</td><td style='padding: 8px; border-bottom: 1px solid #eee;'>{$special_requests}</td></tr>";
+                    }
+                    $body .= "</table>";
+                    $body .= "<p style='margin-top: 20px; font-size: 0.85rem; color: #999;'>This is an automated notification from the Asmara Restaurants website.</p>";
+                    $body .= "</body></html>";
+
+                    $headers  = "MIME-Version: 1.0\r\n";
+                    $headers .= "Content-type: text/html; charset=UTF-8\r\n";
+                    $headers .= "From: Asmara Reservations <noreply@asmara.co.ke>\r\n";
+                    $headers .= "Reply-To: {$email}\r\n";
+
+                    foreach ($notifyEmails as $to) {
+                        @mail($to, $subject, $body, $headers);
+                    }
                 } else {
                     $response = [
                         'success' => false,
