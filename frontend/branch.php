@@ -135,8 +135,23 @@ include 'header.php';
         </div>
       </div>
 
-      <div class="reveal-on-scroll scale-up">
-        <div style="aspect-ratio: 4/3; min-height: clamp(250px, 45vw, 420px); overflow: hidden; border-radius: var(--radius-md); border: 1px solid var(--color-border-light);">
+      <div class="reveal-on-scroll scale-up" style="display: flex; flex-direction: column; gap: var(--space-md);">
+        <!-- Top Image -->
+        <?php
+        $branchImages = [
+          'westlands' => 'images/view more/Lavington-9.jpg',
+          'lavington' => 'images/view more/Lavington-38.jpg',
+          'karen' => 'images/view more/Lavington-46.jpg',
+          'pangani' => 'images/view more/Lavington-49.jpg'
+        ];
+        $selectedImg = $branchImages[$slug] ?? 'images/view more/Lavington-9.jpg';
+        ?>
+        <div style="aspect-ratio: 16/9; overflow: hidden; border-radius: var(--radius-md); border: 1px solid var(--color-border-light);">
+          <img src="<?= htmlspecialchars($selectedImg) ?>" alt="<?= htmlspecialchars($branch['title']) ?>" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+
+        <!-- Google Map Below -->
+        <div style="aspect-ratio: 16/10; overflow: hidden; border-radius: var(--radius-md); border: 1px solid var(--color-border-light);">
           <?php
           $maps = [
             'westlands' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.847551061905!2d36.8041071!3d-1.2639144!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f1741a3962637%3A0xe556b69b0fa69dbb!2sAsmara%20Restaurant%20-%20Westlands!5e0!3m2!1sen!2ske!4v1719650000000!5m2!1sen!2ske',
