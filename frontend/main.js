@@ -830,13 +830,31 @@ function initHeroVideo() {
   const video = document.querySelector('.hero-video-minimal-player');
   if (!video) return;
 
-  // Attempt play immediately in case autoplay was restricted
-  const playPromise = video.play();
-  if (playPromise !== undefined) {
-    playPromise.catch(error => {
-      console.warn('Hero video autoplay prevented or deferred:', error);
-    });
+  const tryPlay = () => {
+    const playPromise = video.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        // Playback successful, clean up event listeners
+        removeInteractionListeners();
+      }).catch(error => {
+        console.warn('Hero video play attempt failed:', error);
+      });
+    }
+  };
+
+  const removeInteractionListeners = () => {
+    document.removeEventListener('click', tryPlay);
+    document.removeEventListener('touchstart', tryPlay);
+    document.removeEventListener('scroll', tryPlay);
+  };
+
+  // Try playing immediately
+  tryPlay();
+
+  // If autoplay is blocked, trigger play on user interaction
+  if (video.paused) {
+    document.addEventListener('click', tryPlay, { once: true });
+    document.addEventListener('touchstart', tryPlay, { once: true });
+    document.addEventListener('scroll', tryPlay, { once: true });
   }
 }
-
-
