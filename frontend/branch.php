@@ -295,12 +295,25 @@ include 'header.php';
           </ul>
         </div>
       </div>
-      <div class="reveal-on-scroll scale-up" style="text-align: center; background: rgba(237, 23, 75, 0.04); padding: var(--space-xl); border-radius: var(--radius-lg); border: 1.5px solid rgba(237, 23, 75, 0.12);">
-        <h3 style="color: var(--color-text-dark); margin-bottom: var(--space-sm);">Reserve your table</h3>
-        <p style="color: var(--color-text-muted-light); margin-bottom: var(--space-md);">
-          Secure your spot easily online or call the branch directly for immediate assistance.
-        </p>
-        <a href="/booking" class="btn btn-primary" style="font-size: 1.1rem; padding: 14px 32px;">Book A Table</a>
+      <div class="reveal-on-scroll scale-up" style="padding: 0; overflow: hidden; border-radius: var(--radius-lg); height: clamp(250px, 45vw, 420px); position: relative; border: 1px solid rgba(255, 255, 255, 0.1);">
+        <?php
+        $maps = [
+          'westlands' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.847551061905!2d36.8041071!3d-1.2639144!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f1741a3962637%3A0xe556b69b0fa69dbb!2sAsmara%20Restaurant%20-%20Westlands!5e0!3m2!1sen!2ske!4v1719650000000!5m2!1sen!2ske',
+          'lavington' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.824707172089!2d36.7725916!3d-1.2787093!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f1a6b0c2e3995%3A0x6b10086d4911d95!2sAsmara%20Restaurant%20Lavington!5e0!3m2!1sen!2ske!4v1719650000000!5m2!1sen!2ske',
+          'karen' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.7516849492194!2d36.7381504!3d-1.3255152!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f1a26ad019483%3A0x9bbad51a0ee331d2!2sAsmara%20Restaurant%20Karen!5e0!3m2!1sen!2ske!4v1719650000000!5m2!1sen!2ske',
+          'pangani' => 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.8359400262114!2d36.8377759!3d-1.2711019!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f1704e9c70817%3A0xc3b838706d871ab1!2sAsmara%20Restaurant%20Pangani!5e0!3m2!1sen!2ske!4v1719650000000!5m2!1sen!2ske'
+        ];
+        $embedUrl = $maps[$slug] ?? $maps['westlands'];
+        ?>
+        <iframe 
+          src="<?= $embedUrl ?>" 
+          width="100%" 
+          height="100%" 
+          style="border:0; display: block;" 
+          allowfullscreen="" 
+          loading="lazy" 
+          referrerpolicy="no-referrer-when-downgrade">
+        </iframe>
       </div>
     </div>
   </section>
