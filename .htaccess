@@ -15,6 +15,7 @@
   RewriteRule ^index$ / [R=301,L]
 
   # ── Admin Panel ──
+  RewriteRule ^asmaraadmin/(.+)\.php$ backend/admin/$1.php [L,QSA]
   RewriteRule ^asmaraadmin/?$ backend/admin/login.php [L,QSA]
   RewriteRule ^asmaraadmin/(.+)$ backend/admin/$1.php [L,QSA]
 

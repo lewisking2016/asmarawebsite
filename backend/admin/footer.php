@@ -10,7 +10,7 @@
 
     <script>
         // Auto-refresh dashboard every 60 seconds
-        if (document.location.pathname.endsWith('index.php')) {
+        if (document.location.pathname.endsWith('/index') || document.location.pathname.endsWith('/index.php')) {
             setTimeout(function() {
                 location.reload();
             }, 60000);

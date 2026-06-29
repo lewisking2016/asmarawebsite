@@ -13,12 +13,13 @@ require_once __DIR__ . '/../data/event_helpers.php';
 
 Auth::requireLogin();
 
-function save_event_image_upload($fieldName, $existingPath = '') {
+function save_event_image_upload($fieldName, $existingPath = '', &$uploadError = '') {
     if (!isset($_FILES[$fieldName]) || empty($_FILES[$fieldName]['name'])) {
         return $existingPath;
     }
 
     if ($_FILES[$fieldName]['error'] !== UPLOAD_ERR_OK) {
+        $uploadError = 'Event image upload failed with error code ' . $_FILES[$fieldName]['error'] . '.';
         return $existingPath;
     }
 
@@ -31,6 +32,7 @@ function save_event_image_upload($fieldName, $existingPath = '') {
     $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
     $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
     if (!in_array($extension, $allowed, true)) {
+        $uploadError = 'Please upload a JPG, JPEG, PNG, GIF, or WebP image.';
         return $existingPath;
     }
 
@@ -43,6 +45,7 @@ function save_event_image_upload($fieldName, $existingPath = '') {
     }
 
     if (!$moved) {
+        $uploadError = 'Could not save the uploaded image on the server.';
         return $existingPath;
     }
 
@@ -75,7 +78,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action_type = $_POST['action_type'] ?? '';
 
     if ($action_type === 'create') {
-        $uploadedImage = save_event_image_upload('image');
+        $uploadError = '';
+        $uploadedImage = save_event_image_upload('image', '', $uploadError);
         $newEvent = [
             'id' => uniqid('evt_'),
             'title' => $_POST['title'] ?? '',
@@ -95,12 +99,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         file_put_contents($eventsFile, json_encode($events, JSON_PRETTY_PRINT));
         Auth::logActivity(Auth::getCurrentUserId(), 'created', 'events', $newEvent['id']);
         $message = 'Event created successfully!';
+        if ($uploadError !== '') {
+            $message .= ' ' . $uploadError;
+        }
         $action = 'list';
 
     } elseif ($action_type === 'update') {
         $event_id = $_POST['id'] ?? '';
         foreach ($events as &$event) {
             if ($event['id'] === $event_id) {
+                $uploadError = '';
+                $currentImage = $event['image'] ?? '';
+                $newImage = save_event_image_upload('image', $currentImage, $uploadError);
                 $event['title'] = $_POST['title'] ?? $event['title'];
                 $event['description'] = $_POST['description'] ?? $event['description'];
                 $event['category'] = $_POST['category'] ?? $event['category'];
@@ -110,13 +120,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $event['services'] = $_POST['services'] ?? $event['services'];
                 $event['updated_at'] = date('Y-m-d H:i:s');
                 $event['event_date'] = $_POST['event_date'] ?? $event['event_date'];
-                $event['image'] = save_event_image_upload('image', $event['image'] ?? '');
+                $event['image'] = $newImage;
                 break;
             }
         }
         file_put_contents($eventsFile, json_encode($events, JSON_PRETTY_PRINT));
         Auth::logActivity(Auth::getCurrentUserId(), 'updated', 'events', $event_id);
         $message = 'Event updated successfully!';
+        if (!empty($uploadError)) {
+            $message .= ' ' . $uploadError;
+        }
         $action = 'list';
 
     } elseif ($action_type === 'delete') {

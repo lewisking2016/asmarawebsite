@@ -11,7 +11,7 @@ Auth::startSession();
 
 // If already logged in, redirect to dashboard
 if (Auth::isLoggedIn()) {
-    header('Location: /backend/admin/index.php');
+    header('Location: /asmaraadmin/index');
     exit();
 }
 
@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Password is required';
     } elseif (Auth::login($username, $password)) {
         // Login successful
-        header('Location: /backend/admin/index.php');
+        header('Location: /asmaraadmin/index');
         exit();
     } else {
         $error = 'Invalid username or password';

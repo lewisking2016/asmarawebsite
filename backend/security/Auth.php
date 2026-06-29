@@ -104,7 +104,7 @@ class Auth {
      */
     public static function requireLogin() {
         if (!self::isLoggedIn()) {
-            header('Location: /backend/admin/login.php');
+            header('Location: /asmaraadmin/login');
             exit();
         }
     }
@@ -116,7 +116,7 @@ class Auth {
         self::requireLogin();
         
         if ($_SESSION['admin_role'] !== 'admin') {
-            header('Location: /backend/admin/index.php');
+            header('Location: /asmaraadmin/index');
             $_SESSION['error'] = 'Unauthorized access';
             exit();
         }

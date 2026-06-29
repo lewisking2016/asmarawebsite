@@ -10,7 +10,7 @@ require_once __DIR__ . '/../security/Auth.php';
 Auth::startSession();
 
 if (!Auth::isLoggedIn()) {
-    header('Location: login.php');
+    header('Location: /asmaraadmin/login');
     exit();
 }
 
