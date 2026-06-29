@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $filename = uniqid('menu_') . '.' . $ext;
             $dest = $uploadDir . $filename;
             if (move_uploaded_file($tmp, $dest)) {
-                $data['image_url'] = '../backend/uploads/menu/' . $filename;
+                $data['image_url'] = '/backend/uploads/menu/' . $filename;
             }
         }
 
@@ -76,7 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $filename = uniqid('menu_') . '.' . $ext;
             $dest = $uploadDir . $filename;
             if (move_uploaded_file($tmp, $dest)) {
-                $data['image_url'] = '../backend/uploads/menu/' . $filename;
+                $data['image_url'] = '/backend/uploads/menu/' . $filename;
             }
         }
 
@@ -119,6 +119,9 @@ function admin_preview_src($url) {
     // If it starts with images/, route via frontend folder
     if (strpos($url, 'images/') === 0) {
         return '/frontend/' . $url;
+    }
+    if (strpos($url, '/backend/uploads/menu/') === 0) {
+        return $url;
     }
     // remove leading ../ so path becomes absolute from webroot
     $p = preg_replace('/^\.\./', '', $url);

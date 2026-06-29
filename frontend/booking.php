@@ -1,5 +1,6 @@
 <?php 
 require_once __DIR__ . '/../backend/database/BranchRepository.php';
+require_once __DIR__ . '/../backend/data/event_helpers.php';
 $branchRepo = new BranchRepository();
 $dbBranches = $branchRepo->getAll();
 
@@ -45,7 +46,7 @@ include 'header.php';
           <h3>What to expect</h3>
           <ul class="booking-contact-list">
             <li>Online reservations need confirmation by email.</li>
-            <li>Tables are held for 20 minutes past the booking time.</li>
+            <li>Tables are held for 30 minutes past the booking time.</li>
             <li>Tell us about allergies or special occasions in the notes field.</li>
           </ul>
         </div>
@@ -75,6 +76,7 @@ include 'header.php';
           if (file_exists($eventsFile)) {
               $ev = json_decode(file_get_contents($eventsFile), true);
               if (is_array($ev)) $events = $ev;
+              $events = asmara_filter_upcoming_events($events);
           }
         ?>
 
@@ -163,7 +165,7 @@ include 'header.php';
                 <select id="event" style="padding: 16px 20px; color: #000000; background: #ffffff;">
                   <option value="">None (Regular Dining)</option>
                   <?php foreach ($events as $ev): ?>
-                    <option value="<?php echo htmlspecialchars($ev['id']); ?>"><?php echo htmlspecialchars($ev['title'] . ' — ' . ($ev['venue'] ?? '')); ?></option>
+                    <option value="<?php echo htmlspecialchars($ev['id']); ?>"><?php echo htmlspecialchars($ev['title'] . ' - ' . asmara_event_date_label($ev) . ' - ' . ($ev['venue'] ?? '')); ?></option>
                   <?php endforeach; ?>
                 </select>
               </div>

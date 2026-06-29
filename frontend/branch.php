@@ -1,8 +1,25 @@
 <?php
 require_once __DIR__ . '/../backend/database/BranchRepository.php';
 require_once __DIR__ . '/../backend/database/MenuRepository.php';
+require_once __DIR__ . '/../backend/data/event_helpers.php';
 $branchRepo = new BranchRepository();
 $menuRepo = new MenuRepository();
+
+function asmara_menu_image_url($url) {
+  if (empty($url)) {
+    return '';
+  }
+  if (strpos($url, '/backend/uploads/menu/') === 0 || strpos($url, '/frontend/images/') === 0) {
+    return $url;
+  }
+  if (strpos($url, '../backend/uploads/menu/') === 0) {
+    return '/' . ltrim(substr($url, 3), '/');
+  }
+  if (strpos($url, 'backend/uploads/menu/') === 0) {
+    return '/' . ltrim($url, '/');
+  }
+  return $url[0] === '/' ? $url : '/' . ltrim($url, '/');
+}
 
 $branchKey = $_GET['branch'] ?? 'westlands';
 $dbBranch = $branchRepo->getByName(ucfirst($branchKey));
@@ -24,6 +41,7 @@ if (file_exists(__DIR__ . '/../backend/data/events.json')) {
         }
     }
 }
+$branchEvents = asmara_filter_upcoming_events($branchEvents);
 
 $slug = strtolower($branchKey);
 
@@ -191,28 +209,17 @@ include 'header.php';
       <div class="grid grid-3">
         <?php foreach (array_slice($branchMenuItems, 0, 6) as $item): 
           $imgUrl = $item['image_url'];
+          $publicImgUrl = asmara_menu_image_url($imgUrl);
           $showImage = false;
           if (!empty($imgUrl)) {
-            $testPath = $imgUrl;
-            if (strpos($imgUrl, '/') === 0) {
-              $testPath = $_SERVER['DOCUMENT_ROOT'] . $imgUrl;
-            } else {
-              $testPath = __DIR__ . '/' . $imgUrl;
-            }
-            $parts = explode('/', str_replace('\\', '/', $testPath));
-            $resolved = [];
-            foreach ($parts as $part) {
-              if ($part === '..' && !empty($resolved)) array_pop($resolved);
-              elseif ($part !== '' && $part !== '.') $resolved[] = $part;
-            }
-            $testPath = implode('/', $resolved);
+            $testPath = $_SERVER['DOCUMENT_ROOT'] . $publicImgUrl;
             $showImage = file_exists($testPath);
           }
         ?>
         <div class="card dish-card reveal-on-scroll slide-up">
           <div class="media-placeholder" style="aspect-ratio: 16/10; overflow: hidden; display: flex; align-items: center; justify-content: center; background: linear-gradient(145deg, #100b06 0%, #080503 100%); position: relative; padding: 0;">
             <?php if ($showImage): ?>
-              <img src="<?= htmlspecialchars($imgUrl) ?>" alt="<?= htmlspecialchars($item['name']) ?>" style="width: 100%; height: 100%; object-fit: cover;">
+              <img src="<?= htmlspecialchars($publicImgUrl) ?>" alt="<?= htmlspecialchars($item['name']) ?>" style="width: 100%; height: 100%; object-fit: cover;">
             <?php else: ?>
               <svg viewBox="0 0 24 24" style="width: 48px; height: 48px; fill: var(--color-primary, #ed174b); opacity: 0.8;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
               <div class="description" style="position: absolute; bottom: 10px; color: #fff; font-size: 0.85rem; font-weight: 600;"><?= htmlspecialchars($item['name']) ?></div>
@@ -254,13 +261,23 @@ include 'header.php';
       <div class="grid grid-3">
         <?php foreach ($branchEvents as $event): ?>
         <div class="card event-card reveal-on-scroll slide-up" style="overflow: hidden; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); background: var(--color-surface-light, #ffffff);">
+          <?php if (!empty($event['image'])): ?>
+            <div style="aspect-ratio: 16/10; overflow: hidden; background: #f5f5f5;">
+              <img src="<?= htmlspecialchars($event['image']) ?>" alt="<?= htmlspecialchars($event['title'] ?? 'Event image') ?>" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+            </div>
+          <?php endif; ?>
           <div style="background: linear-gradient(135deg, #ed174b 0%, #c41140 100%); color: white; padding: var(--space-md);">
             <h3 class="font-heading-h3" style="color: white; margin: 0 0 var(--space-xs) 0; font-size: 1.3rem;">
               <?= htmlspecialchars($event['title'] ?? 'Event') ?>
             </h3>
-            <span class="badge" style="background: rgba(255,255,255,0.3); color: white; font-size: 0.8rem; border: none; padding: 2px 8px;">
-              <?= htmlspecialchars(ucfirst($event['category'] ?? 'Corporate')) ?>
-            </span>
+            <div style="display:flex; gap: 8px; flex-wrap: wrap;">
+              <span class="badge" style="background: rgba(255,255,255,0.3); color: white; font-size: 0.8rem; border: none; padding: 2px 8px;">
+                <?= htmlspecialchars(ucfirst($event['category'] ?? 'Corporate')) ?>
+              </span>
+              <span class="badge" style="background: rgba(255,255,255,0.3); color: white; font-size: 0.8rem; border: none; padding: 2px 8px;">
+                <?= htmlspecialchars(asmara_event_date_label($event)) ?>
+              </span>
+            </div>
           </div>
           <div style="padding: var(--space-md); color: var(--color-text-dark, #333);">
             <p style="font-size: 0.9rem; line-height: 1.6; margin-bottom: var(--space-md); color: #555;">

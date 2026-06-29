@@ -32,6 +32,22 @@ function getCategoryLabel($cat) {
     return $labels[strtolower($cat)] ?? ucfirst($cat);
 }
 
+function asmara_menu_image_url($url) {
+    if (empty($url)) {
+        return '';
+    }
+    if (strpos($url, '/backend/uploads/menu/') === 0 || strpos($url, '/frontend/images/') === 0) {
+        return $url;
+    }
+    if (strpos($url, '../backend/uploads/menu/') === 0) {
+        return '/' . ltrim(substr($url, 3), '/');
+    }
+    if (strpos($url, 'backend/uploads/menu/') === 0) {
+        return '/' . ltrim($url, '/');
+    }
+    return $url[0] === '/' ? $url : '/' . ltrim($url, '/');
+}
+
 $schemaMenuItems = [];
 foreach ($dbItems as $item) {
     $schemaMenuItems[] = [
@@ -138,30 +154,19 @@ include 'header.php';
           
           $classNames = 'card dish-card category-' . htmlspecialchars($item['category']) . ' ' . implode(' ', $itemBranchIds);
           $imgUrl = $item['image_url'];
+          $publicImgUrl = asmara_menu_image_url($imgUrl);
         ?>
         <div class="<?php echo $classNames; ?>">
           <div class="media-placeholder" style="aspect-ratio: 16/10; overflow: hidden; display: flex; align-items: center; justify-content: center; background: linear-gradient(145deg, #100b06 0%, #080503 100%); position: relative; padding: 0;">
             <?php 
             $showImage = false;
             if (!empty($imgUrl)) {
-              $testPath = $imgUrl;
-              if (strpos($imgUrl, '/') === 0) {
-                $testPath = $_SERVER['DOCUMENT_ROOT'] . $imgUrl;
-              } else {
-                $testPath = __DIR__ . '/' . $imgUrl;
-              }
-              $parts = explode('/', str_replace('\\', '/', $testPath));
-              $resolved = [];
-              foreach ($parts as $part) {
-                if ($part === '..' && !empty($resolved)) array_pop($resolved);
-                elseif ($part !== '' && $part !== '.') $resolved[] = $part;
-              }
-              $testPath = implode('/', $resolved);
+              $testPath = $_SERVER['DOCUMENT_ROOT'] . $publicImgUrl;
               $showImage = file_exists($testPath);
             }
             ?>
             <?php if ($showImage): ?>
-              <img src="<?php echo htmlspecialchars($imgUrl); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
+              <img src="<?php echo htmlspecialchars($publicImgUrl); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
             <?php else: ?>
               <svg viewBox="0 0 24 24" style="width: 48px; height: 48px; fill: var(--color-primary, #ed174b); opacity: 0.8;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/></svg>
               <div class="description" style="position: absolute; bottom: 10px; color: #fff; font-size: 0.85rem; font-weight: 600;"><?php echo htmlspecialchars($item['name']); ?></div>

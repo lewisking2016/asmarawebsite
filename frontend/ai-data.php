@@ -11,6 +11,7 @@ header("Expires: 0");
 
 require_once __DIR__ . '/../backend/database/BranchRepository.php';
 require_once __DIR__ . '/../backend/database/MenuRepository.php';
+require_once __DIR__ . '/../backend/data/event_helpers.php';
 
 $branchRepo = new BranchRepository();
 $menuRepo = new MenuRepository();
@@ -75,12 +76,15 @@ if (file_exists($eventsFile)) {
                 'venue' => $evt['venue'] ?? 'All Locations',
                 'capacity' => (int)($evt['capacity'] ?? 0),
                 'price_per_person' => (float)($evt['price_per_person'] ?? 0),
-                'services' => is_array($evt['services'] ?? '') ? $evt['services'] : explode(',', $evt['services'] ?? '')
+                'services' => is_array($evt['services'] ?? '') ? $evt['services'] : explode(',', $evt['services'] ?? ''),
+                'event_date' => $evt['event_date'] ?? '',
+                'image' => $evt['image'] ?? ''
             ];
         }
     }
 }
 
+$events = asmara_filter_upcoming_events($events);
 // Output final structured payload
 echo json_encode([
     'restaurant' => 'Asmara Restaurant',

@@ -9,8 +9,41 @@ $page_title = 'Events Management | Asmara Admin';
 require_once __DIR__ . '/../database/Connection.php';
 require_once __DIR__ . '/../security/Auth.php';
 require_once __DIR__ . '/../security/Validator.php';
+require_once __DIR__ . '/../data/event_helpers.php';
 
 Auth::requireLogin();
+
+function save_event_image_upload($fieldName, $existingPath = '') {
+    if (!isset($_FILES[$fieldName]) || empty($_FILES[$fieldName]['name'])) {
+        return $existingPath;
+    }
+
+    if ($_FILES[$fieldName]['error'] !== UPLOAD_ERR_OK) {
+        return $existingPath;
+    }
+
+    $uploadDir = __DIR__ . '/../uploads/events';
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0755, true);
+    }
+
+    $originalName = basename($_FILES[$fieldName]['name']);
+    $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
+    $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    if (!in_array($extension, $allowed, true)) {
+        return $existingPath;
+    }
+
+    $filename = uniqid('event_') . '.' . $extension;
+    $destination = $uploadDir . '/' . $filename;
+
+    if (!move_uploaded_file($_FILES[$fieldName]['tmp_name'], $destination)) {
+        return $existingPath;
+    }
+
+    return '/backend/uploads/events/' . $filename;
+}
+
 
 // Events data (stored as JSON for simplicity or can be extended to database table)
 $eventsFile = __DIR__ . '/../data/events.json';
@@ -34,6 +67,7 @@ if (file_exists($eventsFile)) {
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action_type = $_POST['action_type'] ?? '';
+    $uploadedImage = save_event_image_upload('image');
 
     if ($action_type === 'create') {
         $newEvent = [
@@ -45,6 +79,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'price_per_person' => (float)($_POST['price_per_person'] ?? 0),
             'venue' => $_POST['venue'] ?? '',
             'services' => $_POST['services'] ?? '',
+            'event_date' => $_POST['event_date'] ?? '',
+            'image' => $uploadedImage,
             'created_at' => date('Y-m-d H:i:s'),
             'status' => 'active'
         ];
@@ -67,6 +103,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $event['venue'] = $_POST['venue'] ?? $event['venue'];
                 $event['services'] = $_POST['services'] ?? $event['services'];
                 $event['updated_at'] = date('Y-m-d H:i:s');
+                $event['event_date'] = $_POST['event_date'] ?? $event['event_date'];
+                $event['image'] = save_event_image_upload('image', $event['image'] ?? '');
                 break;
             }
         }
@@ -122,7 +160,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
 
                         <h3><?php echo $action === 'create' ? 'Add New Event' : 'Edit Event'; ?></h3>
                         
-                        <form method="POST" class="event-form">
+                        <form method="POST" class="event-form" enctype="multipart/form-data">
                             <input type="hidden" name="action_type" value="<?php echo $action === 'edit' ? 'update' : 'create'; ?>">
                             <?php if ($action === 'edit' && $edit_event): ?>
                                 <input type="hidden" name="id" value="<?php echo htmlspecialchars($edit_event['id']); ?>">
@@ -149,6 +187,11 @@ if ($action === 'edit' && isset($_GET['id'])) {
                             </div>
 
                             <div class="form-row">
+                            <div class="form-group">
+                                <label>Event Image</label>
+                                <input type="file" name="image" accept="image/*">
+                                <p style="font-size:12px; color:var(--color-text-muted); margin-top:8px;">Upload a JPG, PNG, GIF, or WebP image for the event card.</p>
+                            </div>
                                 <div class="form-group">
                                     <label>Category *</label>
                                     <select name="category" required>
@@ -197,6 +240,16 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                         required
                                     >
                                 </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Event Date *</label>
+                                <input 
+                                    type="date" 
+                                    name="event_date" 
+                                    value="<?php echo htmlspecialchars($edit_event['event_date'] ?? ''); ?>"
+                                    required
+                                >
                             </div>
 
                             <div class="form-group">
@@ -293,6 +346,11 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                                 <div class="event-detail-row">
                                                     <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                                     <span><?php echo ucfirst($event['venue']); ?></span>
+                                                </div>
+                                                <div class="event-detail-row">
+                                                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M7 2v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm12 8H5v10h14V10z"/></svg>
+                                                    <span><?php echo htmlspecialchars(asmara_event_date_label($event)); ?></span>
+                                                </div>
                                                 </div>
                                             </div>
                                         </div>

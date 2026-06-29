@@ -15,6 +15,8 @@ if (file_exists($eventsFile)) {
 }
 
 require_once __DIR__ . '/../backend/database/BranchRepository.php';
+require_once __DIR__ . '/../backend/data/event_helpers.php';
+$events = asmara_filter_upcoming_events($events);
 $branchRepo = new BranchRepository();
 $allBranches = $branchRepo->getAll();
 
@@ -114,6 +116,11 @@ include 'header.php';
           <div class="<?php echo $classNames; ?>" style="overflow: hidden; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s ease;">
             
             <!-- Event Header Card -->
+          <?php if (!empty($event['image'])): ?>
+          <div style="height: 220px; overflow: hidden; background: #f5f5f5;">
+            <img src="<?php echo htmlspecialchars($event['image']); ?>" alt="<?php echo htmlspecialchars($event['title'] ?? 'Event image'); ?>" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+          </div>
+          <?php endif; ?>
             <div style="background: linear-gradient(135deg, #ed174b 0%, #c41140 100%); color: white; padding: var(--space-md); position: relative; overflow: hidden;">
               <div style="position: absolute; top: -20px; right: -20px; font-size: 80px; opacity: 0.1;">✨</div>
               <h3 class="font-heading-h3" style="color: white; margin: 0 0 var(--space-xs) 0; font-size: 1.5rem;">
@@ -127,6 +134,10 @@ include 'header.php';
                 <span class="badge" style="background: rgba(255,255,255,0.3); color: white; font-size: 0.8rem; display:flex; align-items:center; gap:6px;">
                   <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>
                   <?php echo htmlspecialchars(ucfirst($event['venue'] ?? 'TBA')); ?>
+                </span>
+                <span class="badge" style="background: rgba(255,255,255,0.3); color: white; font-size: 0.8rem; display:flex; align-items:center; gap:6px;">
+                  <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm12 8H5v10h14V10z"/></svg>
+                  <?php echo htmlspecialchars(asmara_event_date_label($event)); ?>
                 </span>
               </div>
             </div>

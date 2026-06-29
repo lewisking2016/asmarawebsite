@@ -232,13 +232,23 @@ class BookingRepository {
      * Generate unique confirmation code
      */
     private function generateConfirmationCode() {
-        do {
-            $code = strtoupper(substr(md5(rand()), 0, 8));
-            $sql = "SELECT id FROM bookings WHERE confirmation_code = ?";
-            $result = $this->db->getRow($sql, [$code]);
-        } while ($result);
-        
-        return $code;
+        // Query next AUTO_INCREMENT value from information_schema, or fallback to count + 1000
+        try {
+            $sql = "SELECT AUTO_INCREMENT FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'bookings'";
+            $res = $this->db->getRow($sql);
+            $nextId = $res['AUTO_INCREMENT'] ?? null;
+            if (!$nextId) {
+                $countSql = "SELECT COUNT(*) as total FROM bookings";
+                $countRes = $this->db->getRow($countSql);
+                $nextId = ($countRes['total'] ?? 0) + 1;
+            }
+        } catch (Exception $e) {
+            $nextId = rand(1000, 9999);
+        }
+
+        // Generate a sequential number padded with leading zeros (e.g., ASM-10001, ASM-10002)
+        $startNumber = 10000 + intval($nextId);
+        return "ASM-" . $startNumber;
     }
 
     /**
