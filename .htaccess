@@ -2,7 +2,7 @@
   RewriteEngine On
   RewriteBase /
 
-  # ── Security: Redirect direct access to /frontend/*.php to clean URLs ──
+  # Security: redirect direct access to frontend PHP files to clean URLs
   RewriteCond %{THE_REQUEST} \s/frontend/index\.php [NC]
   RewriteRule ^frontend/index\.php$ / [R=301,L]
   RewriteCond %{THE_REQUEST} \s/frontend/([a-zA-Z0-9-]+)\.php [NC]
@@ -14,15 +14,12 @@
   RewriteCond %{THE_REQUEST} \s/index\s [NC]
   RewriteRule ^index$ / [R=301,L]
 
-  # ── Admin Panel ──
+  # Admin panel
+  # Serve static admin assets before the PHP catch-all so CSS/JS/images do not become HTML
+  RewriteRule ^asmaraadmin/(.+\.(css|js|jpg|jpeg|png|gif|svg|webp|ico|woff|woff2|ttf|eot))$ backend/admin/$1 [L]
   RewriteRule ^asmaraadmin/(.+)\.php$ backend/admin/$1.php [L,QSA]
   RewriteRule ^asmaraadmin/?$ backend/admin/login.php [L,QSA]
   RewriteRule ^asmaraadmin/(.+)$ backend/admin/$1.php [L,QSA]
-
-  # ── Static Assets: Serve directly from frontend/ directory ──
-  # Serve admin dashboard assets from backend/admin/ if requested under asmaraadmin
-  RewriteCond %{REQUEST_URI} ^/asmaraadmin/.*\.(css|js|jpg|jpeg|png|gif|svg|webp)$ [NC]
-  RewriteRule ^asmaraadmin/(.+)$ backend/admin/$1 [L]
 
   # For assets in subfolders (e.g. css/style.css, images/pic.jpg)
   RewriteCond %{REQUEST_URI} \.(css|js|jpg|jpeg|png|gif|svg|webp|mp4|webm|woff|woff2|ttf|eot|ico)$ [NC]
@@ -33,7 +30,7 @@
   RewriteRule ^main\.js$ frontend/main.js [L]
   RewriteRule ^favicon\.ico$ frontend/logo/asmara_favicon.png [L]
 
-  # ── Clean URL rewrites to frontend/*.php ──
+  # Clean URL rewrites to frontend/*.php
   RewriteRule ^$ frontend/index.php [L]
 
   # If a clean URL is requested, map it directly to frontend/
@@ -43,7 +40,6 @@
 </IfModule>
 
 <IfModule mod_deflate.c>
-  # Compress HTML, CSS, JavaScript, Text, XML and fonts
   AddOutputFilterByType DEFLATE application/javascript
   AddOutputFilterByType DEFLATE application/rss+xml
   AddOutputFilterByType DEFLATE application/vnd.ms-fontobject
@@ -70,7 +66,6 @@
 <IfModule mod_expires.c>
   ExpiresActive On
 
-  # Images and Video
   ExpiresByType image/jpeg "access plus 1 year"
   ExpiresByType image/gif "access plus 1 year"
   ExpiresByType image/png "access plus 1 year"
@@ -80,15 +75,12 @@
   ExpiresByType video/mp4 "access plus 1 year"
   ExpiresByType video/mpeg "access plus 1 year"
 
-  # CSS and JavaScript
   ExpiresByType text/css "access plus 1 month"
   ExpiresByType text/javascript "access plus 1 month"
   ExpiresByType application/javascript "access plus 1 month"
 
-  # Others
   ExpiresByType application/pdf "access plus 1 month"
   ExpiresByType text/html "access plus 0 seconds"
 </IfModule>
 
-# Disable directory browsing
 Options -Indexes
