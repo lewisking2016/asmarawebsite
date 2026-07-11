@@ -69,8 +69,8 @@ $pageSchema = [
   "@type" => "Menu",
   "name" => "Asmara Restaurant Menu",
   "description" => "A selection of authentic Eritrean dishes and continental highlights.",
-  "url" => "https://asmara.co.ke/menu",
-  "mainEntityOfPage" => "https://asmara.co.ke/menu",
+  "url" => "https://new.asmara.co.ke/menu",
+  "mainEntityOfPage" => "https://new.asmara.co.ke/menu",
   "hasMenuItem" => $schemaMenuItems
 ];
 include 'header.php'; 

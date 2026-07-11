@@ -15,7 +15,8 @@ elseif ($cleanPath === '/events') $currentPage = 'events.php';
 $siteName = "Asmara Restaurant";
 $defaultTitle = "Asmara Restaurant - Premium Eritrean & Continental Dining in Nairobi";
 $defaultDescription = "Savor authentic Horn of Africa hospitality and contemporary continental cuisine. Visit our spaces in Westlands, Karen, Lavington, and Pangani.";
-$baseUrl = "https://asmara.co.ke"; // Replace with actual domain if different
+$baseUrl = getenv('ASMARA_SITE_URL') ?: "https://new.asmara.co.ke";
+$ga4MeasurementId = getenv('ASMARA_GA4_MEASUREMENT_ID') ?: '';
 
 $pageTitle = isset($pageTitle) ? $pageTitle . " | " . $siteName : $defaultTitle;
 $pageDescription = isset($pageDescription) ? $pageDescription : $defaultDescription;
@@ -59,6 +60,19 @@ if (!function_exists('format_phone')) {
   
   <link rel="canonical" href="<?php echo htmlspecialchars($canonicalUrl, ENT_QUOTES, 'UTF-8'); ?>">
   <link rel="icon" type="image/png" href="logo/asmara_favicon.png">
+
+  <?php if ($ga4MeasurementId !== ''): ?>
+  <!-- Google Analytics 4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=<?php echo htmlspecialchars($ga4MeasurementId, ENT_QUOTES, 'UTF-8'); ?>"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', '<?php echo htmlspecialchars($ga4MeasurementId, ENT_QUOTES, 'UTF-8'); ?>', {
+      anonymize_ip: true
+    });
+  </script>
+  <?php endif; ?>
   
   <!-- Open Graph / Facebook -->
   <meta property="og:type" content="website">

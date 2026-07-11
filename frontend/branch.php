@@ -86,7 +86,7 @@ $pageSchema = [
   "@type" => "Restaurant",
   "name" => $branch['title'],
   "description" => implode(' ', $branch['long_description']),
-  "url" => "https://asmara.co.ke/branch?branch=" . $branchKey,
+  "url" => "https://new.asmara.co.ke/branch?branch=" . $branchKey,
   "telephone" => htmlspecialchars($branch['phone']),
   "servesCuisine" => ["Eritrean", "Ethiopian", "African", "Continental"],
   "keywords" => $branch['keywords'],

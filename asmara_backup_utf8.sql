@@ -39,7 +39,7 @@ CREATE TABLE `admin_users` (
   `username` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
   `email` varchar(100) NOT NULL,
-  `role` enum('admin','staff') DEFAULT 'staff',
+  `role` enum('admin','manager','staff') DEFAULT 'staff',
   `last_login` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),

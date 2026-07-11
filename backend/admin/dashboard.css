@@ -866,18 +866,263 @@ textarea:focus {
         top: 0;
         bottom: auto;
         height: auto;
+        padding: 10px 12px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
     .admin-main {
         margin-left: 0;
-        padding: 16px;
+        padding: 14px;
     }
     .sidebar-nav {
         flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: space-around;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        gap: 8px;
+        min-width: max-content;
+    }
+    .nav-item {
+        flex: 0 0 auto;
+    }
+    .nav-link {
+        padding: 10px 14px;
+        border-radius: 999px;
+        white-space: nowrap;
+        font-size: 13px;
     }
     .nav-link span:not(.nav-icon) {
         display: inline;
+    }
+    .admin-header {
+        padding: 0 14px;
+        height: 60px;
+    }
+    .header-left {
+        gap: 12px;
+        min-width: 0;
+    }
+    .admin-logo {
+        font-size: 18px;
+    }
+    .header-right {
+        gap: 10px;
+    }
+    .user-info span {
+        display: none;
+    }
+    .logout-btn {
+        padding: 8px 12px;
+        font-size: 12px;
+    }
+    .page-header {
+        margin-bottom: 20px;
+    }
+    .page-title {
+        font-size: 24px;
+        line-height: 1.2;
+    }
+    .page-subtitle {
+        font-size: 13px;
+    }
+    .stats-grid,
+    .cards-grid,
+    .items-grid,
+    .branches-grid.premium-branches,
+    .events-grid.card-view-mode,
+    .messages-grid.card-view-mode,
+    .users-grid.card-view-mode {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+    .stat-card {
+        padding: 18px 16px;
+        gap: 14px;
+        align-items: flex-start;
+    }
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        border-radius: 12px;
+        flex-shrink: 0;
+    }
+    .stat-value {
+        font-size: 26px;
+    }
+    .section,
+    .quick-actions,
+    .form-container,
+    .detail-container {
+        padding: 18px 16px;
+        border-radius: 18px;
+        margin-bottom: 16px;
+    }
+    .section h3,
+    .quick-actions h3,
+    .form-container h3 {
+        font-size: 17px;
+    }
+    .action-buttons {
+        gap: 10px;
+    }
+    .action-btn,
+    .btn {
+        width: 100%;
+        min-height: 44px;
+    }
+    .quick-actions .action-buttons .action-btn,
+    .user-card-footer .btn,
+    .user-card-footer form {
+        width: 100%;
+    }
+    .data-table {
+        display: block;
+        width: 100%;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        white-space: nowrap;
+    }
+    .data-table th,
+    .data-table td {
+        padding: 12px 14px;
+    }
+    .filter-bar-premium {
+        padding: 16px;
+        gap: 14px;
+        border-radius: 18px;
+    }
+    .filter-left-actions {
+        width: 100%;
+        gap: 10px;
+    }
+    .filter-left-actions .action-btn,
+    .filter-search-input,
+    .filter-select {
+        width: 100%;
+        min-width: 0;
+    }
+    .view-toggle-container {
+        width: 100%;
+        justify-content: flex-start;
+    }
+    .view-toggle-btn {
+        width: 40px;
+        height: 40px;
+    }
+    .user-card-header,
+    .users-grid.list-view-mode .user-card-header,
+    .events-grid.list-view-mode .event-card-body,
+    .messages-grid.list-view-mode .message-card-body {
+        width: 100%;
+    }
+    .users-grid.list-view-mode .user-card-premium,
+    .events-grid.list-view-mode .event-card-premium,
+    .messages-grid.list-view-mode .message-card-premium,
+    .branches-grid.premium-branches.list-view-mode .branch-card-premium {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+        padding: 16px;
+    }
+    .users-grid.list-view-mode .user-card-body,
+    .events-grid.list-view-mode .event-card-body,
+    .messages-grid.list-view-mode .message-card-body {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+    .users-grid.list-view-mode .user-details-list,
+    .events-grid.list-view-mode .event-card-details,
+    .messages-grid.list-view-mode .message-card-footer {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .users-grid.list-view-mode .user-card-footer,
+    .events-grid.list-view-mode .event-card-footer,
+    .messages-grid.list-view-mode .message-card-footer,
+    .branches-grid.premium-branches.list-view-mode .branch-premium-footer {
+        min-width: 0;
+        width: 100%;
+    }
+    .user-detail-row {
+        gap: 8px;
+        align-items: flex-start;
+    }
+    .user-detail-row strong {
+        min-width: 92px;
+        flex-shrink: 0;
+    }
+    .detail-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+    .footer-content {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-header {
+        padding: 0 10px;
+    }
+    .admin-logo {
+        font-size: 16px;
+        gap: 6px;
+    }
+    .breadcrumb {
+        display: none;
+    }
+    .admin-main {
+        padding: 12px;
+    }
+    .page-title {
+        font-size: 22px;
+    }
+    .page-content {
+        overflow-x: hidden;
+    }
+    .admin-sidebar {
+        padding: 8px 10px;
+    }
+    .nav-link {
+        padding: 9px 12px;
+        font-size: 12px;
+    }
+    .stat-card {
+        gap: 12px;
+    }
+    .stat-value {
+        font-size: 24px;
+    }
+    .section,
+    .quick-actions,
+    .form-container,
+    .detail-container {
+        padding: 16px 14px;
+    }
+    .filter-bar-premium {
+        padding: 14px;
+    }
+    .filter-search-input,
+    .filter-select {
+        padding: 11px 14px;
+        font-size: 13px;
+    }
+    .user-card-header {
+        gap: 12px;
+    }
+    .user-avatar-premium {
+        width: 42px;
+        height: 42px;
+        font-size: 1rem;
+    }
+    .user-username {
+        font-size: 1rem;
+    }
+    .user-email {
+        font-size: 0.8rem;
     }
 }
 

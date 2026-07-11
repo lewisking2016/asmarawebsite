@@ -10,6 +10,7 @@ require_once __DIR__ . '/../database/Connection.php';
 require_once __DIR__ . '/../database/BookingRepository.php';
 require_once __DIR__ . '/../database/MenuRepository.php';
 require_once __DIR__ . '/../database/ContactRepository.php';
+require_once __DIR__ . '/../data/GoogleAnalyticsService.php';
 require_once __DIR__ . '/../security/Auth.php';
 
 Auth::requireLogin();
@@ -17,6 +18,31 @@ Auth::requireLogin();
 $bookingRepo = new BookingRepository();
 $menuRepo = new MenuRepository();
 $contactRepo = new ContactRepository();
+$gaService = GoogleAnalyticsService::fromEnvironment();
+$gaStartDate = $_GET['ga_start'] ?? '30daysAgo';
+$gaEndDate = $_GET['ga_end'] ?? 'today';
+$gaRangeLabel = ($gaStartDate === '30daysAgo' && $gaEndDate === 'today')
+    ? 'last 30 days'
+    : $gaStartDate . ' to ' . $gaEndDate;
+$gaData = $gaService->getDashboardData($gaStartDate, $gaEndDate);
+
+if (!function_exists('formatAnalyticsMetric')) {
+    function formatAnalyticsMetric($metricName, $value) {
+        if ($value === null || $value === '') {
+            return '0';
+        }
+
+        if (in_array($metricName, ['bounceRate', 'engagementRate'], true)) {
+            return number_format(((float)$value) * 100, 1) . '%';
+        }
+
+        if (is_float($value) || (is_numeric($value) && strpos((string)$value, '.') !== false)) {
+            return number_format((float)$value, 1);
+        }
+
+        return (string)$value;
+    }
+}
 
 // Get report data
 $total_bookings = $bookingRepo->count();
@@ -145,6 +171,167 @@ $recent_bookings = $bookingRepo->getAll();
                             <div class="stat-label">Response Rate</div>
                         </div>
                     </div>
+                </div>
+
+                <!-- GOOGLE ANALYTICS -->
+                <div class="section">
+                    <h3>Google Analytics</h3>
+                    <p style="margin-top: -8px; color: #64748b;">
+                        <?php if (!empty($gaData['enabled'])): ?>
+                            Connected to property <?php echo htmlspecialchars($gaData['property_id']); ?>, showing <?php echo htmlspecialchars($gaRangeLabel); ?>.
+                        <?php else: ?>
+                            Connect GA4 credentials to show website traffic, engagement, and audience reporting here.
+                        <?php endif; ?>
+                    </p>
+
+                    <?php if (!empty($gaData['error']) && empty($gaData['enabled'])): ?>
+                        <div class="alert alert-error"><?php echo htmlspecialchars($gaData['error']); ?></div>
+                    <?php endif; ?>
+
+                    <?php if (!empty($gaData['enabled'])): ?>
+                        <?php $gaTotals = $gaData['overview']['totals'] ?? []; ?>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm1 15h-2v-6h2zm0-8h-2V7h2z" fill="currentColor"/></svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value"><?php echo formatAnalyticsMetric('activeUsers', $gaTotals['activeUsers'] ?? 0); ?></div>
+                                    <div class="stat-label">Active Users</div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v14H5.17L4 19.17V4zm3 4h10v2H7zm0 4h7v2H7z" fill="currentColor"/></svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value"><?php echo formatAnalyticsMetric('sessions', $gaTotals['sessions'] ?? 0); ?></div>
+                                    <div class="stat-label">Sessions</div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v4H4zm0 6h10v4H4zm0 6h7v4H4z" fill="currentColor"/></svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value"><?php echo formatAnalyticsMetric('newUsers', $gaTotals['newUsers'] ?? 0); ?></div>
+                                    <div class="stat-label">New Users</div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M4 5h16v14H4zM7 8h10v2H7zm0 4h7v2H7z" fill="currentColor"/></svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value"><?php echo formatAnalyticsMetric('screenPageViews', $gaTotals['screenPageViews'] ?? 0); ?></div>
+                                    <div class="stat-label">Page Views</div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 0 0-9 9h2a7 7 0 1 1 7 7v2a9 9 0 0 0 0-18zm0 5a4 4 0 1 0 0 8 4 4 0 0 0 0-8z" fill="currentColor"/></svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value"><?php echo formatAnalyticsMetric('engagementRate', $gaTotals['engagementRate'] ?? 0); ?></div>
+                                    <div class="stat-label">Engagement Rate</div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 4a8 8 0 1 0 8 8h-2a6 6 0 1 1-6-6V4z" fill="currentColor"/></svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value"><?php echo formatAnalyticsMetric('bounceRate', $gaTotals['bounceRate'] ?? 0); ?></div>
+                                    <div class="stat-label">Bounce Rate</div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <div class="stat-icon">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M7 3h10v2H7zm0 4h10v2H7zm0 4h10v2H7zM7 15h6v2H7z" fill="currentColor"/></svg>
+                                </div>
+                                <div class="stat-content">
+                                    <div class="stat-value"><?php echo formatAnalyticsMetric('eventCount', $gaTotals['eventCount'] ?? 0); ?></div>
+                                    <div class="stat-label">Event Count</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section">
+                            <h3>Top Pages</h3>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Page</th>
+                                        <th>Views</th>
+                                        <th>Users</th>
+                                        <th>Events</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach (($gaData['top_pages']['rows'] ?? []) as $row): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($row['dimensions']['fullPageUrl'] ?? ''); ?></td>
+                                            <td><?php echo formatAnalyticsMetric('screenPageViews', $row['metrics']['screenPageViews'] ?? 0); ?></td>
+                                            <td><?php echo formatAnalyticsMetric('activeUsers', $row['metrics']['activeUsers'] ?? 0); ?></td>
+                                            <td><?php echo formatAnalyticsMetric('eventCount', $row['metrics']['eventCount'] ?? 0); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="section">
+                            <h3>Traffic Sources</h3>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Channel</th>
+                                        <th>Sessions</th>
+                                        <th>Users</th>
+                                        <th>Engagement</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach (($gaData['traffic_sources']['rows'] ?? []) as $row): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($row['dimensions']['sessionDefaultChannelGroup'] ?? ''); ?></td>
+                                            <td><?php echo formatAnalyticsMetric('sessions', $row['metrics']['sessions'] ?? 0); ?></td>
+                                            <td><?php echo formatAnalyticsMetric('activeUsers', $row['metrics']['activeUsers'] ?? 0); ?></td>
+                                            <td><?php echo formatAnalyticsMetric('engagementRate', $row['metrics']['engagementRate'] ?? 0); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="section">
+                            <h3>Top Countries</h3>
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Country</th>
+                                        <th>Users</th>
+                                        <th>Sessions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach (($gaData['audience']['rows'] ?? []) as $row): ?>
+                                        <tr>
+                                            <td><?php echo htmlspecialchars($row['dimensions']['country'] ?? ''); ?></td>
+                                            <td><?php echo formatAnalyticsMetric('activeUsers', $row['metrics']['activeUsers'] ?? 0); ?></td>
+                                            <td><?php echo formatAnalyticsMetric('sessions', $row['metrics']['sessions'] ?? 0); ?></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- DETAILED REPORTS -->

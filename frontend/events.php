@@ -46,7 +46,7 @@ $pageSchema = [
   "@type" => "ItemList",
   "name" => "Asmara Restaurant Events List",
   "description" => "Upcoming events at Asmara Restaurant",
-  "url" => "https://asmara.co.ke/events",
+  "url" => "https://new.asmara.co.ke/events",
   "itemListElement" => $schemaEvents
 ];
 include 'header.php'; 
