@@ -128,16 +128,58 @@ class MenuRepository {
     }
 
     /**
-     * Get all categories
+     * Get all categories (slugs/values)
      */
     public function getCategories() {
-        $sql = "SELECT DISTINCT category FROM menu_items ORDER BY category ASC";
+        $sql = "SELECT name FROM menu_categories ORDER BY display_name ASC";
         $rows = $this->db->getRows($sql);
         $categories = [];
         foreach ($rows as $row) {
-            $categories[] = $row['category'];
+            $categories[] = $row['name'];
         }
         return $categories;
+    }
+
+    /**
+     * Get all category records with full details
+     */
+    public function getCategoriesList() {
+        $sql = "SELECT * FROM menu_categories ORDER BY display_name ASC";
+        return $this->db->getRows($sql);
+    }
+
+    /**
+     * Get category by ID
+     */
+    public function getCategoryById($id) {
+        $sql = "SELECT * FROM menu_categories WHERE id = ?";
+        return $this->db->getRow($sql, [$id]);
+    }
+
+    /**
+     * Create new menu category
+     */
+    public function createCategory($name, $display_name) {
+        $sql = "INSERT INTO menu_categories (name, display_name) VALUES (?, ?)";
+        return $this->db->insert($sql, [$name, $display_name]);
+    }
+
+    /**
+     * Update menu category
+     */
+    public function updateCategory($id, $name, $display_name) {
+        $sql = "UPDATE menu_categories SET name = ?, display_name = ? WHERE id = ?";
+        $this->db->query($sql, [$name, $display_name, $id]);
+        return true;
+    }
+
+    /**
+     * Delete menu category
+     */
+    public function deleteCategory($id) {
+        $sql = "DELETE FROM menu_categories WHERE id = ?";
+        $this->db->query($sql, [$id]);
+        return true;
     }
 
     /**

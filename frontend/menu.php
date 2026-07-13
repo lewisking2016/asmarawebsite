@@ -20,7 +20,15 @@ foreach ($dbItems as $item) {
     }
 }
 
+// Load categories list for display names mapping
+$categoriesList = $menuRepo->getCategoriesList();
+$categoryDisplayNames = [];
+foreach ($categoriesList as $cat) {
+    $categoryDisplayNames[strtolower($cat['name'])] = $cat['display_name'];
+}
+
 function getCategoryLabel($cat) {
+    global $categoryDisplayNames;
     $labels = [
         'mains' => 'Main Course',
         'appetizers' => 'Starters',
@@ -29,7 +37,8 @@ function getCategoryLabel($cat) {
         'starters' => 'Starters',
         'drinks' => 'Drinks'
     ];
-    return $labels[strtolower($cat)] ?? ucfirst($cat);
+    $lowerCat = strtolower($cat);
+    return $categoryDisplayNames[$lowerCat] ?? $labels[$lowerCat] ?? ucfirst($cat);
 }
 
 function asmara_menu_image_url($url) {

@@ -52,6 +52,7 @@ $current_user = Auth::getCurrentUser();
                 <div class="nav-item">
                     <a href="/asmaraadmin/index" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'index.php' ? 'active' : ''; ?>">
                         <span class="nav-icon">
+                        <span class="nav-icon">
                             <svg width="18" height="18" viewBox="0 0 256 256" fill="none"><path d="M216 40H40a16 16 0 0 0-16 16v144a16 16 0 0 0 16 16h176a16 16 0 0 0 16-16V56a16 16 0 0 0-16-16ZM40 56h176v16H40Zm0 144V88h176v112Z" fill="currentColor"/><rect x="48" y="104" width="72" height="72" rx="4" fill="currentColor" opacity=".5"/><rect x="136" y="104" width="72" height="32" rx="4" fill="currentColor" opacity=".5"/><rect x="136" y="148" width="72" height="28" rx="4" fill="currentColor" opacity=".3"/></svg>
                         </span>
                         Dashboard
@@ -68,9 +69,16 @@ $current_user = Auth::getCurrentUser();
                 </div>
 
                 <div class="nav-item">
-                    <a href="/asmaraadmin/bookings" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'bookings.php' ? 'active' : ''; ?>">
+                    <a href="/asmaraadmin/categories" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'categories.php' ? 'active' : ''; ?>">
                         <span class="nav-icon">
-                            <svg width="18" height="18" viewBox="0 0 256 256" fill="none"><path d="M208 32h-24V24a8 8 0 0 0-16 0v8H88V24a8 8 0 0 0-16 0v8H48a16 16 0 0 0-16 16v160a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16Zm0 176H48V48h24v8a8 8 0 0 0 16 0v-8h80v8a8 8 0 0 0 16 0v-8h24Zm-68-76a12 12 0 1 1-12-12 12 12 0 0 1 12 12Zm44 0a12 12 0 1 1-12-12 12 12 0 0 1 12 12Zm-88 40a12 12 0 1 1-12-12 12 12 0 0 1 12 12Zm44 0a12 12 0 1 1-12-12 12 12 0 0 1 12 12Zm44 0a12 12 0 1 1-12-12 12 12 0 0 1 12 12Z" fill="currentColor"/></svg>
+                            <svg width="18" height="18" viewBox="0 0 256 256" fill="none"><path d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24Zm0 192a88 88 0 1 1 88-88 88.1 88.1 0 0 1-88 88Zm48-88a8 8 0 0 1-8 8h-32v32a8 8 0 0 1-16 0v-32H88a8 8 0 0 1 0-16h32V88a8 8 0 0 1 16 0v32h32a8 8 0 0 1 8 8Z" fill="currentColor"/></svg>
+                        </span>
+                        Menu Categories
+                    </a>
+                </div>
+
+                <div class="nav-item">
+                    <a href="/asmaraadmin/bookings" class="nav-link <?php echo basename($_SERVER['PHP_SELF']) === 'bookings.php' ? 'active' : ''; ?>">
                         </span>
                         Bookings
                     </a>

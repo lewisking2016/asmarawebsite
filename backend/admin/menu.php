@@ -103,6 +103,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $categories = $menuRepo->getCategories();
+$categories_list = $menuRepo->getCategoriesList();
+$category_display_names = [];
+foreach ($categories_list as $c) {
+    $category_display_names[$c['name']] = $c['display_name'];
+}
 $items = $menuRepo->getAll();
 $edit_item = null;
 
@@ -181,10 +186,11 @@ function admin_preview_src($url) {
                                     <label>Category *</label>
                                     <select name="category" required>
                                         <option value="">Select category</option>
-                                        <option value="appetizers" <?php echo ($edit_item['category'] ?? '') === 'appetizers' ? 'selected' : ''; ?>>Appetizers</option>
-                                        <option value="mains" <?php echo ($edit_item['category'] ?? '') === 'mains' ? 'selected' : ''; ?>>Main Courses</option>
-                                        <option value="desserts" <?php echo ($edit_item['category'] ?? '') === 'desserts' ? 'selected' : ''; ?>>Desserts</option>
-                                        <option value="drinks" <?php echo ($edit_item['category'] ?? '') === 'drinks' ? 'selected' : ''; ?>>Drinks</option>
+                                        <?php foreach ($categories_list as $cat): ?>
+                                            <option value="<?php echo htmlspecialchars($cat['name']); ?>" <?php echo ($edit_item['category'] ?? '') === $cat['name'] ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($cat['display_name']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
                                     </select>
                                 </div>
 
@@ -263,8 +269,8 @@ function admin_preview_src($url) {
 
                             <select id="category-filter" class="filter-select" onchange="filterItems()">
                                 <option value="">All Categories</option>
-                                <?php foreach ($categories as $cat): ?>
-                                    <option value="<?php echo $cat; ?>"><?php echo ucfirst($cat); ?></option>
+                                <?php foreach ($categories_list as $cat): ?>
+                                    <option value="<?php echo htmlspecialchars($cat['name']); ?>"><?php echo htmlspecialchars($cat['display_name']); ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -296,7 +302,7 @@ function admin_preview_src($url) {
 
                                         <div class="item-content">
                                             <div class="item-meta">
-                                                <span class="status-badge" style="background:rgba(0,0,0,0.05); color:var(--color-text); padding:4px 10px; font-size:11px;"><?php echo ucfirst($item['category']); ?></span>
+                                                <span class="status-badge" style="background:rgba(0,0,0,0.05); color:var(--color-text); padding:4px 10px; font-size:11px;"><?php echo htmlspecialchars($category_display_names[$item['category']] ?? ucfirst($item['category'])); ?></span>
                                                 <span class="status-badge <?php echo $item['is_available'] ? 'status-confirmed' : 'status-cancelled'; ?>">
                                                     <?php echo $item['is_available'] ? 'Available' : 'Unavailable'; ?>
                                                 </span>

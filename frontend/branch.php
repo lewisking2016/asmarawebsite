@@ -30,6 +30,13 @@ if (!$dbBranch) {
 
 $branchMenuItems = $menuRepo->getByBranch($dbBranch['id'], true);
 
+// Load categories list for display names mapping
+$categoriesList = $menuRepo->getCategoriesList();
+$categoryDisplayNames = [];
+foreach ($categoriesList as $cat) {
+    $categoryDisplayNames[strtolower($cat['name'])] = $cat['display_name'];
+}
+
 $branchEvents = [];
 if (file_exists(__DIR__ . '/../backend/data/events.json')) {
     $eventsData = json_decode(file_get_contents(__DIR__ . '/../backend/data/events.json'), true);
@@ -232,7 +239,7 @@ include 'header.php';
             </div>
             <p class="dish-desc"><?= htmlspecialchars($item['description'] ?? '') ?></p>
             <div class="tag-container" style="margin-top: 10px;">
-              <span class="badge" style="background: rgba(237, 23, 75, 0.08); color: var(--color-primary);"><?= htmlspecialchars(ucfirst($item['category'])) ?></span>
+              <span class="badge" style="background: rgba(237, 23, 75, 0.08); color: var(--color-primary);"><?= htmlspecialchars($categoryDisplayNames[strtolower($item['category'])] ?? ucfirst($item['category'])) ?></span>
             </div>
           </div>
         </div>

@@ -48,6 +48,8 @@ if (strpos($request_uri, 'asmaraadmin') === 0) {
         'dashboard' => 'index.php',
         'index' => 'index.php',
         'menu' => 'menu.php',
+        'categories' => 'categories.php',
+        'category' => 'categories.php',
         'bookings' => 'bookings.php',
         'booking' => 'bookings.php',
         'branches' => 'branches.php',
