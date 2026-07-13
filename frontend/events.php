@@ -54,17 +54,17 @@ include 'header.php';
 
   <!-- Events Banner -->
   <section class="hero panel-dark" style="min-height: 50vh; padding-top: 180px; padding-bottom: var(--space-lg); text-align: center; position: relative; overflow: hidden;">
-    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.55;">
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.6;">
       <img src="images/optimized/Lavington-15.jpg" alt="Asmara Events Background" style="width: 100%; height: 100%; object-fit: cover; filter: saturate(1.05) contrast(1.03);">
-      <div style="position:absolute; inset:0; background: linear-gradient(180deg, rgba(0,0,0,0.12), rgba(0,0,0,0.18)); mix-blend-mode: multiply;"></div>
+      <div style="position: absolute; inset: 0; background: rgba(0, 0, 0, 0.65);"></div>
     </div>
     <div class="container" style="max-width: 900px; position: relative; z-index: 1;">
-      <span class="hero-tagline" style="justify-content: center; display: inline-flex;">
+      <span class="hero-tagline" style="justify-content: center; display: inline-flex; color: var(--color-primary); font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
         <svg width="20" height="20" viewBox="0 0 24 24" style="margin-right:6px;" aria-hidden="true"><path fill="currentColor" d="M12 2l2.9 6.26L21 9.27l-5 3.64L17.8 21 12 17.77 6.2 21 8 12.91 3 9.27l6.1-1.01L12 2z"/></svg>
         Events & Celebrations
       </span>
-      <h1 class="font-display-h1" style="font-size: clamp(2.5rem, 6vw, 5rem);">SPECIAL OCCASIONS</h1>
-      <p style="margin-top: var(--space-sm); color: var(--color-text-muted-light); font-size: 1.2rem;">
+      <h1 class="font-display-h1" style="font-size: clamp(2.5rem, 6vw, 5rem); color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.7);">SPECIAL OCCASIONS</h1>
+      <p style="margin-top: var(--space-sm); color: #ffffff; font-size: 1.2rem; text-shadow: 0 1px 5px rgba(0,0,0,0.7); line-height: 1.5; font-weight: 500;">
         Host your corporate events, celebrations, and weddings at Asmara. Four beautiful branches ready to make your occasion unforgettable.
       </p>
     </div>
@@ -227,8 +227,8 @@ include 'header.php';
         <p style="margin-bottom: var(--space-md); color: var(--color-text-muted); margin-left: auto; margin-right: auto;">
           Contact us directly to discuss custom event packages and special arrangements for your unique celebration.
         </p>
-        <a href="tel:+254713610707" class="btn btn-primary" style="display: inline-block; padding: var(--space-sm) var(--space-lg); background: #ed174b; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
-          Call Us: <?php echo format_phone('+254713610707'); ?>
+        <a href="tel:+254721948020" class="btn btn-primary" style="display: inline-block; padding: var(--space-sm) var(--space-lg); background: #ed174b; color: white; text-decoration: none; border-radius: 6px; font-weight: 600;">
+          Call Us: <?php echo format_phone('+254721948020'); ?>
         </a>
       </div>
 

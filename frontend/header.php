@@ -10,6 +10,7 @@ elseif ($cleanPath === '/about') $currentPage = 'about.php';
 elseif ($cleanPath === '/menu') $currentPage = 'menu.php';
 elseif ($cleanPath === '/booking') $currentPage = 'booking.php';
 elseif ($cleanPath === '/events') $currentPage = 'events.php';
+elseif ($cleanPath === '/kids-corner') $currentPage = 'kids-corner.php';
 
 // SEO Defaults
 $siteName = "Asmara Restaurant";
@@ -106,7 +107,7 @@ if (!function_exists('format_phone')) {
       "image" => $baseUrl . '/logo/asmara%20logo.png',
       "description" => $defaultDescription,
       "url" => $baseUrl,
-      "telephone" => "+254713610707",
+      "telephone" => "+254721948020",
       "servesCuisine" => ["Eritrean", "Continental", "African", "Ethiopian"],
       "address" => [
         "@type" => "PostalAddress",
@@ -158,6 +159,7 @@ if (!function_exists('format_phone')) {
           <li><a href="/#branches" id="linkBranches">Branches</a></li>
           <li><a href="/events" id="linkEvents" class="<?php echo nav_class('events.php', $currentPage); ?>" <?php echo nav_aria_current('events.php', $currentPage); ?>>Events</a></li>
           <li><a href="/menu" id="linkMenu" class="<?php echo nav_class('menu.php', $currentPage); ?>" <?php echo nav_aria_current('menu.php', $currentPage); ?>>Menu</a></li>
+          <li><a href="/kids-corner" id="linkKidsCorner" class="<?php echo nav_class('kids-corner.php', $currentPage); ?>" <?php echo nav_aria_current('kids-corner.php', $currentPage); ?>>Kids Corner</a></li>
         </ul>
       </nav>
 
@@ -196,12 +198,13 @@ if (!function_exists('format_phone')) {
           <li><a href="/#branches" id="mobileLinkBranches">Branches</a></li>
           <li><a href="/events" id="mobileLinkEvents" class="<?php echo nav_class('events.php', $currentPage); ?>" <?php echo nav_aria_current('events.php', $currentPage); ?>>Events</a></li>
           <li><a href="/menu" id="mobileLinkMenu" class="<?php echo nav_class('menu.php', $currentPage); ?>" <?php echo nav_aria_current('menu.php', $currentPage); ?>>Menu</a></li>
+          <li><a href="/kids-corner" id="mobileLinkKidsCorner" class="<?php echo nav_class('kids-corner.php', $currentPage); ?>" <?php echo nav_aria_current('kids-corner.php', $currentPage); ?>>Kids Corner</a></li>
         </ul>
       </nav>
 
       <div class="mobile-nav-card">
         <span class="mobile-nav-card-label">Quick contact</span>
-        <a href="tel:+254713610707"><?php echo format_phone('+254713610707'); ?></a>
+        <a href="tel:+254721948020"><?php echo format_phone('+254721948020'); ?></a>
         <p>Best for same-day table requests and direct branch questions.</p>
       </div>
 

@@ -17,13 +17,14 @@ include 'header.php';
 ?>
 
   <section class="hero panel-dark" style="min-height: 50vh; margin-top: 40px; padding-top: 180px; padding-bottom: var(--space-lg); text-align: center; position: relative; overflow: hidden;">
-    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.3;">
+    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.4;">
       <img src="images/optimized/Lavington-15.jpg" alt="Asmara Reservation Background" style="width: 100%; height: 100%; object-fit: cover;">
+      <div style="position: absolute; inset: 0; background: rgba(0, 0, 0, 0.65);"></div>
     </div>
     <div class="container" style="max-width: 900px; position: relative; z-index: 1;">
-      <span class="hero-tagline" style="justify-content: center; display: inline-flex;">Reservation</span>
-      <h1 class="font-display-h1" style="font-size: clamp(2.5rem, 6vw, 5rem);">TABLE BOOKING</h1>
-      <p style="margin-top: var(--space-sm); color: var(--color-text-muted-light); font-size: 1.2rem;">
+      <span class="hero-tagline" style="justify-content: center; display: inline-flex; color: var(--color-primary); font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Reservation</span>
+      <h1 class="font-display-h1" style="font-size: clamp(2.5rem, 6vw, 5rem); color: #ffffff; text-shadow: 0 2px 10px rgba(0,0,0,0.7);">TABLE BOOKING</h1>
+      <p style="margin-top: var(--space-sm); color: #ffffff; font-size: 1.2rem; text-shadow: 0 1px 5px rgba(0,0,0,0.7); line-height: 1.5; font-weight: 500;">
         All reservations made online require an emailed confirmation statement. Use the booking form below or contact a branch directly.
       </p>
     </div>
