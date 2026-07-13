@@ -117,47 +117,6 @@ include 'header.php';
 
       </div>
 
-      <!-- Kids Menu Highlights -->
-      <div style="background: var(--color-surface-light, #ffffff); border: 1.5px solid var(--color-border-light, #eaeaea); border-radius: 16px; padding: var(--space-xl); box-shadow: 0 10px 30px rgba(0,0,0,0.015); margin-bottom: var(--space-xxl);">
-        <h3 class="font-heading-h3" style="text-align: center; margin-bottom: var(--space-lg); font-size: 1.8rem; color: var(--color-text-dark);">Kid-Approved Menu Highlights</h3>
-        
-        <div style="display: grid; grid-template-columns: 1fr; gap: var(--space-md);">
-          
-          <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--color-border-light); padding-bottom: var(--space-xs);">
-            <div>
-              <strong style="color: var(--color-text-dark); font-size: 1.1rem;">Mini Asmara Beef Burgers</strong>
-              <p style="font-size: 0.85rem; color: var(--color-text-muted-dark); margin: 4px 0 0 0;">Two small beef burgers served with potato fries</p>
-            </div>
-            <span style="font-weight: 700; color: var(--color-primary); font-size: 1.1rem;">KES 650</span>
-          </div>
-
-          <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--color-border-light); padding-bottom: var(--space-xs);">
-            <div>
-              <strong style="color: var(--color-text-dark); font-size: 1.1rem;">Crispy Chicken Strips</strong>
-              <p style="font-size: 0.85rem; color: var(--color-text-muted-dark); margin: 4px 0 0 0;">Hand-breaded chicken breast fillets with a creamy dip</p>
-            </div>
-            <span style="font-weight: 700; color: var(--color-primary); font-size: 1.1rem;">KES 700</span>
-          </div>
-
-          <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--color-border-light); padding-bottom: var(--space-xs);">
-            <div>
-              <strong style="color: var(--color-text-dark); font-size: 1.1rem;">Kids Injera Roll (Zigni)</strong>
-              <p style="font-size: 0.85rem; color: var(--color-text-muted-dark); margin: 4px 0 0 0;">Mild beef stew wrapped in soft, mini injera pieces</p>
-            </div>
-            <span style="font-weight: 700; color: var(--color-primary); font-size: 1.1rem;">KES 550</span>
-          </div>
-
-          <div style="display: flex; justify-content: space-between; border-bottom: 1px dashed var(--color-border-light); padding-bottom: var(--space-xs);">
-            <div>
-              <strong style="color: var(--color-text-dark); font-size: 1.1rem;">Cheesy Margherita Pizza (Small)</strong>
-              <p style="font-size: 0.85rem; color: var(--color-text-muted-dark); margin: 4px 0 0 0;">Fresh tomato sauce, local mozzarella, and a hint of herbs</p>
-            </div>
-            <span style="font-weight: 700; color: var(--color-primary); font-size: 1.1rem;">KES 600</span>
-          </div>
-
-        </div>
-      </div>
-
       <!-- Action Footer -->
       <div class="section-green" style="padding: var(--space-xl); border-radius: 16px; text-align: center; background: var(--color-primary); color: #ffffff;">
         <h3 class="font-heading-h3" style="margin-bottom: var(--space-sm); color: #ffffff; font-size: 1.6rem; text-shadow: 0 1px 3px rgba(0,0,0,0.3);">Planning a Family Visit?</h3>
