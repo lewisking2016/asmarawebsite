@@ -50,7 +50,9 @@ include 'header.php';
           
           <!-- Feature 1 -->
           <div style="background: var(--color-surface-light, #ffffff); border: 1.5px solid var(--color-border-light, #eaeaea); border-radius: 12px; padding: var(--space-lg); text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.015); transition: transform 0.3s ease;">
-            <div style="font-size: 3rem; margin-bottom: var(--space-sm); color: var(--color-primary);">🎈</div>
+            <div style="margin-bottom: var(--space-sm); color: var(--color-primary);">
+              <svg width="48" height="48" viewBox="0 0 256 256" fill="currentColor"><path d="M220.27,158l-46.65-27.08A42,42,0,0,0,174,128a50,50,0,0,0-50-50h-1.64A50,50,0,0,0,74,128a42,42,0,0,0,.38,2.92L27.73,158a14,14,0,0,0,0,24.27l71.42,41.24a14,14,0,0,0,14,0L128,214.8l14.85,8.71a14,14,0,0,0,14,0l71.42-41.24a14,14,0,0,0,0-24.27ZM124,90.37a34,34,0,0,1,33.63,29.24L128,136.15,98.37,119.61A34,34,0,0,1,124,90.37ZM109.15,212.3a2,2,0,0,1-2,0L35.73,171.06a2,2,0,0,1,0-3.47l43.48-25.22L120,166.22v41.37Zm12.85-46.08L84.38,145.07l.15.09L128,171.75l43.47-26.59.15-.09L134,145.22Zm26,46.08V171l40.79-24.63,43.48,25.22a2,2,0,0,1,0,3.47L148.85,212.3A2,2,0,0,1,148,212.3Z"/></svg>
+            </div>
             <h4 class="font-heading-h4" style="margin-bottom: var(--space-xs); font-size: 1.25rem;">Fun Equipment</h4>
             <p style="font-size: 0.95rem; color: var(--color-text-muted-dark); line-height: 1.6; margin: 0;">
               Equipped with modern slides, secure climbing structures, swings, and interactive play setups.
@@ -59,7 +61,9 @@ include 'header.php';
 
           <!-- Feature 2 -->
           <div style="background: var(--color-surface-light, #ffffff); border: 1.5px solid var(--color-border-light, #eaeaea); border-radius: 12px; padding: var(--space-lg); text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.015); transition: transform 0.3s ease;">
-            <div style="font-size: 3rem; margin-bottom: var(--space-sm); color: var(--color-primary);">🛡️</div>
+            <div style="margin-bottom: var(--space-sm); color: var(--color-primary);">
+              <svg width="48" height="48" viewBox="0 0 256 256" fill="currentColor"><path d="M208,40H48A16,16,0,0,0,32,56v58.77c0,89.62,75.82,119.34,91,124.39a15.53,15.53,0,0,0,10,0c15.2-5.05,91-34.77,91-124.39V56A16,16,0,0,0,208,40Zm0,74.79c0,78.42-66.35,104.62-80,109.18-13.53-4.52-80-30.69-80-109.18V56H208Zm-30.47,3.74a8,8,0,0,1,0,11.32l-56,56a8,8,0,0,1-11.32,0l-24-24a8,8,0,0,1,11.32-11.32L116,169.06l50.34-50.34A8,8,0,0,1,177.53,118.53Z"/></svg>
+            </div>
             <h4 class="font-heading-h4" style="margin-bottom: var(--space-xs); font-size: 1.25rem;">Child Safety First</h4>
             <p style="font-size: 0.95rem; color: var(--color-text-muted-dark); line-height: 1.6; margin: 0;">
               Features cushioned soft-turf safety flooring to prevent bumps and scrapes, along with childproof fencing.
@@ -68,7 +72,9 @@ include 'header.php';
 
           <!-- Feature 3 -->
           <div style="background: var(--color-surface-light, #ffffff); border: 1.5px solid var(--color-border-light, #eaeaea); border-radius: 12px; padding: var(--space-lg); text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.015); transition: transform 0.3s ease;">
-            <div style="font-size: 3rem; margin-bottom: var(--space-sm); color: var(--color-primary);">🎨</div>
+            <div style="margin-bottom: var(--space-sm); color: var(--color-primary);">
+              <svg width="48" height="48" viewBox="0 0 256 256" fill="currentColor"><path d="M200.77,53.89A103.27,103.27,0,0,0,128,24h-1.07A104,104,0,0,0,24,128c0,43.41,16.22,71.44,32,88.66C72.91,234.58,94.22,240,128,240a8,8,0,0,0,8-8,40,40,0,0,1,40-40h.32c13.93-.1,36-2,50.81-16.82C240.68,161.54,240.12,101.71,200.77,53.89ZM216,164.07c-10.54,10.54-28.06,12.31-39.63,12.43A56,56,0,0,0,120,232c-38.63,0-58-8.06-72.72-24.4C33.85,193,24,169.67,24,128A88,88,0,0,1,126.93,40h.94a87.24,87.24,0,0,1,61.56,25.28C224.93,104.51,225.32,154.79,216,164.07ZM140,76a12,12,0,1,1-12-12A12,12,0,0,1,140,76Zm-44,24a12,12,0,1,1-12-12A12,12,0,0,1,96,100Zm0,48a12,12,0,1,1-12-12A12,12,0,0,1,96,148Zm88-44a12,12,0,1,1-12-12A12,12,0,0,1,184,104Z"/></svg>
+            </div>
             <h4 class="font-heading-h4" style="margin-bottom: var(--space-xs); font-size: 1.25rem;">Creative Arts Corner</h4>
             <p style="font-size: 0.95rem; color: var(--color-text-muted-dark); line-height: 1.6; margin: 0;">
               An indoor creative space with coloring books, building blocks, and puzzles for quiet, imaginative play.
@@ -84,7 +90,9 @@ include 'header.php';
         <!-- Weekend Events Card -->
         <div style="background: var(--color-surface-light, #ffffff); border: 1.5px solid var(--color-border-light, #eaeaea); border-radius: 16px; padding: var(--space-xl); box-shadow: 0 10px 30px rgba(0,0,0,0.015);">
           <div style="display: flex; align-items: center; gap: 12px; margin-bottom: var(--space-sm);">
-            <span style="font-size: 2rem;">✨</span>
+            <span style="color: var(--color-primary); display: inline-flex;">
+              <svg width="32" height="32" viewBox="0 0 256 256" fill="currentColor"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Zm0,176H48V48H208ZM168,96a8,8,0,0,1-4.58,7.23L148.58,110l6.84,14.77a8,8,0,0,1-3.58,10.73,8.19,8.19,0,0,1-3.57.84,8,8,0,0,1-7.16-4.42L134,118.15l-7.11,13.77a8,8,0,0,1-14.31-7.15L119.42,110l-14.84-6.77a8,8,0,0,1,6.65-14.56L118,92.52V76a8,8,0,0,1,16,0V92.52l6.77-3.85A8,8,0,0,1,168,96Zm-28,60a12,12,0,1,1-12,12A12,12,0,0,1,140,156Zm-56,0a12,12,0,1,1-12,12A12,12,0,0,1,84,156Zm112,0a12,12,0,1,1-12,12A12,12,0,0,1,196,156Z"/></svg>
+            </span>
             <h3 class="font-heading-h3" style="margin: 0; font-size: 1.5rem; color: var(--color-text-dark);">Weekend Activities</h3>
           </div>
           <p style="color: var(--color-text-muted-dark); line-height: 1.6; font-size: 0.95rem; margin-bottom: var(--space-md);">
@@ -101,7 +109,9 @@ include 'header.php';
         <!-- Birthday Parties Card -->
         <div style="background: var(--color-surface-light, #ffffff); border: 1.5px solid var(--color-border-light, #eaeaea); border-radius: 16px; padding: var(--space-xl); box-shadow: 0 10px 30px rgba(0,0,0,0.015);">
           <div style="display: flex; align-items: center; gap: 12px; margin-bottom: var(--space-sm);">
-            <span style="font-size: 2rem;">🎂</span>
+            <span style="color: var(--color-primary); display: inline-flex;">
+              <svg width="32" height="32" viewBox="0 0 256 256" fill="currentColor"><path d="M216,72H180V64a28,28,0,0,0-28-28H104A28,28,0,0,0,76,64v8H40A16,16,0,0,0,24,88V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V88A16,16,0,0,0,216,72ZM92,64a12,12,0,0,1,12-12h48a12,12,0,0,1,12,12v8H92ZM216,200H40V88H216V200Zm-40-80a8,8,0,0,1-8,8H140v28a8,8,0,0,1-16,0V128H96a8,8,0,0,1,0-16h32V84a8,8,0,0,1,16,0v28h28A8,8,0,0,1,176,120Z"/></svg>
+            </span>
             <h3 class="font-heading-h3" style="margin: 0; font-size: 1.5rem; color: var(--color-text-dark);">Birthday Parties</h3>
           </div>
           <p style="color: var(--color-text-muted-dark); line-height: 1.6; font-size: 0.95rem; margin-bottom: var(--space-md);">

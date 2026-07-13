@@ -37,7 +37,8 @@ class MenuRepository {
                     ['desserts', 'Desserts'],
                     ['drinks', 'Drinks'],
                     ['pizzas', 'Pizzas'],
-                    ['vegetarian', 'Vegetarian Options']
+                    ['vegetarian', 'Vegetarian Options'],
+                    ['kidsmenu', 'Kids Menu']
                 ];
 
                 $insertStmt = $conn->prepare("INSERT IGNORE INTO menu_categories (name, display_name) VALUES (?, ?)");
@@ -45,6 +46,9 @@ class MenuRepository {
                     $insertStmt->execute($cat);
                 }
             }
+
+            // Always ensure Kids Menu category exists (for existing installations)
+            $conn->exec("INSERT IGNORE INTO menu_categories (name, display_name) VALUES ('kidsmenu', 'Kids Menu')");
         } catch (Exception $e) {
             error_log("Failed to ensure menu_categories table exists: " . $e->getMessage());
         }

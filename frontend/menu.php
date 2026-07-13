@@ -12,15 +12,7 @@ $dbItems = $menuRepo->getAll(true);
 $branchRepo = new BranchRepository();
 $allBranches = $branchRepo->getAll();
 
-// Get unique categories from items
-$categories = [];
-foreach ($dbItems as $item) {
-    if (!empty($item['category']) && !in_array($item['category'], $categories)) {
-        $categories[] = $item['category'];
-    }
-}
-
-// Load categories list for display names mapping
+// Load all categories from the database (dynamic)
 $categoriesList = $menuRepo->getCategoriesList();
 $categoryDisplayNames = [];
 foreach ($categoriesList as $cat) {
@@ -29,16 +21,8 @@ foreach ($categoriesList as $cat) {
 
 function getCategoryLabel($cat) {
     global $categoryDisplayNames;
-    $labels = [
-        'mains' => 'Main Course',
-        'appetizers' => 'Starters',
-        'desserts' => 'Desserts',
-        'beverages' => 'Beverages',
-        'starters' => 'Starters',
-        'drinks' => 'Drinks'
-    ];
     $lowerCat = strtolower($cat);
-    return $categoryDisplayNames[$lowerCat] ?? $labels[$lowerCat] ?? ucfirst($cat);
+    return $categoryDisplayNames[$lowerCat] ?? ucfirst($cat);
 }
 
 function asmara_menu_image_url($url) {
@@ -110,8 +94,8 @@ include 'header.php';
           <span style="display: block; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-text-muted-dark, #666); margin-bottom: 10px; font-weight: 700;">Filter by Category</span>
           <div class="tab-nav category-filter-row" style="gap: 8px; flex-wrap: wrap; margin: 0; justify-content: flex-start;">
             <button class="tab-btn category-btn active" data-category="all" style="padding: 10px 20px; font-size: 0.9rem;">All Categories</button>
-            <?php foreach ($categories as $cat): ?>
-              <button class="tab-btn category-btn" data-category="category-<?php echo htmlspecialchars($cat); ?>" style="padding: 10px 20px; font-size: 0.9rem;"><?php echo htmlspecialchars(getCategoryLabel($cat)); ?></button>
+            <?php foreach ($categoriesList as $cat): ?>
+              <button class="tab-btn category-btn" data-category="category-<?php echo htmlspecialchars($cat['name']); ?>" style="padding: 10px 20px; font-size: 0.9rem;"><?php echo htmlspecialchars($cat['display_name']); ?></button>
             <?php endforeach; ?>
           </div>
         </div>
