@@ -11,6 +11,43 @@ class MenuRepository {
 
     public function __construct() {
         $this->db = Database::getInstance();
+        $this->ensureCategoriesTableExists();
+    }
+
+    /**
+     * Automatically ensure the categories table exists and is seeded
+     */
+    private function ensureCategoriesTableExists() {
+        try {
+            $conn = $this->db->getConnection();
+            $stmt = $conn->query("SHOW TABLES LIKE 'menu_categories'");
+            if ($stmt->rowCount() === 0) {
+                // Create table
+                $conn->exec("CREATE TABLE IF NOT EXISTS menu_categories (
+                    id INT PRIMARY KEY AUTO_INCREMENT,
+                    name VARCHAR(50) NOT NULL UNIQUE,
+                    display_name VARCHAR(100) NOT NULL,
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )");
+
+                // Seed initial categories
+                $categories = [
+                    ['appetizers', 'Appetizers'],
+                    ['mains', 'Main Courses'],
+                    ['desserts', 'Desserts'],
+                    ['drinks', 'Drinks'],
+                    ['pizzas', 'Pizzas'],
+                    ['vegetarian', 'Vegetarian Options']
+                ];
+
+                $insertStmt = $conn->prepare("INSERT IGNORE INTO menu_categories (name, display_name) VALUES (?, ?)");
+                foreach ($categories as $cat) {
+                    $insertStmt->execute($cat);
+                }
+            }
+        } catch (Exception $e) {
+            error_log("Failed to ensure menu_categories table exists: " . $e->getMessage());
+        }
     }
 
     /**
