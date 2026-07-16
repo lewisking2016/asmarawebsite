@@ -13,3 +13,6 @@ frontend/images/*
 
 # Ignore specific large video file
 frontend/hero-videos/herosection.mp4
+
+# Ignore local migration flag
+backend/uploads/menu/.migration_done
