@@ -10,3 +10,6 @@ asmara_deploy.zip
 # Ignore unoptimized images under frontend/images/
 frontend/images/*
 !frontend/images/optimized/
+
+# Ignore specific large video file
+frontend/hero-videos/herosection.mp4

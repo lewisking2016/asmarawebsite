@@ -12,7 +12,25 @@ class MenuRepository {
     public function __construct() {
         $this->db = Database::getInstance();
         $this->ensureCategoriesTableExists();
+        $this->runImageMigration();
     }
+
+    /**
+     * Run a one-time optimization on all existing menu images
+     */
+    private function runImageMigration() {
+        $migrationFlag = __DIR__ . '/../uploads/menu/.migration_done';
+        if (!file_exists($migrationFlag)) {
+            $uploadDir = __DIR__ . '/../uploads/menu/';
+            if (is_dir($uploadDir)) {
+                require_once __DIR__ . '/../security/ImageOptimizer.php';
+                ImageOptimizer::optimizeDirectory($uploadDir);
+            }
+            // Create the migration flag file so it only runs once
+            @file_put_contents($migrationFlag, date('Y-m-d H:i:s'));
+        }
+    }
+
 
     /**
      * Automatically ensure the categories table exists and is seeded

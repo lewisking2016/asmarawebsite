@@ -2,6 +2,12 @@
   RewriteEngine On
   RewriteBase /
 
+  # Prevent Image Hotlinking (direct linking/scraping from other sites)
+  RewriteCond %{HTTP_REFERER} !^$
+  RewriteCond %{HTTP_REFERER} !^https?://%{HTTP_HOST} [NC]
+  RewriteRule \.(jpg|jpeg|png|gif|webp|svg)$ - [F,NC]
+
+
   # Security: redirect direct access to frontend PHP files to clean URLs
   RewriteCond %{THE_REQUEST} \s/frontend/index\.php [NC]
   RewriteRule ^frontend/index\.php$ / [R=301,L]

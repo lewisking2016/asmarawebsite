@@ -11,6 +11,7 @@ require_once __DIR__ . '/../database/MenuRepository.php';
 require_once __DIR__ . '/../database/BranchRepository.php';
 require_once __DIR__ . '/../security/Auth.php';
 require_once __DIR__ . '/../security/Validator.php';
+require_once __DIR__ . '/../security/ImageOptimizer.php';
 
 Auth::requireLogin();
 
@@ -45,6 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $filename = uniqid('menu_') . '.' . $ext;
             $dest = $uploadDir . $filename;
             if (move_uploaded_file($tmp, $dest)) {
+                ImageOptimizer::optimize($dest);
                 $data['image_url'] = '/backend/uploads/menu/' . $filename;
             }
         }
@@ -76,6 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $filename = uniqid('menu_') . '.' . $ext;
             $dest = $uploadDir . $filename;
             if (move_uploaded_file($tmp, $dest)) {
+                ImageOptimizer::optimize($dest);
                 $data['image_url'] = '/backend/uploads/menu/' . $filename;
             }
         }

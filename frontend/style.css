@@ -3775,3 +3775,13 @@ html.lenis, html.lenis body {
     box-sizing: border-box !important;
   }
 }
+
+/* Image Security & Scraping Protection */
+img {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+

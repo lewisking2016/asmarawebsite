@@ -19,7 +19,9 @@ function initializeAll() {
   initTypingAnimation();
   initAnchorScroll();
   initHeroVideo();
+  initImageSecurity();
 }
+
 
 // Execute immediately if DOM is ready, or wait for DOMContentLoaded
 if (document.readyState === 'loading') {
@@ -858,3 +860,22 @@ function initHeroVideo() {
     document.addEventListener('scroll', tryPlay, { once: true });
   }
 }
+
+/**
+ * Image Security & Protection
+ * Prevents right-click and dragging on all images.
+ */
+function initImageSecurity() {
+  document.addEventListener('contextmenu', function(e) {
+    if (e.target.tagName === 'IMG') {
+      e.preventDefault();
+    }
+  }, true);
+
+  document.addEventListener('dragstart', function(e) {
+    if (e.target.tagName === 'IMG') {
+      e.preventDefault();
+    }
+  }, true);
+}
+
