@@ -34,7 +34,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Handle hero image upload
         if (!empty($_FILES['hero_image']['name'])) {
-            $uploadDir = __DIR__ . '/../uploads/branches/';
+            // Upload to frontend/images/branches/ directory
+            $uploadDir = __DIR__ . '/../../frontend/images/branches/';
             
             // Create directory if it doesn't exist
             if (!is_dir($uploadDir)) {
@@ -56,13 +57,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 // Move file
                 if (move_uploaded_file($tmp, $dest)) {
-                    // Store relative path from frontend
+                    // Store relative path - frontend will look for images/branches/[filename]
                     $data['hero_image'] = 'images/branches/' . $new_filename;
                     
                     // Log the upload
-                    error_log('Branch image uploaded: ' . $data['hero_image']);
+                    error_log('Branch image uploaded to: ' . $dest . ' | Saved path: ' . $data['hero_image']);
                 } else {
-                    $error = 'Failed to upload image. Check folder permissions.';
+                    $error = 'Failed to upload image. Check folder permissions: ' . $uploadDir;
                 }
             }
         }
