@@ -140,7 +140,8 @@ $branchImageMap = [
         
         <?php foreach ($dbBranches as $b): 
           $slug = strtolower($b['name']);
-          $branchImg = $branchImageMap[$slug] ?? $galleryFeaturedPath;
+          // Use hero_image from database, fallback to gallery if not set
+          $branchImg = !empty($b['hero_image']) ? $b['hero_image'] : $galleryFeaturedPath;
           
           $summary = !empty($b['summary']) ? $b['summary'] : htmlspecialchars($b['address']);
 
