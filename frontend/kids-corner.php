@@ -10,7 +10,7 @@ $pageSchema = [
   "@type" => "WebPage",
   "name" => "Kids Corner - Asmara Restaurant",
   "description" => "Vibrant and secure children's play area at Asmara Westlands.",
-  "url" => "https://new.asmara.co.ke/kids-corner"
+  "url" => "https://asmara.co.ke/kids-corner"
 ];
 include 'header.php';
 ?>

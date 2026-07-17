@@ -16,7 +16,7 @@ elseif ($cleanPath === '/kids-corner') $currentPage = 'kids-corner.php';
 $siteName = "Asmara Restaurant";
 $defaultTitle = "Asmara Restaurant - Premium Eritrean & Continental Dining in Nairobi";
 $defaultDescription = "Savor authentic Horn of Africa hospitality and contemporary continental cuisine. Visit our spaces in Westlands, Karen, Lavington, and Pangani.";
-$baseUrl = getenv('ASMARA_SITE_URL') ?: "https://new.asmara.co.ke";
+$baseUrl = getenv('ASMARA_SITE_URL') ?: "https://asmara.co.ke";
 $ga4MeasurementId = getenv('ASMARA_GA4_MEASUREMENT_ID') ?: '';
 
 $pageTitle = isset($pageTitle) ? $pageTitle . " | " . $siteName : $defaultTitle;
