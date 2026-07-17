@@ -11,14 +11,14 @@ echo "<h2>Asmara Website - DB Image List</h2>";
 
 try {
     $db = Database::getInstance();
-    $items = $db->getRows("SELECT name, image_url, image FROM menu_items");
+    $items = $db->getRows("SELECT name, image_url FROM menu_items");
     
     echo "<h3>Menu Items in Database:</h3>";
     echo "<table border='1' cellpadding='5' style='border-collapse: collapse;'>";
-    echo "<tr><th>ID / Name</th><th>Image URL Field</th><th>Image Field</th><th>Status</th></tr>";
+    echo "<tr><th>ID / Name</th><th>Image URL Field</th><th>Status</th></tr>";
     
     foreach ($items as $item) {
-        $img = !empty($item['image_url']) ? $item['image_url'] : ($item['image'] ?? '');
+        $img = $item['image_url'] ?? '';
         $filename = basename($img);
         
         $localExists = file_exists(__DIR__ . '/backend/uploads/menu/' . $filename);
@@ -27,7 +27,6 @@ try {
         echo "<tr>";
         echo "<td>" . htmlspecialchars($item['name']) . "</td>";
         echo "<td>" . htmlspecialchars($item['image_url'] ?? 'NULL') . "</td>";
-        echo "<td>" . htmlspecialchars($item['image'] ?? 'NULL') . "</td>";
         echo "<td>$status ($filename)</td>";
         echo "</tr>";
     }
