@@ -3,10 +3,12 @@
   RewriteBase /
 
   # Prevent Image Hotlinking (direct linking/scraping from other sites)
+  # Allow empty referer (direct access) and same-site access
   RewriteCond %{HTTP_REFERER} !^$
-  RewriteCond %{HTTP_REFERER} !asmara [NC]
-  RewriteCond %{HTTP_REFERER} !localhost [NC]
-  RewriteCond %{HTTP_REFERER} !127\.0\.0\.1 [NC]
+  RewriteCond %{HTTP_REFERER} !^https?://(www\.)?localhost [NC]
+  RewriteCond %{HTTP_REFERER} !^https?://(www\.)?127\.0\.0\.1 [NC]
+  RewriteCond %{HTTP_REFERER} !^https?://(www\.)?asmara [NC]
+  RewriteCond %{HTTP_REFERER} !^https?://(www\.)?new\.asmara [NC]
   RewriteRule \.(jpg|jpeg|png|gif|webp|svg)$ - [F,NC]
 
 
