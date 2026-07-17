@@ -13,9 +13,32 @@ $galleryChunkSize = $galleryRowCount > 0 ? max(1, (int) ceil(count($galleryImage
 $galleryRows = $galleryImagePaths ? array_chunk($galleryImagePaths, $galleryChunkSize) : [];
 
 function gallery_asset_path($absolutePath) {
+  if (empty($absolutePath)) {
+    return 'images/optimized/Lavington-5.jpg';
+  }
+
+  // If it starts with images/branches/ or contains /branches/, preserve it
+  if (strpos($absolutePath, 'images/branches/') === 0 || strpos($absolutePath, 'branches/') === 0) {
+    if (strpos($absolutePath, 'images/') === 0) {
+      return $absolutePath;
+    }
+    return 'images/' . $absolutePath;
+  }
+
+  // If it's a generated branch filename but lacks the folder structure (e.g. "branch_6a5a1.jpg")
+  if (strpos(basename($absolutePath), 'branch_') === 0) {
+    return 'images/branches/' . basename($absolutePath);
+  }
+
+  // Check for optimized version first
   $optimizedPath = __DIR__ . '/images/optimized/' . basename($absolutePath);
   if (file_exists($optimizedPath)) {
     return 'images/optimized/' . basename($absolutePath);
+  }
+
+  // If the path already has "images/", preserve it
+  if (strpos($absolutePath, 'images/') === 0) {
+    return $absolutePath;
   }
 
   return 'images/' . basename($absolutePath);

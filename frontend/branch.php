@@ -11,7 +11,20 @@ function asmara_hero_image_url($url) {
     return 'images/optimized/Lavington-5.jpg';
   }
   
-  // If it starts with images/, it's relative to frontend - keep as is
+  // If it starts with images/branches/ or contains /branches/, preserve it
+  if (strpos($url, 'images/branches/') === 0 || strpos($url, 'branches/') === 0) {
+    if (strpos($url, 'images/') === 0) {
+      return $url;
+    }
+    return 'images/' . $url;
+  }
+
+  // If it's a generated branch filename but lacks the folder structure (e.g. "branch_6a5a1.jpg")
+  if (strpos(basename($url), 'branch_') === 0) {
+    return 'images/branches/' . basename($url);
+  }
+  
+  // If it starts with images/, keep as is
   if (strpos($url, 'images/') === 0) {
     return $url;
   }
@@ -28,6 +41,11 @@ function asmara_hero_image_url($url) {
   // If it's an absolute path starting with /
   if (strpos($url, '/') === 0) {
     return substr($url, 1); // Remove leading slash to make it relative
+  }
+
+  // If it's a plain filename, assume it's in images/
+  if (preg_match('/\.(jpg|jpeg|png|gif|webp)$/i', $url)) {
+    return 'images/' . basename($url);
   }
   
   // Default fallback
