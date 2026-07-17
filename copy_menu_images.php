@@ -33,76 +33,66 @@ $possibleSources = [
 ];
 
 $sourceRoot = null;
-foreach ($possibleSources as $path) {
-    if (is_dir($path)) {
-        $sourceRoot = $path;
-        echo "<p style='color: green;'><strong>Found source directory in predefined list:</strong> $sourceRoot</p>";
-        break;
-    }
-}
+$foundPaths = [];
 
-if (!$sourceRoot) {
-    echo "<p>Searching recursively for old uploads folders in /home/asmaraco (this may take a few seconds)...</p>";
-    $homeDir = '/home/asmaraco';
-    if (is_dir($homeDir)) {
-        // Recursive directory iterator to find any folder named 'uploads' containing 'menu' or 'branches'
-        try {
-            $directory = new RecursiveDirectoryIterator($homeDir, RecursiveDirectoryIterator::SKIP_DOTS | FilesystemIterator::FOLLOW_SYMLINKS);
-            $iterator = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST);
-            // Cap recursion depth to prevent issues
-            $iterator->setMaxDepth(4);
-            
-            foreach ($iterator as $name => $object) {
-                if ($object->isDir() && basename($name) === 'uploads') {
-                    // Check that it's not the current active uploads folder
-                    if (realpath($name) !== realpath($targetRoot)) {
-                        // Check if it contains a 'menu' subfolder
-                        if (is_dir($name . '/menu')) {
-                            $sourceRoot = $name;
-                            echo "<p style='color: green;'><strong>Auto-detected source directory recursively:</strong> $sourceRoot</p>";
-                            break;
-                        }
-                    }
-                }
-            }
-        } catch (Exception $e) {
-            echo "<p style='color: orange;'>Recursive search warning: " . $e->getMessage() . "</p>";
-        }
-    }
-}
-
-if (!$sourceRoot) {
-    echo "<p style='color: red;'><strong>Error:</strong> Could not automatically locate the old uploads folder. Please make sure the old files exist on this server.</p>";
+// Custom safe recursive directory scanner
+function scanForUploads($dir, &$foundPaths) {
+    // Avoid infinite loops, system directories, and standard blacklisted folders
+    $blacklistedNames = [
+        '.', '..', '.git', 'node_modules', 'wp-admin', 'wp-includes', 
+        'mail', '.cpanel', 'etc', 'ssl', '.cagefs', '.spamassassin', 
+        '.trash', 'roundcube', 'perl5', 'caches', 'datastore'
+    ];
     
-    // Debug helper: let's list home directory folders to help locate it
-    echo "<h3>Directory Listing of /home/asmaraco for debugging:</h3>";
-    $homeDir = '/home/asmaraco';
-    if (is_dir($homeDir)) {
-        $files = scandir($homeDir);
-        echo "<ul>";
-        foreach ($files as $file) {
-            if ($file === '.' || $file === '..') continue;
-            $fullPath = $homeDir . '/' . $file;
-            $isDir = is_dir($fullPath) ? ' (Directory)' : ' (File)';
-            echo "<li>$file $isDir";
-            if (is_dir($fullPath)) {
-                // List subfolders
-                $subfiles = @scandir($fullPath);
-                if ($subfiles) {
-                    echo "<ul>";
-                    foreach ($subfiles as $sf) {
-                        if ($sf === '.' || $sf === '..') continue;
-                        if (is_dir($fullPath . '/' . $sf)) {
-                            echo "<li>$sf (Directory)</li>";
-                        }
-                    }
-                    echo "</ul>";
-                }
-            }
-            echo "</li>";
-        }
-        echo "</ul>";
+    if (!is_dir($dir) || !is_readable($dir)) {
+        return;
     }
+    
+    $files = @scandir($dir);
+    if ($files === false) {
+        return;
+    }
+    
+    foreach ($files as $file) {
+        if (in_array($file, $blacklistedNames)) {
+            continue;
+        }
+        
+        $path = $dir . '/' . $file;
+        if (is_dir($path)) {
+            // Check if this directory is named 'uploads' and contains a 'menu' folder
+            if ($file === 'uploads' && is_dir($path . '/menu')) {
+                // Ensure it is not the current active uploads folder
+                $targetRealPath = realpath(__DIR__ . '/backend/uploads');
+                $foundRealPath = realpath($path);
+                if ($foundRealPath && $foundRealPath !== $targetRealPath) {
+                    $foundPaths[] = $path;
+                }
+            } else {
+                // Recursively scan subfolder
+                scanForUploads($path, $foundPaths);
+            }
+        }
+    }
+}
+
+echo "<p>Scanning server directories for old uploads folder safely...</p>";
+scanForUploads('/home/asmaraco', $foundPaths);
+
+if (!empty($foundPaths)) {
+    echo "<p style='color: green;'><strong>Found candidate source uploads directories:</strong></p><ul>";
+    foreach ($foundPaths as $index => $path) {
+        echo "<li>[$index] $path</li>";
+    }
+    echo "</ul>";
+    
+    // Choose the first match as sourceRoot
+    $sourceRoot = $foundPaths[0];
+    echo "<p style='color: green;'><strong>Selected source directory:</strong> $sourceRoot</p>";
+}
+
+if (!$sourceRoot) {
+    echo "<p style='color: red;'><strong>Error:</strong> Could not automatically locate the old uploads folder. Please check if the folders were deleted or if they exist in a different directory.</p>";
     exit;
 }
 
@@ -137,11 +127,15 @@ function copyFolderContents($src, $dst, $type) {
         }
     }
     closedir($dir);
-    echo "<p><strong>$type Migration:</strong> Copied $copiedCount files, skipped $skippedCount existing files.</p>";
+    echo "<p><strong>$type Migration:</strong> Copied $copiedCount files from $src, skipped $skippedCount existing files.</p>";
 }
 
-// Perform copy
-copyFolderContents($sourceRoot . '/menu', $targetMenuDir, 'Menu Images');
-copyFolderContents($sourceRoot . '/branches', $targetBranchesDir, 'Branch Images');
+// Perform copy from all candidate folders found (just in case)
+foreach ($foundPaths as $sourceRoot) {
+    echo "<h4>Migrating from: $sourceRoot</h4>";
+    copyFolderContents($sourceRoot . '/menu', $targetMenuDir, 'Menu Images');
+    copyFolderContents($sourceRoot . '/branches', $targetBranchesDir, 'Branch Images');
+}
 
 echo "<p style='color: green; font-weight: bold;'>Migration complete! Please delete this file (`copy_menu_images.php`) from your server for security.</p>";
+
