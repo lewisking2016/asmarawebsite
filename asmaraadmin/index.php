@@ -1,3 +1,3 @@
 <?php
-header('Location: /backend/admin/login.php');
+header('Location: /asmaraadmin/login');
 exit();
