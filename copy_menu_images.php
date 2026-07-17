@@ -34,9 +34,10 @@ $possibleSources = [
 
 $sourceRoot = null;
 $foundPaths = [];
+$foundFilesMap = [];
 
-// Custom safe recursive directory scanner
-function scanForUploads($dir, &$foundPaths) {
+// Custom safe recursive file and directory scanner
+function scanForFiles($dir, &$foundPaths, &$foundFilesMap) {
     // Avoid infinite loops, system directories, and standard blacklisted folders
     $blacklistedNames = [
         '.', '..', '.git', 'node_modules', 'wp-admin', 'wp-includes', 
@@ -68,16 +69,23 @@ function scanForUploads($dir, &$foundPaths) {
                 if ($foundRealPath && $foundRealPath !== $targetRealPath) {
                     $foundPaths[] = $path;
                 }
-            } else {
-                // Recursively scan subfolder
-                scanForUploads($path, $foundPaths);
+            }
+            // Recurse
+            scanForFiles($path, $foundPaths, $foundFilesMap);
+        } else {
+            // If it's a menu image file, catalog it
+            if (strpos($file, 'menu_') === 0 && preg_match('/\.(jpg|jpeg|png|webp|gif)$/i', $file)) {
+                // Ensure it is not in the current active uploads directory
+                if (strpos($path, 'public_html/backend/uploads') === false) {
+                    $foundFilesMap[$file] = $path;
+                }
             }
         }
     }
 }
 
-echo "<p>Scanning server directories for old uploads folder safely...</p>";
-scanForUploads('/home/asmaraco', $foundPaths);
+echo "<p>Scanning server recursively for any old menu images (this may take a few seconds)...</p>";
+scanForFiles('/home/asmaraco', $foundPaths, $foundFilesMap);
 
 if (!empty($foundPaths)) {
     echo "<p style='color: green;'><strong>Found candidate source uploads directories:</strong></p><ul>";
@@ -85,57 +93,70 @@ if (!empty($foundPaths)) {
         echo "<li>[$index] $path</li>";
     }
     echo "</ul>";
-    
-    // Choose the first match as sourceRoot
-    $sourceRoot = $foundPaths[0];
-    echo "<p style='color: green;'><strong>Selected source directory:</strong> $sourceRoot</p>";
 }
 
-if (!$sourceRoot) {
-    echo "<p style='color: red;'><strong>Error:</strong> Could not automatically locate the old uploads folder. Please check if the folders were deleted or if they exist in a different directory.</p>";
-    exit;
-}
-
-// Helper function to copy files
-function copyFolderContents($src, $dst, $type) {
-    if (!is_dir($src)) {
-        echo "<p style='color: orange;'>Source directory for $type ($src) does not exist. Skipping.</p>";
-        return;
-    }
+if (!empty($foundFilesMap)) {
+    echo "<p style='color: green;'><strong>Found " . count($foundFilesMap) . " old menu image files on the server!</strong></p>";
     
-    $dir = opendir($src);
+    // Copy the individual files found
     $copiedCount = 0;
-    $skippedCount = 0;
-    
-    while (($file = readdir($dir)) !== false) {
-        if ($file === '.' || $file === '..') continue;
-        
-        $srcFile = $src . '/' . $file;
-        $dstFile = $dst . '/' . $file;
-        
-        if (is_file($srcFile)) {
-            // Check if file already exists in destination
-            if (!file_exists($dstFile)) {
-                if (copy($srcFile, $dstFile)) {
-                    $copiedCount++;
-                } else {
-                    echo "<p style='color: red;'>Failed to copy: $file</p>";
-                }
+    $errorsCount = 0;
+    foreach ($foundFilesMap as $filename => $sourcePath) {
+        $destPath = $targetMenuDir . '/' . $filename;
+        if (!file_exists($destPath)) {
+            if (copy($sourcePath, $destPath)) {
+                $copiedCount++;
             } else {
-                $skippedCount++;
+                echo "<p style='color: red;'>Failed to copy file: $filename from $sourcePath</p>";
+                $errorsCount++;
             }
         }
     }
-    closedir($dir);
-    echo "<p><strong>$type Migration:</strong> Copied $copiedCount files from $src, skipped $skippedCount existing files.</p>";
+    echo "<p style='color: green;'><strong>File Copy complete:</strong> Successfully copied $copiedCount files, $errorsCount errors.</p>";
+} else {
+    echo "<p style='color: orange;'>No files starting with 'menu_' were found outside the active folder.</p>";
 }
 
-// Perform copy from all candidate folders found (just in case)
-foreach ($foundPaths as $sourceRoot) {
-    echo "<h4>Migrating from: $sourceRoot</h4>";
-    copyFolderContents($sourceRoot . '/menu', $targetMenuDir, 'Menu Images');
-    copyFolderContents($sourceRoot . '/branches', $targetBranchesDir, 'Branch Images');
+// Perform folder copy from candidate folders if any were found
+if (!empty($foundPaths)) {
+    // Helper function to copy files
+    function copyFolderContents($src, $dst, $type) {
+        if (!is_dir($src)) {
+            return;
+        }
+        
+        $dir = opendir($src);
+        $copiedCount = 0;
+        $skippedCount = 0;
+        
+        while (($file = readdir($dir)) !== false) {
+            if ($file === '.' || $file === '..') continue;
+            
+            $srcFile = $src . '/' . $file;
+            $dstFile = $dst . '/' . $file;
+            
+            if (is_file($srcFile)) {
+                if (!file_exists($dstFile)) {
+                    if (copy($srcFile, $dstFile)) {
+                        $copiedCount++;
+                    }
+                } else {
+                    $skippedCount++;
+                }
+            }
+        }
+        closedir($dir);
+        echo "<p><strong>$type Folder Sync:</strong> Copied $copiedCount files from $src.</p>";
+    }
+
+    foreach ($foundPaths as $sourceRoot) {
+        copyFolderContents($sourceRoot . '/menu', $targetMenuDir, 'Menu');
+        copyFolderContents($sourceRoot . '/branches', $targetBranchesDir, 'Branches');
+    }
 }
 
-echo "<p style='color: green; font-weight: bold;'>Migration complete! Please delete this file (`copy_menu_images.php`) from your server for security.</p>";
-
+if (empty($foundFilesMap) && empty($foundPaths)) {
+    echo "<p style='color: red; font-weight: bold;'>Error: No old upload directories or individual menu images (menu_*.jpg) were found anywhere in /home/asmaraco.</p>";
+} else {
+    echo "<p style='color: green; font-weight: bold;'>Migration complete! Please delete this file (`copy_menu_images.php`) from your server for security.</p>";
+}
