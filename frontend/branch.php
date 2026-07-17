@@ -5,6 +5,35 @@ require_once __DIR__ . '/../backend/data/event_helpers.php';
 $branchRepo = new BranchRepository();
 $menuRepo = new MenuRepository();
 
+// Function to properly handle hero image URLs
+function asmara_hero_image_url($url) {
+  if (empty($url)) {
+    return 'images/optimized/Lavington-5.jpg';
+  }
+  
+  // If it starts with images/, it's relative to frontend - keep as is
+  if (strpos($url, 'images/') === 0) {
+    return $url;
+  }
+  
+  // If it starts with backend uploads
+  if (strpos($url, 'backend/uploads/') === 0) {
+    return '../' . $url;
+  }
+  
+  if (strpos($url, '../backend/uploads/') === 0) {
+    return $url;
+  }
+  
+  // If it's an absolute path starting with /
+  if (strpos($url, '/') === 0) {
+    return substr($url, 1); // Remove leading slash to make it relative
+  }
+  
+  // Default fallback
+  return 'images/optimized/Lavington-5.jpg';
+}
+
 function asmara_menu_image_url($url) {
   if (empty($url)) {
     return '';
@@ -66,35 +95,6 @@ $branch = [
   'hero_img'  => asmara_hero_image_url($dbBranch['hero_image'] ?? 'images/optimized/Lavington-5.jpg'),
   'gallery'   => ['Gallery view 1', 'Gallery view 2', 'Gallery view 3', 'Gallery view 4'],
 ];
-
-// Function to properly handle hero image URLs
-function asmara_hero_image_url($url) {
-  if (empty($url)) {
-    return 'images/optimized/Lavington-5.jpg';
-  }
-  
-  // If it starts with images/, it's relative to frontend - keep as is
-  if (strpos($url, 'images/') === 0) {
-    return $url;
-  }
-  
-  // If it starts with backend uploads
-  if (strpos($url, 'backend/uploads/') === 0) {
-    return '../' . $url;
-  }
-  
-  if (strpos($url, '../backend/uploads/') === 0) {
-    return $url;
-  }
-  
-  // If it's an absolute path starting with /
-  if (strpos($url, '/') === 0) {
-    return substr($url, 1); // Remove leading slash to make it relative
-  }
-  
-  // Default fallback
-  return 'images/optimized/Lavington-5.jpg';
-}
 
 // Parse long_description into paragraphs (split on double newline)
 $rawDesc = $dbBranch['long_description'] ?? '';

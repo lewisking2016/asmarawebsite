@@ -145,20 +145,32 @@ function admin_preview_src($url) {
     
     // If it starts with images/, it's from frontend folder
     if (strpos($url, 'images/') === 0) {
-        return '/frontend/' . $url;
+        $path = '../../frontend/' . $url;
+        // URL encode the filename part to handle spaces
+        $parts = explode('/', $path);
+        $filename = array_pop($parts);
+        return implode('/', $parts) . '/' . rawurlencode($filename);
     }
     
     // If it starts with backend uploads
     if (strpos($url, 'backend/uploads/') === 0 || strpos($url, '../backend/uploads/') === 0) {
         $path = str_replace('../backend/', '', $url);
-        return '/' . $path;
+        $path = '../' . $path;
+        // URL encode the filename
+        $parts = explode('/', $path);
+        $filename = array_pop($parts);
+        return implode('/', $parts) . '/' . rawurlencode($filename);
     }
     
     // Clean up relative paths
     $p = preg_replace('/^\.\./', '', $url);
     if ($p === '') return '';
     if ($p[0] !== '/') $p = '/' . $p;
-    return $p;
+    
+    // URL encode the filename
+    $parts = explode('/', $p);
+    $filename = array_pop($parts);
+    return implode('/', $parts) . '/' . rawurlencode($filename);
 }
 ?>
 
@@ -266,9 +278,13 @@ function admin_preview_src($url) {
                                                 // Convert database path to accessible URL from admin directory
                                                 if (strpos($previewUrl, 'images/') === 0) {
                                                     // Path is relative to frontend, make it relative to admin
-                                                    $previewUrl = '../../frontend/' . $previewUrl;
+                                                    $parts = explode('/', $previewUrl);
+                                                    $filename = array_pop($parts);
+                                                    $previewUrl = '../../frontend/' . implode('/', $parts) . '/' . rawurlencode($filename);
                                                 } elseif (strpos($previewUrl, 'backend/uploads/') === 0) {
-                                                    $previewUrl = '../' . substr($previewUrl, 8); // Remove 'backend/' prefix
+                                                    $parts = explode('/', substr($previewUrl, 8));
+                                                    $filename = array_pop($parts);
+                                                    $previewUrl = '../uploads/' . implode('/', $parts) . '/' . rawurlencode($filename);
                                                 } elseif (strpos($previewUrl, '../backend/uploads/') === 0) {
                                                     $previewUrl = '../' . str_replace('../backend/', '', $previewUrl);
                                                 }
@@ -369,9 +385,13 @@ function admin_preview_src($url) {
                                                 // Convert database path to accessible URL from admin directory
                                                 if (strpos($cardPreviewUrl, 'images/') === 0) {
                                                     // Path is relative to frontend, make it relative to admin
-                                                    $cardPreviewUrl = '../../frontend/' . $cardPreviewUrl;
+                                                    $parts = explode('/', $cardPreviewUrl);
+                                                    $filename = array_pop($parts);
+                                                    $cardPreviewUrl = '../../frontend/' . implode('/', $parts) . '/' . rawurlencode($filename);
                                                 } elseif (strpos($cardPreviewUrl, 'backend/uploads/') === 0) {
-                                                    $cardPreviewUrl = '../' . substr($cardPreviewUrl, 8); // Remove 'backend/' prefix
+                                                    $parts = explode('/', substr($cardPreviewUrl, 8));
+                                                    $filename = array_pop($parts);
+                                                    $cardPreviewUrl = '../uploads/' . implode('/', $parts) . '/' . rawurlencode($filename);
                                                 } elseif (strpos($cardPreviewUrl, '../backend/uploads/') === 0) {
                                                     $cardPreviewUrl = '../' . str_replace('../backend/', '', $cardPreviewUrl);
                                                 }
