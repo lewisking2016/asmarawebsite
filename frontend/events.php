@@ -176,13 +176,13 @@ include 'header.php';
               <!-- Services -->
               <?php if (!empty($event['services'])): ?>
               <div style="margin-bottom: var(--space-md);">
-                <p style="font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted); margin-bottom: 6px; display:flex; align-items:center; gap:8px;"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/></svg> Services Included:</p>
-                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+                <p style="font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted); margin-bottom: 8px; display:flex; align-items:center; gap:8px;"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/></svg> Services Included:</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
                   <?php 
                     $serviceList = is_array($event['services']) ? $event['services'] : explode(',', $event['services']);
                     foreach (array_slice($serviceList, 0, 3) as $service): 
                   ?>
-                  <span class="badge" style="background: #f0f0f0; color: #333; font-size: 0.8rem; padding: 4px 10px;">
+                  <span class="badge" style="background: #f0f0f0; color: #333; font-size: 0.8rem; padding: 6px 14px; border-radius: 8px; border: 1px solid #e5e5e5;">
                     <?php echo trim($service); ?>
                   </span>
                   <?php endforeach; ?>
