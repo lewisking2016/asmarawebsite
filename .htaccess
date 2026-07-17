@@ -27,11 +27,13 @@
   RewriteCond %{THE_REQUEST} \s/index\s [NC]
   RewriteRule ^index$ / [R=301,L]
 
-  # Admin panel
-  # Serve static admin assets before the PHP catch-all so CSS/JS/images do not become HTML
+  # Admin panel - Static assets MUST come first
+  RewriteRule ^asmaraadmin/(dashboard\.css)$ backend/admin/$1 [L]
   RewriteRule ^asmaraadmin/(.+\.(css|js|jpg|jpeg|png|gif|svg|webp|ico|woff|woff2|ttf|eot))$ backend/admin/$1 [L]
-  RewriteRule ^asmaraadmin/(.+)\.php$ backend/admin/$1.php [L,QSA]
+  
+  # Admin panel - PHP files
   RewriteRule ^asmaraadmin/?$ backend/admin/login.php [L,QSA]
+  RewriteRule ^asmaraadmin/(.+)\.php$ backend/admin/$1.php [L,QSA]
   RewriteRule ^asmaraadmin/(.+)$ backend/admin/$1.php [L,QSA]
 
   # For assets in subfolders (e.g. css/style.css, images/pic.jpg)
