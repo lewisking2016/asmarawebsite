@@ -208,7 +208,18 @@ function admin_preview_src($url) {
                                 <div class="upload-dropzone">
                                     <div class="thumbnail-preview" id="branch-image-preview">
                                         <?php if (!empty($edit_branch['hero_image'])): ?>
-                                            <img src="<?php echo htmlspecialchars(admin_preview_src($edit_branch['hero_image'])); ?>" alt="current">
+                                            <?php
+                                                $previewUrl = $edit_branch['hero_image'];
+                                                // Convert path to accessible URL
+                                                if (strpos($previewUrl, 'images/') === 0) {
+                                                    $previewUrl = '/frontend/' . $previewUrl;
+                                                } elseif (strpos($previewUrl, 'backend/uploads/') === 0) {
+                                                    $previewUrl = '/' . $previewUrl;
+                                                } elseif (strpos($previewUrl, '../backend/uploads/') === 0) {
+                                                    $previewUrl = '/' . str_replace('../backend/', '', $previewUrl);
+                                                }
+                                            ?>
+                                            <img src="<?= htmlspecialchars($previewUrl) ?>" alt="current" style="width: 100%; height: 100%; object-fit: cover;">
                                         <?php else: ?>
                                             <svg width="40" height="30" viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 15l-5-5-4 4-7-7" stroke="#cbd5e1" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                         <?php endif; ?>
@@ -256,7 +267,18 @@ function admin_preview_src($url) {
                                 <div class="branch-card-premium" data-name="<?php echo htmlspecialchars(strtolower($branch['name'])); ?>">
                                     <div class="branch-premium-hero">
                                         <?php if (!empty($branch['hero_image'])): ?>
-                                            <img src="<?php echo htmlspecialchars(admin_preview_src($branch['hero_image'])); ?>" alt="<?php echo htmlspecialchars($branch['name']); ?>">
+                                            <?php
+                                                $cardPreviewUrl = $branch['hero_image'];
+                                                // Convert path to accessible URL
+                                                if (strpos($cardPreviewUrl, 'images/') === 0) {
+                                                    $cardPreviewUrl = '/frontend/' . $cardPreviewUrl;
+                                                } elseif (strpos($cardPreviewUrl, 'backend/uploads/') === 0) {
+                                                    $cardPreviewUrl = '/' . $cardPreviewUrl;
+                                                } elseif (strpos($cardPreviewUrl, '../backend/uploads/') === 0) {
+                                                    $cardPreviewUrl = '/' . str_replace('../backend/', '', $cardPreviewUrl);
+                                                }
+                                            ?>
+                                            <img src="<?= htmlspecialchars($cardPreviewUrl) ?>" alt="<?php echo htmlspecialchars($branch['name']); ?>" style="width: 100%; height: 100%; object-fit: cover;">
                                         <?php else: ?>
                                             <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#f1f5f9; color:#cbd5e1;">
                                                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="M21 15l-5-5-4 4-7-7"/></svg>

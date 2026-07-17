@@ -63,9 +63,35 @@ $branch = [
   'opening_hours' => $dbBranch['opening_hours'] ?? '10:00 AM - 11:00 PM',
   'capacity'  => $dbBranch['capacity'] ?? 50,
   'keywords'  => $dbBranch['seo_keywords'] ?? 'Asmara ' . $dbBranch['name'] . ', Eritrean restaurant Nairobi',
-  'hero_img'  => $dbBranch['hero_image'] ?? 'images/optimized/Lavington-5.jpg',
+  'hero_img'  => asmara_hero_image_url($dbBranch['hero_image'] ?? 'images/optimized/Lavington-5.jpg'),
   'gallery'   => ['Gallery view 1', 'Gallery view 2', 'Gallery view 3', 'Gallery view 4'],
 ];
+
+// Function to properly handle hero image URLs
+function asmara_hero_image_url($url) {
+  if (empty($url)) {
+    return 'images/optimized/Lavington-5.jpg';
+  }
+  
+  // If it starts with images/, it's relative to frontend
+  if (strpos($url, 'images/') === 0) {
+    return '/' . $url;
+  }
+  
+  // If it starts with backend uploads
+  if (strpos($url, 'backend/uploads/') === 0 || strpos($url, '../backend/uploads/') === 0) {
+    $path = str_replace('../backend/', '', $url);
+    return '/' . $path;
+  }
+  
+  // If it's an absolute path already
+  if (strpos($url, '/') === 0) {
+    return $url;
+  }
+  
+  // Default fallback
+  return 'images/optimized/Lavington-5.jpg';
+}
 
 // Parse long_description into paragraphs (split on double newline)
 $rawDesc = $dbBranch['long_description'] ?? '';
@@ -110,7 +136,19 @@ include 'header.php';
 
   <section class="hero panel-dark" style="min-height: 50vh; padding-top: 180px; padding-bottom: var(--space-lg); text-align: center; position: relative; overflow: hidden;">
     <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.3;">
-      <img src="<?= htmlspecialchars($branch['hero_img']) ?>" alt="<?= htmlspecialchars($branch['title']) ?> background" style="width: 100%; height: 100%; object-fit: cover;">
+      <?php 
+        $heroImg = $branch['hero_img'];
+        // Make sure image path is absolute
+        if (strpos($heroImg, 'images/') === 0) {
+          $heroImg = '/frontend/' . $heroImg;
+        }
+        if (strpos($heroImg, '/frontend/images/') === 0) {
+          // Path is already correct
+        } elseif (strpos($heroImg, 'backend/uploads/') === 0) {
+          $heroImg = '/' . $heroImg;
+        }
+      ?>
+      <img src="<?= htmlspecialchars($heroImg) ?>" alt="<?= htmlspecialchars($branch['title']) ?> background" style="width: 100%; height: 100%; object-fit: cover;">
     </div>
     <div class="container" style="max-width: 900px; position: relative; z-index: 1;">
       <span class="hero-tagline" style="justify-content: center; display: inline-flex;">Our Locations</span>
