@@ -42,7 +42,7 @@ function scanForFiles($dir, &$foundPaths, &$foundFilesMap) {
     $blacklistedNames = [
         '.', '..', '.git', 'node_modules', 'wp-admin', 'wp-includes', 
         'mail', '.cpanel', 'etc', 'ssl', '.cagefs', '.spamassassin', 
-        '.trash', 'roundcube', 'perl5', 'caches', 'datastore'
+        'roundcube', 'perl5', 'caches', 'datastore'
     ];
     
     if (!is_dir($dir) || !is_readable($dir)) {
