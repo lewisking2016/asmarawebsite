@@ -23,6 +23,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action_type = $_POST['action_type'] ?? '';
     $branch_id = $_POST['branch_id'] ?? 0;
 
+    // Handle delete image action
+    if ($action_type === 'delete_image') {
+        $branch = $branchRepo->getById($branch_id);
+        if ($branch && !empty($branch['hero_image'])) {
+            $oldImagePath = $branch['hero_image'];
+            
+            // Delete physical file if it's in the uploads folder
+            if (strpos($oldImagePath, 'images/branches/') === 0) {
+                $physicalPath = __DIR__ . '/../../frontend/' . $oldImagePath;
+                if (file_exists($physicalPath)) {
+                    unlink($physicalPath);
+                }
+            }
+            
+            // Clear image from database
+            $branchRepo->update($branch_id, ['hero_image' => '']);
+            Auth::logActivity(Auth::getCurrentUserId(), 'deleted image for', 'branches', $branch_id);
+            $message = 'Image deleted successfully!';
+        }
+        $action = 'edit';
+        $edit_branch = $branchRepo->getById($branch_id);
+    }
+
     if ($action_type === 'update') {
         $data = [
             'phone' => $_POST['phone'] ?? '',
@@ -38,6 +61,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($_FILES['hero_image']['error'] !== UPLOAD_ERR_OK) {
                 $error = 'Upload error: ' . $_FILES['hero_image']['error'];
             } else {
+                // Get current branch data to delete old image
+                $currentBranch = $branchRepo->getById($branch_id);
+                $oldImagePath = $currentBranch['hero_image'] ?? '';
+                
                 // Upload to frontend/images/branches/ directory
                 $uploadDir = __DIR__ . '/../../frontend/images/branches/';
                 
@@ -68,6 +95,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         } else {
                             // Move file
                             if (move_uploaded_file($tmp, $dest)) {
+                                // Delete old image if it exists in uploads folder
+                                if (!empty($oldImagePath) && strpos($oldImagePath, 'images/branches/') === 0) {
+                                    $oldPhysicalPath = __DIR__ . '/../../frontend/' . $oldImagePath;
+                                    if (file_exists($oldPhysicalPath)) {
+                                        unlink($oldPhysicalPath);
+                                    }
+                                }
+                                
                                 // Store relative path - frontend will look for images/branches/[filename]
                                 $data['hero_image'] = 'images/branches/' . $new_filename;
                                 $message = 'Branch updated and image uploaded successfully!';
@@ -86,7 +121,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!$error) {
             $branchRepo->update($branch_id, $data);
             Auth::logActivity(Auth::getCurrentUserId(), 'updated', 'branches', $branch_id);
-            $message = 'Branch updated successfully!';
+            if (!$message) {
+                $message = 'Branch updated successfully!';
+            }
             $action = 'list';
         }
     }
@@ -242,11 +279,54 @@ function admin_preview_src($url) {
                                         <?php endif; ?>
                                     </div>
                                     <div>
-                                        <div class="upload-instructions">Upload a cover photo for this branch. Recommended: 1200x600 JPG/PNG.</div>
+                                        <div class="upload-instructions">
+                                            <?php if (!empty($edit_branch['hero_image'])): ?>
+                                                <strong>Current image:</strong> <?= htmlspecialchars(basename($edit_branch['hero_image'])) ?>
+                                                <br><br>
+                                            <?php endif; ?>
+                                            Upload a new cover photo for this branch. Recommended: 1200x600 JPG/PNG.
+                                            <?php if (!empty($edit_branch['hero_image'])): ?>
+                                                <br><em>Uploading a new image will replace the current one.</em>
+                                            <?php endif; ?>
+                                        </div>
                                         <input type="file" name="hero_image" id="branch-image-input" accept="image/*" style="margin-top:8px;">
+                                        
+                                        <?php if (!empty($edit_branch['hero_image'])): ?>
+                                            <button type="button" class="btn btn-danger btn-sm" style="margin-top: 12px;" onclick="deleteImage(<?= $edit_branch['id'] ?>)">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align: middle; margin-right: 4px;">
+                                                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2M10 11v6M14 11v6"/>
+                                                </svg>
+                                                Delete Current Image
+                                            </button>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                             </div>
+
+                            <script>
+                                function deleteImage(branchId) {
+                                    if (confirm('Are you sure you want to delete this image? This action cannot be undone.')) {
+                                        const form = document.createElement('form');
+                                        form.method = 'POST';
+                                        form.action = '';
+                                        
+                                        const actionInput = document.createElement('input');
+                                        actionInput.type = 'hidden';
+                                        actionInput.name = 'action_type';
+                                        actionInput.value = 'delete_image';
+                                        
+                                        const branchInput = document.createElement('input');
+                                        branchInput.type = 'hidden';
+                                        branchInput.name = 'branch_id';
+                                        branchInput.value = branchId;
+                                        
+                                        form.appendChild(actionInput);
+                                        form.appendChild(branchInput);
+                                        document.body.appendChild(form);
+                                        form.submit();
+                                    }
+                                }
+                            </script>
 
                             <div class="form-actions">
                                 <button type="submit" class="btn btn-primary">Save Changes</button>
