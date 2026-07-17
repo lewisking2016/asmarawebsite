@@ -31,23 +31,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'capacity' => $_POST['capacity'] ?? 50,
             'address' => $_POST['address'] ?? '',
         ];
+        
         // Handle hero image upload
         if (!empty($_FILES['hero_image']['name'])) {
             $uploadDir = __DIR__ . '/../uploads/branches/';
-            if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+            
+            // Create directory if it doesn't exist
+            if (!is_dir($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            
             $tmp = $_FILES['hero_image']['tmp_name'];
-            $ext = pathinfo($_FILES['hero_image']['name'], PATHINFO_EXTENSION);
-            $filename = uniqid('branch_') . '.' . $ext;
-            $dest = $uploadDir . $filename;
-            if (move_uploaded_file($tmp, $dest)) {
-                $data['hero_image'] = '../backend/uploads/branches/' . $filename;
+            $filename = $_FILES['hero_image']['name'];
+            $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+            
+            // Validate file type
+            $allowed_types = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+            if (!in_array($ext, $allowed_types)) {
+                $error = 'Invalid image format. Allowed: JPG, PNG, GIF, WebP';
+            } else {
+                // Generate unique filename
+                $new_filename = 'branch_' . uniqid() . '.' . $ext;
+                $dest = $uploadDir . $new_filename;
+                
+                // Move file
+                if (move_uploaded_file($tmp, $dest)) {
+                    // Store relative path from frontend
+                    $data['hero_image'] = 'images/branches/' . $new_filename;
+                    
+                    // Log the upload
+                    error_log('Branch image uploaded: ' . $data['hero_image']);
+                } else {
+                    $error = 'Failed to upload image. Check folder permissions.';
+                }
             }
         }
 
-        $branchRepo->update($branch_id, $data);
-        Auth::logActivity(Auth::getCurrentUserId(), 'updated', 'branches', $branch_id);
-        $message = 'Branch updated successfully!';
-        $action = 'list';
+        if (!$error) {
+            $branchRepo->update($branch_id, $data);
+            Auth::logActivity(Auth::getCurrentUserId(), 'updated', 'branches', $branch_id);
+            $message = 'Branch updated successfully!';
+            $action = 'list';
+        }
     }
 }
 
@@ -64,10 +89,19 @@ if ($action === 'edit' && isset($_GET['id'])) {
 <?php
 function admin_preview_src($url) {
     if (empty($url)) return '';
-    // If it starts with images/, route via frontend folder
+    
+    // If it starts with images/, it's from frontend folder
     if (strpos($url, 'images/') === 0) {
         return '/frontend/' . $url;
     }
+    
+    // If it starts with backend uploads
+    if (strpos($url, 'backend/uploads/') === 0 || strpos($url, '../backend/uploads/') === 0) {
+        $path = str_replace('../backend/', '', $url);
+        return '/' . $path;
+    }
+    
+    // Clean up relative paths
     $p = preg_replace('/^\.\./', '', $url);
     if ($p === '') return '';
     if ($p[0] !== '/') $p = '/' . $p;
