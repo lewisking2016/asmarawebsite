@@ -36,35 +36,73 @@ $sourceRoot = null;
 foreach ($possibleSources as $path) {
     if (is_dir($path)) {
         $sourceRoot = $path;
-        echo "<p style='color: green;'><strong>Found source directory:</strong> $sourceRoot</p>";
+        echo "<p style='color: green;'><strong>Found source directory in predefined list:</strong> $sourceRoot</p>";
         break;
     }
 }
 
 if (!$sourceRoot) {
-    // If not found, let's scan /home/asmaraco/
+    echo "<p>Searching recursively for old uploads folders in /home/asmaraco (this may take a few seconds)...</p>";
     $homeDir = '/home/asmaraco';
     if (is_dir($homeDir)) {
-        $files = scandir($homeDir);
-        foreach ($files as $file) {
-            if ($file === '.' || $file === '..') continue;
-            $fullPath = $homeDir . '/' . $file . '/backend/uploads';
-            if (is_dir($fullPath) && realpath($fullPath) !== realpath($targetRoot)) {
-                $sourceRoot = $fullPath;
-                echo "<p style='color: green;'><strong>Auto-detected source directory:</strong> $sourceRoot</p>";
-                break;
+        // Recursive directory iterator to find any folder named 'uploads' containing 'menu' or 'branches'
+        try {
+            $directory = new RecursiveDirectoryIterator($homeDir, RecursiveDirectoryIterator::SKIP_DOTS | FilesystemIterator::FOLLOW_SYMLINKS);
+            $iterator = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST);
+            // Cap recursion depth to prevent issues
+            $iterator->setMaxDepth(4);
+            
+            foreach ($iterator as $name => $object) {
+                if ($object->isDir() && basename($name) === 'uploads') {
+                    // Check that it's not the current active uploads folder
+                    if (realpath($name) !== realpath($targetRoot)) {
+                        // Check if it contains a 'menu' subfolder
+                        if (is_dir($name . '/menu')) {
+                            $sourceRoot = $name;
+                            echo "<p style='color: green;'><strong>Auto-detected source directory recursively:</strong> $sourceRoot</p>";
+                            break;
+                        }
+                    }
+                }
             }
+        } catch (Exception $e) {
+            echo "<p style='color: orange;'>Recursive search warning: " . $e->getMessage() . "</p>";
         }
     }
 }
 
 if (!$sourceRoot) {
     echo "<p style='color: red;'><strong>Error:</strong> Could not automatically locate the old uploads folder. Please make sure the old files exist on this server.</p>";
-    echo "<p>Locations searched:</p><ul>";
-    foreach ($possibleSources as $path) {
-        echo "<li>$path</li>";
+    
+    // Debug helper: let's list home directory folders to help locate it
+    echo "<h3>Directory Listing of /home/asmaraco for debugging:</h3>";
+    $homeDir = '/home/asmaraco';
+    if (is_dir($homeDir)) {
+        $files = scandir($homeDir);
+        echo "<ul>";
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..') continue;
+            $fullPath = $homeDir . '/' . $file;
+            $isDir = is_dir($fullPath) ? ' (Directory)' : ' (File)';
+            echo "<li>$file $isDir";
+            if (is_dir($fullPath)) {
+                // List subfolders
+                $subfiles = @scandir($fullPath);
+                if ($subfiles) {
+                    echo "<ul>";
+                    foreach ($subfiles as $sf) {
+                        if ($sf === '.' || $sf === '..') continue;
+                        if (is_dir($fullPath . '/' . $sf)) {
+                            echo "<li>$sf (Directory)</li>";
+                        }
+                    }
+                    echo "</ul>";
+                }
+            }
+            echo "</li>";
+        }
+        echo "</ul>";
     }
-    echo "</ul>";
     exit;
 }
 
