@@ -34,36 +34,51 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Handle hero image upload
         if (!empty($_FILES['hero_image']['name'])) {
-            // Upload to frontend/images/branches/ directory
-            $uploadDir = __DIR__ . '/../../frontend/images/branches/';
-            
-            // Create directory if it doesn't exist
-            if (!is_dir($uploadDir)) {
-                mkdir($uploadDir, 0755, true);
-            }
-            
-            $tmp = $_FILES['hero_image']['tmp_name'];
-            $filename = $_FILES['hero_image']['name'];
-            $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-            
-            // Validate file type
-            $allowed_types = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-            if (!in_array($ext, $allowed_types)) {
-                $error = 'Invalid image format. Allowed: JPG, PNG, GIF, WebP';
+            // Check for upload errors first
+            if ($_FILES['hero_image']['error'] !== UPLOAD_ERR_OK) {
+                $error = 'Upload error: ' . $_FILES['hero_image']['error'];
             } else {
-                // Generate unique filename
-                $new_filename = 'branch_' . uniqid() . '.' . $ext;
-                $dest = $uploadDir . $new_filename;
+                // Upload to frontend/images/branches/ directory
+                $uploadDir = __DIR__ . '/../../frontend/images/branches/';
                 
-                // Move file
-                if (move_uploaded_file($tmp, $dest)) {
-                    // Store relative path - frontend will look for images/branches/[filename]
-                    $data['hero_image'] = 'images/branches/' . $new_filename;
+                // Create directory if it doesn't exist
+                if (!is_dir($uploadDir)) {
+                    if (!mkdir($uploadDir, 0777, true)) {
+                        $error = 'Failed to create upload directory: ' . $uploadDir;
+                    }
+                }
+                
+                if (!$error) {
+                    $tmp = $_FILES['hero_image']['tmp_name'];
+                    $filename = $_FILES['hero_image']['name'];
+                    $ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
                     
-                    // Log the upload
-                    error_log('Branch image uploaded to: ' . $dest . ' | Saved path: ' . $data['hero_image']);
-                } else {
-                    $error = 'Failed to upload image. Check folder permissions: ' . $uploadDir;
+                    // Validate file type
+                    $allowed_types = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+                    if (!in_array($ext, $allowed_types)) {
+                        $error = 'Invalid image format. Allowed: JPG, PNG, GIF, WebP';
+                    } else {
+                        // Generate unique filename
+                        $new_filename = 'branch_' . uniqid() . '.' . $ext;
+                        $dest = $uploadDir . $new_filename;
+                        
+                        // Check if directory is writable
+                        if (!is_writable($uploadDir)) {
+                            $error = 'Upload directory is not writable: ' . $uploadDir;
+                        } else {
+                            // Move file
+                            if (move_uploaded_file($tmp, $dest)) {
+                                // Store relative path - frontend will look for images/branches/[filename]
+                                $data['hero_image'] = 'images/branches/' . $new_filename;
+                                $message = 'Branch updated and image uploaded successfully!';
+                                
+                                // Log the upload
+                                error_log('Branch image uploaded to: ' . $dest . ' | Saved path: ' . $data['hero_image']);
+                            } else {
+                                $error = 'Failed to upload image. Destination: ' . $dest;
+                            }
+                        }
+                    }
                 }
             }
         }
