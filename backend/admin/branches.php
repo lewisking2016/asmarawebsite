@@ -211,13 +211,14 @@ function admin_preview_src($url) {
                                         <?php if (!empty($edit_branch['hero_image'])): ?>
                                             <?php
                                                 $previewUrl = $edit_branch['hero_image'];
-                                                // Convert path to accessible URL
+                                                // Convert database path to accessible URL from admin directory
                                                 if (strpos($previewUrl, 'images/') === 0) {
-                                                    $previewUrl = '/frontend/' . $previewUrl;
+                                                    // Path is relative to frontend, make it relative to admin
+                                                    $previewUrl = '../../frontend/' . $previewUrl;
                                                 } elseif (strpos($previewUrl, 'backend/uploads/') === 0) {
-                                                    $previewUrl = '/' . $previewUrl;
+                                                    $previewUrl = '../' . substr($previewUrl, 8); // Remove 'backend/' prefix
                                                 } elseif (strpos($previewUrl, '../backend/uploads/') === 0) {
-                                                    $previewUrl = '/' . str_replace('../backend/', '', $previewUrl);
+                                                    $previewUrl = '../' . str_replace('../backend/', '', $previewUrl);
                                                 }
                                             ?>
                                             <img src="<?= htmlspecialchars($previewUrl) ?>" alt="current" style="width: 100%; height: 100%; object-fit: cover;">
@@ -270,13 +271,14 @@ function admin_preview_src($url) {
                                         <?php if (!empty($branch['hero_image'])): ?>
                                             <?php
                                                 $cardPreviewUrl = $branch['hero_image'];
-                                                // Convert path to accessible URL
+                                                // Convert database path to accessible URL from admin directory
                                                 if (strpos($cardPreviewUrl, 'images/') === 0) {
-                                                    $cardPreviewUrl = '/frontend/' . $cardPreviewUrl;
+                                                    // Path is relative to frontend, make it relative to admin
+                                                    $cardPreviewUrl = '../../frontend/' . $cardPreviewUrl;
                                                 } elseif (strpos($cardPreviewUrl, 'backend/uploads/') === 0) {
-                                                    $cardPreviewUrl = '/' . $cardPreviewUrl;
+                                                    $cardPreviewUrl = '../' . substr($cardPreviewUrl, 8); // Remove 'backend/' prefix
                                                 } elseif (strpos($cardPreviewUrl, '../backend/uploads/') === 0) {
-                                                    $cardPreviewUrl = '/' . str_replace('../backend/', '', $cardPreviewUrl);
+                                                    $cardPreviewUrl = '../' . str_replace('../backend/', '', $cardPreviewUrl);
                                                 }
                                             ?>
                                             <img src="<?= htmlspecialchars($cardPreviewUrl) ?>" alt="<?php echo htmlspecialchars($branch['name']); ?>" style="width: 100%; height: 100%; object-fit: cover;">

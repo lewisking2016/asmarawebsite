@@ -73,20 +73,23 @@ function asmara_hero_image_url($url) {
     return 'images/optimized/Lavington-5.jpg';
   }
   
-  // If it starts with images/, it's relative to frontend
+  // If it starts with images/, it's relative to frontend - keep as is
   if (strpos($url, 'images/') === 0) {
-    return '/' . $url;
+    return $url;
   }
   
   // If it starts with backend uploads
-  if (strpos($url, 'backend/uploads/') === 0 || strpos($url, '../backend/uploads/') === 0) {
-    $path = str_replace('../backend/', '', $url);
-    return '/' . $path;
+  if (strpos($url, 'backend/uploads/') === 0) {
+    return '../' . $url;
   }
   
-  // If it's an absolute path already
-  if (strpos($url, '/') === 0) {
+  if (strpos($url, '../backend/uploads/') === 0) {
     return $url;
+  }
+  
+  // If it's an absolute path starting with /
+  if (strpos($url, '/') === 0) {
+    return substr($url, 1); // Remove leading slash to make it relative
   }
   
   // Default fallback
@@ -137,16 +140,7 @@ include 'header.php';
   <section class="hero panel-dark" style="min-height: 50vh; padding-top: 180px; padding-bottom: var(--space-lg); text-align: center; position: relative; overflow: hidden;">
     <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.3;">
       <?php 
-        $heroImg = $branch['hero_img'];
-        // Make sure image path is absolute
-        if (strpos($heroImg, 'images/') === 0) {
-          $heroImg = '/frontend/' . $heroImg;
-        }
-        if (strpos($heroImg, '/frontend/images/') === 0) {
-          // Path is already correct
-        } elseif (strpos($heroImg, 'backend/uploads/') === 0) {
-          $heroImg = '/' . $heroImg;
-        }
+        $heroImg = $branch['hero_img']; // Already processed by asmara_hero_image_url()
       ?>
       <img src="<?= htmlspecialchars($heroImg) ?>" alt="<?= htmlspecialchars($branch['title']) ?> background" style="width: 100%; height: 100%; object-fit: cover;">
     </div>
