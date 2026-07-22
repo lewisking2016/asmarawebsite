@@ -2,8 +2,8 @@
   RewriteEngine On
   RewriteBase /
 
-  # Redirect any requests ending in asmaraadmin (like /kids-corner/asmaraadmin) to absolute /asmaraadmin/
-  RewriteRule asmaraadmin/?$ /asmaraadmin/ [R=301,L,NC]
+  # Redirect requests ending in asmaraadmin without a trailing slash to absolute /asmaraadmin/
+  RewriteRule ^asmaraadmin$ /asmaraadmin/ [R=301,L,NC]
 
   # Prevent Image Hotlinking (direct linking/scraping from other sites)
   # Allow empty referer (direct access) and same-site access
