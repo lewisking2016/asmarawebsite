@@ -19,6 +19,12 @@ $branchRepo = new BranchRepository();
 
 $total_bookings = $bookingRepo->count();
 $pending_bookings = $bookingRepo->countByStatus('pending');
+$confirmed_bookings = $bookingRepo->countByStatus('confirmed');
+$completed_bookings = $bookingRepo->countByStatus('completed');
+$cancelled_bookings = $bookingRepo->countByStatus('cancelled');
+$booking_confirmation_rate = $total_bookings > 0 ? round(($confirmed_bookings / $total_bookings) * 100, 1) : 0;
+$booking_completion_rate = $total_bookings > 0 ? round(($completed_bookings / $total_bookings) * 100, 1) : 0;
+$booking_cancellation_rate = $total_bookings > 0 ? round(($cancelled_bookings / $total_bookings) * 100, 1) : 0;
 $total_menu_items = $menuRepo->count();
 $new_messages = $contactRepo->getNewCount();
 $total_branches = $branchRepo->count();
@@ -47,10 +53,34 @@ $upcoming_bookings = $bookingRepo->getUpcomingBookings(7);
                     </div>
 
                     <div class="stat-card">
-                        <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 256 256" fill="none"><path d="M128 24a104 104 0 1 0 104 104A104.11 104.11 0 0 0 128 24Zm0 192a88 88 0 1 1 88-88 88.1 88.1 0 0 1-88 88Zm64-88a8 8 0 0 1-8 8h-56a8 8 0 0 1-8-8V72a8 8 0 0 1 16 0v48h48a8 8 0 0 1 8 8Z" fill="currentColor"/></svg></div>
+                        <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 16.2l-3.5-3.5L4 14.2 9 19.2 20 8.2 18.6 6.8z" fill="currentColor"/></svg></div>
+                        <div class="stat-content">
+                            <div class="stat-value" style="color: #10b981;"><?php echo $completed_bookings; ?></div>
+                            <div class="stat-label">Completed (<?php echo $booking_completion_rate; ?>%)</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M21.65 2.34a1 1 0 0 0-1.42 0l-16 16a1 1 0 0 0 0 1.42l.71.71a1 1 0 0 0 1.42 0l16-16a1 1 0 0 0 0-1.42zM7.34 17.34 5 15l10-10 2.34 2.34z" fill="currentColor"/><path d="M9.88 5.88l8.24 8.24a1 1 0 0 1 0 1.42l-.7.7-8.24-8.24a1 1 0 0 1 0-1.42l.7-.7a1 1 0 0 1 1.42 0z" fill="currentColor"/><path d="M5 15l-1.5 1.5a1 1 0 0 0 0 1.42l.71.71a1 1 0 0 0 1.42 0L7.34 17.34z" fill="currentColor"/></svg></div>
+                        <div class="stat-content">
+                            <div class="stat-value" style="color: #3b82f6;"><?php echo $confirmed_bookings; ?></div>
+                            <div class="stat-label">Confirmed (<?php echo $booking_confirmation_rate; ?>%)</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 8v5l3 3 .7-.7-2.7-2.3V8z" fill="currentColor"/><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 20a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" fill="currentColor"/></svg></div>
                         <div class="stat-content">
                             <div class="stat-value" style="color: #ffd200;"><?php echo $pending_bookings; ?></div>
                             <div class="stat-label">Pending Bookings</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18.3 5.7l-1-1L12 9l-5.3-4.3-1 1L11 10l-5 5 1 1L12 11l5.3 5.7 1-1-5-5z" fill="currentColor"/></svg></div>
+                        <div class="stat-content">
+                            <div class="stat-value" style="color: #ef4444;"><?php echo $cancelled_bookings; ?></div>
+                            <div class="stat-label">Cancelled (<?php echo $booking_cancellation_rate; ?>%)</div>
                         </div>
                     </div>
 

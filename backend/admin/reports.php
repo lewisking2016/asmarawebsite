@@ -57,6 +57,7 @@ $new_inquiries = $contactRepo->getNewCount();
 $replied_inquiries = count($contactRepo->getByStatus('replied'));
 
 // Calculate percentages
+$booking_confirmation_rate = $total_bookings > 0 ? round(($confirmed_bookings / $total_bookings) * 100, 1) : 0;
 $booking_completion_rate = $total_bookings > 0 ? round(($completed_bookings / $total_bookings) * 100, 1) : 0;
 $booking_cancellation_rate = $total_bookings > 0 ? round(($cancelled_bookings / $total_bookings) * 100, 1) : 0;
 $inquiry_response_rate = $total_inquiries > 0 ? round(($replied_inquiries / $total_inquiries) * 100, 1) : 0;
@@ -96,6 +97,19 @@ $recent_bookings = $bookingRepo->getAll();
                         <div class="stat-content">
                             <div class="stat-value" style="color: #10b981;"><?php echo $completed_bookings; ?></div>
                             <div class="stat-label">Completed (<?php echo $booking_completion_rate; ?>%)</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21.65 2.34a1 1 0 0 0-1.42 0l-16 16a1 1 0 0 0 0 1.42l.71.71a1 1 0 0 0 1.42 0l16-16a1 1 0 0 0 0-1.42zM7.34 17.34 5 15l10-10 2.34 2.34z" fill="currentColor"/>
+                                <path d="M9.88 5.88l8.24 8.24a1 1 0 0 1 0 1.42l-.7.7-8.24-8.24a1 1 0 0 1 0-1.42l.7-.7a1 1 0 0 1 1.42 0zM5 15l-1.5 1.5a1 1 0 0 0 0 1.42l.71.71a1 1 0 0 0 1.42 0L7.34 17.34z" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value" style="color: #3b82f6;"><?php echo $confirmed_bookings; ?></div>
+                            <div class="stat-label">Confirmed (<?php echo $booking_confirmation_rate; ?>%)</div>
                         </div>
                     </div>
 
