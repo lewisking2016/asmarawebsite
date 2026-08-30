@@ -240,13 +240,27 @@ if ($view_id && $action === 'view') {
                                         <?php endif; ?>
                                     </div>
 
-                                    <div class="booking-card-footer" style="display:flex; justify-content:space-between; align-items:center;">
+                                    <div class="booking-card-footer" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                                         <div class="contact-links" style="display:flex; gap:12px; font-size:13px;">
                                             <a href="tel:<?php echo htmlspecialchars($booking['phone']); ?>" style="color:var(--color-primary); font-weight:600;">Call</a>
                                             <a href="mailto:<?php echo htmlspecialchars($booking['email']); ?>" style="color:var(--color-primary); font-weight:600;">Email</a>
                                         </div>
-                                        <div class="actions">
-                                            <a href="?action=view&id=<?php echo $booking['id']; ?>" class="action-btn" style="padding:8px 16px; border-radius:8px; font-size:12px;">View Details</a>
+                                        <div class="actions" style="display:flex; gap:8px; align-items:center;">
+                                            <?php if ($booking['status'] === 'pending'): ?>
+                                            <form method="POST" style="margin:0;" onsubmit="return confirm('Confirm this booking?')">
+                                                <input type="hidden" name="booking_id" value="<?php echo $booking['id']; ?>">
+                                                <input type="hidden" name="status" value="confirmed">
+                                                <button type="submit" style="background:#10b981; color:#fff; border:none; padding:7px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">Confirm</button>
+                                            </form>
+                                            <?php endif; ?>
+                                            <?php if ($booking['status'] === 'confirmed'): ?>
+                                            <form method="POST" style="margin:0;" onsubmit="return confirm('Mark this booking as completed?')">
+                                                <input type="hidden" name="booking_id" value="<?php echo $booking['id']; ?>">
+                                                <input type="hidden" name="status" value="completed">
+                                                <button type="submit" style="background:#3b82f6; color:#fff; border:none; padding:7px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer;">Complete</button>
+                                            </form>
+                                            <?php endif; ?>
+                                            <a href="?action=view&id=<?php echo $booking['id']; ?>" class="action-btn" style="padding:7px 14px; border-radius:8px; font-size:12px;">View</a>
                                         </div>
                                     </div>
                                 </div>
