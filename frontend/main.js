@@ -628,7 +628,7 @@ function initBookingForm() {
     submitBtn.innerHTML = 'Securing Table...';
 
     // Real API call to the PHP backend
-    fetch('../backend/booking_submit.php', {
+    fetch('/backend/booking_submit.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -797,7 +797,7 @@ function initNewsletterForm() {
     submitBtn.disabled = true;
     submitBtn.innerHTML = '...';
 
-    fetch('../backend/newsletter_submit.php', {
+    fetch('/backend/newsletter_submit.php', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
