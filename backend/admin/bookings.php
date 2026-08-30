@@ -159,7 +159,7 @@ if ($view_id && $action === 'view') {
                             </div>
                         </div>
 
-                        <?php if ($booking_detail['status'] === 'pending'): ?>
+                        <?php if (in_array($booking_detail['status'], ['pending', 'confirmed'])): ?>
                         <div class="action-panel">
                             <h3>Update Status</h3>
                             <form method="POST" class="status-form">
@@ -168,7 +168,12 @@ if ($view_id && $action === 'view') {
                                     <label>New Status:</label>
                                     <select name="status" id="booking-status-select" required>
                                         <option value="">Select new status</option>
+                                        <?php if ($booking_detail['status'] === 'pending'): ?>
                                         <option value="confirmed">Confirm Booking</option>
+                                        <?php endif; ?>
+                                        <?php if ($booking_detail['status'] === 'confirmed'): ?>
+                                        <option value="completed">Mark as Completed</option>
+                                        <?php endif; ?>
                                         <option value="cancelled">Cancel Booking</option>
                                     </select>
                                 </div>
