@@ -188,6 +188,41 @@ if ($view_id && $action === 'view') {
                     </div>
 
                 <?php else: ?>
+                    <!-- BOOKING STATUS SUMMARY CARDS -->
+                    <?php
+                        $total_b = count($bookingRepo->getAll());
+                        $pending_b = $bookingRepo->countByStatus('pending');
+                        $confirmed_b = $bookingRepo->countByStatus('confirmed');
+                        $completed_b = $bookingRepo->countByStatus('completed');
+                        $cancelled_b = $bookingRepo->countByStatus('cancelled');
+                    ?>
+                    <div class="booking-summary-cards">
+                        <a href="?action=list" class="summary-card <?php echo !$filter_status ? 'active' : ''; ?>">
+                            <div class="summary-count"><?php echo $total_b; ?></div>
+                            <div class="summary-label">All Bookings</div>
+                        </a>
+                        <a href="?action=list&filter=pending" class="summary-card summary-pending <?php echo $filter_status === 'pending' ? 'active' : ''; ?>">
+                            <div class="summary-count"><?php echo $pending_b; ?></div>
+                            <div class="summary-label">Pending</div>
+                            <div class="summary-percent"><?php echo $total_b > 0 ? round(($pending_b / $total_b) * 100, 1) : 0; ?>%</div>
+                        </a>
+                        <a href="?action=list&filter=confirmed" class="summary-card summary-confirmed <?php echo $filter_status === 'confirmed' ? 'active' : ''; ?>">
+                            <div class="summary-count"><?php echo $confirmed_b; ?></div>
+                            <div class="summary-label">Confirmed</div>
+                            <div class="summary-percent"><?php echo $total_b > 0 ? round(($confirmed_b / $total_b) * 100, 1) : 0; ?>%</div>
+                        </a>
+                        <a href="?action=list&filter=completed" class="summary-card summary-completed <?php echo $filter_status === 'completed' ? 'active' : ''; ?>">
+                            <div class="summary-count"><?php echo $completed_b; ?></div>
+                            <div class="summary-label">Completed</div>
+                            <div class="summary-percent"><?php echo $total_b > 0 ? round(($completed_b / $total_b) * 100, 1) : 0; ?>%</div>
+                        </a>
+                        <a href="?action=list&filter=cancelled" class="summary-card summary-cancelled <?php echo $filter_status === 'cancelled' ? 'active' : ''; ?>">
+                            <div class="summary-count"><?php echo $cancelled_b; ?></div>
+                            <div class="summary-label">Cancelled</div>
+                            <div class="summary-percent"><?php echo $total_b > 0 ? round(($cancelled_b / $total_b) * 100, 1) : 0; ?>%</div>
+                        </a>
+                    </div>
+
                     <!-- BOOKINGS LIST WITH SAAS CONTROLS -->
                     <div class="filter-bar-premium">
                         <div class="filter-left-actions">
@@ -208,7 +243,15 @@ if ($view_id && $action === 'view') {
                             </select>
                         </div>
 
-                        <div class="filter-tabs">
+                        <div class="filter-tabs" style="display:flex; gap:10px; align-items:center;">
+                            <div class="view-toggle-container">
+                                <button class="view-toggle-btn active" id="gridViewBtn" onclick="setView('grid')" title="Grid View">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 3h8v8H3V3zm10 0h8v8h-8V3zM3 13h8v8H3v-8zm10 0h8v8h-8v-8z"/></svg>
+                                </button>
+                                <button class="view-toggle-btn" id="listViewBtn" onclick="setView('list')" title="List View">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z"/></svg>
+                                </button>
+                            </div>
                             <a href="?action=list" class="action-btn" style="background:#ffffff; color:var(--color-text); border:1.5px solid var(--color-border); box-shadow:none; padding:10px 18px; border-radius:10px;">Reset Filters</a>
                         </div>
                     </div>
@@ -277,6 +320,7 @@ if ($view_id && $action === 'view') {
                             const searchVal = document.getElementById('booking-search-input').value.toLowerCase();
                             const statusVal = document.getElementById('status-select-filter').value;
                             const cards = document.querySelectorAll('.booking-card');
+                            let visibleCount = 0;
 
                             cards.forEach(card => {
                                 const searchData = card.getAttribute('data-search');
@@ -287,11 +331,40 @@ if ($view_id && $action === 'view') {
 
                                 if (matchesSearch && matchesStatus) {
                                     card.style.display = '';
+                                    visibleCount++;
                                 } else {
                                     card.style.display = 'none';
                                 }
                             });
+
+                            // Update count display
+                            const countEl = document.getElementById('visible-count');
+                            if (countEl) countEl.textContent = visibleCount + ' bookings';
                         }
+
+                        function setView(mode) {
+                            const grid = document.getElementById('bookingsGrid');
+                            const gridBtn = document.getElementById('gridViewBtn');
+                            const listBtn = document.getElementById('listViewBtn');
+                            if (!grid) return;
+                            if (mode === 'list') {
+                                grid.classList.add('list-view');
+                                listBtn.classList.add('active');
+                                gridBtn.classList.remove('active');
+                                localStorage.setItem('bookings-view', 'list');
+                            } else {
+                                grid.classList.remove('list-view');
+                                gridBtn.classList.add('active');
+                                listBtn.classList.remove('active');
+                                localStorage.setItem('bookings-view', 'grid');
+                            }
+                        }
+
+                        // Restore saved view mode
+                        document.addEventListener('DOMContentLoaded', function() {
+                            const savedView = localStorage.getItem('bookings-view') || 'grid';
+                            setView(savedView);
+                        });
                     </script>
 
                 <?php endif; ?>

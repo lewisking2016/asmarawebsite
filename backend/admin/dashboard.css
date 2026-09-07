@@ -2464,3 +2464,150 @@ textarea:focus {
     margin: 0;
     flex-shrink: 0;
 }
+
+/* ============================================================
+   BOOKING SUMMARY CARDS (Bookings Page)
+   ============================================================ */
+.booking-summary-cards {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+}
+
+.summary-card {
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    border-radius: 16px;
+    padding: 20px 16px;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.summary-card:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+}
+
+.summary-card.active {
+    border-color: var(--color-primary);
+    background: var(--color-primary-light);
+    box-shadow: 0 4px 14px rgba(237, 23, 75, 0.12);
+}
+
+.summary-count {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-text);
+    line-height: 1.1;
+}
+
+.summary-label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.summary-percent {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 99px;
+    margin-top: 4px;
+}
+
+.summary-pending .summary-count { color: #d97706; }
+.summary-pending .summary-percent { background: rgba(245,158,11,0.1); color: #d97706; }
+
+.summary-confirmed .summary-count { color: #2563eb; }
+.summary-confirmed .summary-percent { background: rgba(59,130,246,0.1); color: #2563eb; }
+
+.summary-completed .summary-count { color: #059669; }
+.summary-completed .summary-percent { background: rgba(16,185,129,0.1); color: #059669; }
+
+.summary-cancelled .summary-count { color: #dc2626; }
+.summary-cancelled .summary-percent { background: rgba(239,68,68,0.1); color: #dc2626; }
+
+/* ============================================================
+   BOOKINGS LIST VIEW MODE
+   ============================================================ */
+#bookingsGrid.list-view {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+#bookingsGrid.list-view .booking-card {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    margin-bottom: 0;
+}
+
+#bookingsGrid.list-view .booking-card-header {
+    flex-shrink: 0;
+    min-width: 200px;
+    border-bottom: none;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+#bookingsGrid.list-view .booking-card-body {
+    flex: 1;
+    border-bottom: none;
+    margin-bottom: 0;
+    padding: 0;
+}
+
+#bookingsGrid.list-view .booking-card-footer {
+    flex-shrink: 0;
+    border-top: none;
+    padding-top: 0;
+}
+
+/* Mobile responsive for booking summary cards */
+@media (max-width: 768px) {
+    .booking-summary-cards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    .summary-card {
+        padding: 14px 10px;
+    }
+    .summary-count {
+        font-size: 22px;
+    }
+    .summary-label {
+        font-size: 11px;
+    }
+    #bookingsGrid.list-view .booking-card {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    #bookingsGrid.list-view .booking-card-header,
+    #bookingsGrid.list-view .booking-card-body,
+    #bookingsGrid.list-view .booking-card-footer {
+        min-width: 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .booking-summary-cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .summary-card:last-child {
+        grid-column: span 2;
+    }
+}
