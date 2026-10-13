@@ -16,3 +16,10 @@ frontend/hero-videos/herosection.mp4
 
 # Ignore local migration flag
 backend/uploads/menu/.migration_done
+
+# Local scratch and diagnostic files
+check_current_db.php
+*.sql
+FIX_BRANCH_IMAGES_GUIDE.txt
+Clean State*.md
+.freebuff/
