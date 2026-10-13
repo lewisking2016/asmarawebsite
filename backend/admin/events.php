@@ -301,6 +301,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                     <label>Venue *</label>
                                     <select name="venue" required>
                                         <option value="">Select venue</option>
+                                        <option value="all" <?php echo ($edit_event['venue'] ?? '') === 'all' ? 'selected' : ''; ?>>All Branches</option>
                                         <option value="pangani" <?php echo ($edit_event['venue'] ?? '') === 'pangani' ? 'selected' : ''; ?>>Pangani</option>
                                         <option value="westlands" <?php echo ($edit_event['venue'] ?? '') === 'westlands' ? 'selected' : ''; ?>>Westlands</option>
                                         <option value="karen" <?php echo ($edit_event['venue'] ?? '') === 'karen' ? 'selected' : ''; ?>>Karen</option>
@@ -728,7 +729,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                                 </div>
                                                 <div class="event-detail-row" style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:var(--color-text);">
                                                     <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--color-primary); flex-shrink:0;"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                                                    <span><?php echo ucfirst($event['venue']); ?></span>
+                                                    <span><?php echo (($event['venue'] ?? '') === 'all') ? 'All Branches' : ucfirst($event['venue'] ?? ''); ?></span>
                                                 </div>
                                                 <div class="event-detail-row" style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:var(--color-text);">
                                                     <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="color:var(--color-primary); flex-shrink:0;"><path d="M7 2v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm12 8H5v10h14V10z"/></svg>
@@ -767,7 +768,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
 
                                 const ok = title.includes(searchVal)
                                     && (categoryVal === '' || category === categoryVal)
-                                    && (branchVal   === '' || branch   === branchVal);
+                                    && (branchVal   === '' || branch   === branchVal || branch === 'all');
 
                                 card.style.display = ok ? '' : 'none';
                             });

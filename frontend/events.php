@@ -113,7 +113,7 @@ include 'header.php';
           <div style="border-top: 1px solid var(--color-border-light, #eaeaea); padding-top: 15px;">
             <span style="display: block; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-text-muted-dark, #666); margin-bottom: 10px; font-weight: 700;">Filter by Location</span>
             <div class="tab-nav branch-filter-row" style="gap: 8px; flex-wrap: wrap; margin: 0; justify-content: flex-start;">
-              <button class="tab-btn branch-btn active" data-branch="all" style="padding: 10px 20px; font-size: 0.9rem;">All Locations</button>
+              <button class="tab-btn branch-btn active" data-branch="all" style="padding: 10px 20px; font-size: 0.9rem;">All Branches</button>
               <?php foreach ($allBranches as $b): ?>
                 <button class="tab-btn branch-btn" data-branch="branch-<?php echo htmlspecialchars(strtolower($b['name'])); ?>" style="padding: 10px 20px; font-size: 0.9rem;"><?php echo htmlspecialchars($b['name']); ?></button>
               <?php endforeach; ?>
@@ -176,7 +176,7 @@ include 'header.php';
                 </span>
                 <span class="badge" style="background: rgba(255,255,255,0.3); color: white; font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; display:flex; align-items:center; gap:4px;">
                   <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>
-                  <?php echo htmlspecialchars(ucfirst($event['venue'] ?? 'TBA')); ?>
+                  <?php echo htmlspecialchars(($event['venue'] ?? '') === 'all' ? 'All Branches' : ucfirst($event['venue'] ?? 'TBA')); ?>
                 </span>
                 <span class="badge" style="background: rgba(255,255,255,0.3); color: white; font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; display:flex; align-items:center; gap:4px;">
                   <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm12 8H5v10h14V10z"/></svg>
@@ -457,7 +457,7 @@ include 'header.php';
 
       eventCards.forEach(card => {
         const okCat    = selCat    === 'all' || card.classList.contains(selCat);
-        const okBranch = selBranch === 'all' || card.classList.contains(selBranch);
+        const okBranch = selBranch === 'all' || card.classList.contains(selBranch) || card.classList.contains('branch-all');
         if (okCat && okBranch) {
           card.style.display   = '';
           card.style.opacity   = '0';
