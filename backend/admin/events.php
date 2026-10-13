@@ -23,7 +23,7 @@ function save_event_image_upload($fieldName, $existingPath = '', &$uploadError =
     }
 
     $uploadDir = __DIR__ . '/../uploads/events';
-    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+    if (!is_dir($uploadDir)) @mkdir($uploadDir, 0755, true);
 
     $ext      = strtolower(pathinfo($_FILES[$fieldName]['name'], PATHINFO_EXTENSION));
     $allowed  = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
@@ -63,7 +63,7 @@ function save_event_gallery_uploads(array $existingGallery = []): array {
     }
 
     $uploadDir = __DIR__ . '/../uploads/events';
-    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+    if (!is_dir($uploadDir)) @mkdir($uploadDir, 0755, true);
 
     $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
     $saved   = $existingGallery;

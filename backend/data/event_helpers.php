@@ -167,6 +167,11 @@ if (!function_exists('asmara_compress_and_save_image')) {
             $src = $resized;
         }
 
+        // Ensure destination folder exists
+        if (!is_dir($uploadDir)) {
+            @mkdir($uploadDir, 0755, true);
+        }
+
         // Prefer WebP — superior compression
         $useWebP  = function_exists('imagewebp');
         $ext      = $useWebP ? 'webp' : 'jpg';

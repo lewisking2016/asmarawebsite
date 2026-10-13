@@ -17,9 +17,9 @@ if (file_exists($eventsFile)) {
 require_once __DIR__ . '/../backend/database/BranchRepository.php';
 require_once __DIR__ . '/../backend/data/event_helpers.php';
 $events = asmara_filter_upcoming_events($events);
-$branchRepo = new BranchRepository();
 $allBranches = [];
 try {
+    $branchRepo = new BranchRepository();
     $allBranches = $branchRepo->getAll();
 } catch (\Throwable $e) {
     $allBranches = [];
@@ -136,17 +136,17 @@ include 'header.php';
             $galleryCount = count($galleryUrls);
           ?>
           <?php if ($hasCover): ?>
-          <div class="event-gallery-strip" aria-label="Event photo gallery">
+          <div class="event-gallery-strip" 
+               aria-label="Event photo gallery"
+               data-gallery="<?php echo htmlspecialchars(json_encode($galleryUrls), ENT_QUOTES, 'UTF-8'); ?>"
+               data-title="<?php echo htmlspecialchars($event['title'] ?? 'Event', ENT_QUOTES, 'UTF-8'); ?>">
             <?php foreach ($galleryUrls as $gi => $gUrl): ?>
-            <div class="event-gallery-slide">
+            <div class="event-gallery-slide" data-index="<?php echo $gi; ?>">
               <img
                 src="<?php echo htmlspecialchars($gUrl); ?>"
                 alt="<?php echo htmlspecialchars(($event['title'] ?? 'Event') . ' photo ' . ($gi + 1)); ?>"
                 style="width:100%; height:100%; object-fit:cover; display:block; cursor:<?php echo $galleryCount > 1 ? 'zoom-in' : 'default'; ?>;"
                 <?php echo $gi === 0 ? 'fetchpriority="high"' : 'loading="lazy" fetchpriority="low"'; ?>
-                <?php if ($galleryCount > 1): ?>
-                onclick="openGalleryLightbox(<?php echo htmlspecialchars(json_encode($galleryUrls)); ?>, <?php echo $gi; ?>, <?php echo htmlspecialchars(json_encode($event['title'] ?? 'Event')); ?>)"
-                <?php endif; ?>
               >
             </div>
             <?php endforeach; ?>
@@ -409,6 +409,21 @@ include 'header.php';
       }, { root: strip, threshold: 0.6 });
 
       slides.forEach(s => observer.observe(s));
+
+      // Click to open lightbox
+      strip.addEventListener('click', function(e) {
+        const slide = e.target.closest('.event-gallery-slide');
+        if (!slide) return;
+        const raw = strip.getAttribute('data-gallery');
+        if (!raw) return;
+        try {
+          const imgs = JSON.parse(raw);
+          if (!Array.isArray(imgs) || imgs.length <= 1) return;
+          const idx = parseInt(slide.getAttribute('data-index'), 10) || 0;
+          const title = strip.getAttribute('data-title') || 'Event';
+          openGalleryLightbox(imgs, idx, title);
+        } catch(err) {}
+      });
     });
 
     /* ===== Filter ===== */
