@@ -17,40 +17,78 @@ function save_event_image_upload($fieldName, $existingPath = '', &$uploadError =
     if (!isset($_FILES[$fieldName]) || empty($_FILES[$fieldName]['name'])) {
         return $existingPath;
     }
-
     if ($_FILES[$fieldName]['error'] !== UPLOAD_ERR_OK) {
-        $uploadError = 'Event image upload failed with error code ' . $_FILES[$fieldName]['error'] . '.';
+        $uploadError = 'Image upload failed (error ' . $_FILES[$fieldName]['error'] . ').';
         return $existingPath;
     }
 
     $uploadDir = __DIR__ . '/../uploads/events';
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0755, true);
-    }
+    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
 
-    $originalName = basename($_FILES[$fieldName]['name']);
-    $extension = strtolower(pathinfo($originalName, PATHINFO_EXTENSION));
-    $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
-    if (!in_array($extension, $allowed, true)) {
+    $ext      = strtolower(pathinfo($_FILES[$fieldName]['name'], PATHINFO_EXTENSION));
+    $allowed  = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    if (!in_array($ext, $allowed, true)) {
         $uploadError = 'Please upload a JPG, JPEG, PNG, GIF, or WebP image.';
         return $existingPath;
     }
 
-    $filename = uniqid('event_') . '.' . $extension;
-    $destination = $uploadDir . '/' . $filename;
+    // Try GD compression first (produces WebP/JPEG at ~82 quality)
+    $compressed = asmara_compress_and_save_image($_FILES[$fieldName]['tmp_name'], $uploadDir);
+    if ($compressed !== '') {
+        return $compressed;
+    }
 
+    // GD not available — plain move
+    $filename    = uniqid('event_') . '.' . $ext;
+    $destination = $uploadDir . '/' . $filename;
     $moved = move_uploaded_file($_FILES[$fieldName]['tmp_name'], $destination);
     if (!$moved && is_file($_FILES[$fieldName]['tmp_name'])) {
         $moved = copy($_FILES[$fieldName]['tmp_name'], $destination);
     }
-
     if (!$moved) {
-        $uploadError = 'Could not save the uploaded image on the server.';
+        $uploadError = 'Could not save the image on the server.';
         return $existingPath;
     }
-
     @chmod($destination, 0644);
     return '/backend/uploads/events/' . $filename;
+}
+
+/**
+ * Handle multi-file gallery upload field.
+ * Returns array of saved public paths merged with any existing paths.
+ */
+function save_event_gallery_uploads(array $existingGallery = []): array {
+    if (empty($_FILES['gallery_images']['name'][0])) {
+        return $existingGallery;
+    }
+
+    $uploadDir = __DIR__ . '/../uploads/events';
+    if (!is_dir($uploadDir)) mkdir($uploadDir, 0755, true);
+
+    $allowed = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+    $saved   = $existingGallery;
+
+    foreach ($_FILES['gallery_images']['tmp_name'] as $i => $tmpPath) {
+        if ($_FILES['gallery_images']['error'][$i] !== UPLOAD_ERR_OK) continue;
+        $ext = strtolower(pathinfo($_FILES['gallery_images']['name'][$i], PATHINFO_EXTENSION));
+        if (!in_array($ext, $allowed, true)) continue;
+
+        // Compress via GD
+        $compressed = asmara_compress_and_save_image($tmpPath, $uploadDir);
+        if ($compressed !== '') {
+            $saved[] = $compressed;
+            continue;
+        }
+
+        // Plain move fallback
+        $filename = uniqid('evt_g_') . '.' . $ext;
+        $dest     = $uploadDir . '/' . $filename;
+        if (move_uploaded_file($tmpPath, $dest) || copy($tmpPath, $dest)) {
+            @chmod($dest, 0644);
+            $saved[] = '/backend/uploads/events/' . $filename;
+        }
+    }
+    return $saved;
 }
 
 
@@ -78,58 +116,75 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action_type = $_POST['action_type'] ?? '';
 
     if ($action_type === 'create') {
-        $uploadError = '';
+        $uploadError   = '';
         $uploadedImage = save_event_image_upload('image', '', $uploadError);
+        $gallery       = save_event_gallery_uploads();
+        // If no separate cover image was uploaded, use first gallery image as cover
+        if ($uploadedImage === '' && !empty($gallery)) {
+            $uploadedImage = $gallery[0];
+        }
         $newEvent = [
-            'id' => uniqid('evt_'),
-            'title' => $_POST['title'] ?? '',
-            'description' => $_POST['description'] ?? '',
-            'category' => $_POST['category'] ?? '',
-            'capacity' => (int)($_POST['capacity'] ?? 0),
-            'price_per_person' => (float)($_POST['price_per_person'] ?? 0),
-            'venue' => $_POST['venue'] ?? '',
-            'services' => $_POST['services'] ?? '',
-            'event_date' => $_POST['event_date'] ?? '',
-            'image' => $uploadedImage,
-            'created_at' => date('Y-m-d H:i:s'),
-            'status' => 'active'
+            'id'              => uniqid('evt_'),
+            'title'           => $_POST['title'] ?? '',
+            'description'     => $_POST['description'] ?? '',
+            'category'        => $_POST['category'] ?? '',
+            'capacity'        => (int)($_POST['capacity'] ?? 0),
+            'price_per_person'=> (float)($_POST['price_per_person'] ?? 0),
+            'venue'           => $_POST['venue'] ?? '',
+            'services'        => $_POST['services'] ?? '',
+            'event_date'      => $_POST['event_date'] ?? '',
+            'image'           => $uploadedImage,
+            'gallery'         => $gallery,
+            'created_at'      => date('Y-m-d H:i:s'),
+            'status'          => 'active'
         ];
 
         $events[] = $newEvent;
         file_put_contents($eventsFile, json_encode($events, JSON_PRETTY_PRINT));
         Auth::logActivity(Auth::getCurrentUserId(), 'created', 'events', $newEvent['id']);
         $message = 'Event created successfully!';
-        if ($uploadError !== '') {
-            $message .= ' ' . $uploadError;
-        }
+        if ($uploadError !== '') $message .= ' ' . $uploadError;
         $action = 'list';
 
     } elseif ($action_type === 'update') {
         $event_id = $_POST['id'] ?? '';
         foreach ($events as &$event) {
             if ($event['id'] === $event_id) {
-                $uploadError = '';
+                $uploadError  = '';
                 $currentImage = $event['image'] ?? '';
-                $newImage = save_event_image_upload('image', $currentImage, $uploadError);
-                $event['title'] = $_POST['title'] ?? $event['title'];
-                $event['description'] = $_POST['description'] ?? $event['description'];
-                $event['category'] = $_POST['category'] ?? $event['category'];
-                $event['capacity'] = (int)($_POST['capacity'] ?? $event['capacity']);
+                $newImage     = save_event_image_upload('image', $currentImage, $uploadError);
+
+                // Gallery: keep existing + append newly uploaded
+                $existingGallery = $event['gallery'] ?? [];
+                // Handle removed images (from hidden remove_gallery[] inputs)
+                $toRemove = $_POST['remove_gallery'] ?? [];
+                $existingGallery = array_values(array_filter($existingGallery, fn($p) => !in_array($p, $toRemove, true)));
+                $newGallery = save_event_gallery_uploads($existingGallery);
+
+                // If cover image was cleared/unchanged and no dedicated cover, use first gallery photo
+                if ($newImage === '' && !empty($newGallery)) {
+                    $newImage = $newGallery[0];
+                }
+
+                $event['title']            = $_POST['title'] ?? $event['title'];
+                $event['description']      = $_POST['description'] ?? $event['description'];
+                $event['category']         = $_POST['category'] ?? $event['category'];
+                $event['capacity']         = (int)($_POST['capacity'] ?? $event['capacity']);
                 $event['price_per_person'] = (float)($_POST['price_per_person'] ?? $event['price_per_person']);
-                $event['venue'] = $_POST['venue'] ?? $event['venue'];
-                $event['services'] = $_POST['services'] ?? $event['services'];
-                $event['updated_at'] = date('Y-m-d H:i:s');
-                $event['event_date'] = $_POST['event_date'] ?? $event['event_date'];
-                $event['image'] = $newImage;
+                $event['venue']            = $_POST['venue'] ?? $event['venue'];
+                $event['services']         = $_POST['services'] ?? $event['services'];
+                $event['updated_at']       = date('Y-m-d H:i:s');
+                $event['event_date']       = $_POST['event_date'] ?? $event['event_date'];
+                $event['image']            = $newImage;
+                $event['gallery']          = $newGallery;
                 break;
             }
         }
+        unset($event);
         file_put_contents($eventsFile, json_encode($events, JSON_PRETTY_PRINT));
         Auth::logActivity(Auth::getCurrentUserId(), 'updated', 'events', $event_id);
         $message = 'Event updated successfully!';
-        if (!empty($uploadError)) {
-            $message .= ' ' . $uploadError;
-        }
+        if (!empty($uploadError)) $message .= ' ' . $uploadError;
         $action = 'list';
 
     } elseif ($action_type === 'delete') {
@@ -207,22 +262,22 @@ if ($action === 'edit' && isset($_GET['id'])) {
 
                             <div class="form-row">
                             <div class="form-group">
-                                <label>Event Image</label>
+                                <label>Cover Image</label>
                                 <div style="display:grid; gap:12px;">
                                     <div id="event-image-preview" style="aspect-ratio: 16/9; overflow:hidden; border-radius:12px; border:1px solid var(--color-border); background:#f8fafc; display:flex; align-items:center; justify-content:center;">
                                         <?php $editEventImageUrl = !empty($edit_event) ? asmara_event_image_url($edit_event) : ''; ?>
                                         <?php if (!empty($editEventImageUrl)): ?>
-                                            <img src="<?php echo htmlspecialchars($editEventImageUrl); ?>" alt="Current event image" style="width:100%; height:100%; object-fit:cover; display:block;">
+                                            <img src="<?php echo htmlspecialchars($editEventImageUrl); ?>" alt="Current event cover" style="width:100%; height:100%; object-fit:cover; display:block;">
                                         <?php else: ?>
                                             <div style="text-align:center; color:var(--color-text-muted); padding:16px;">
                                                 <svg width="36" height="36" viewBox="0 0 24 24" fill="none" style="margin-bottom:8px;"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 15l-5-5-4 4-7-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                                <div>No image selected yet</div>
+                                                <div>No cover image yet</div>
                                             </div>
                                         <?php endif; ?>
                                     </div>
                                     <input type="file" name="image" id="event-image-input" accept="image/*">
                                 </div>
-                                <p style="font-size:12px; color:var(--color-text-muted); margin-top:8px;">Upload a JPG, PNG, GIF, or WebP image for the event card.</p>
+                                <p style="font-size:12px; color:var(--color-text-muted); margin-top:8px;">Images are automatically compressed &amp; optimised on upload (WebP/JPEG, max 1920px).</p>
                             </div>
                                 <div class="form-group">
                                     <label>Category *</label>
@@ -293,6 +348,38 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                 ><?php echo htmlspecialchars($edit_event['services'] ?? ''); ?></textarea>
                             </div>
 
+                            <!-- ===== GALLERY UPLOAD ===== -->
+                            <div class="form-group">
+                                <label>Event Gallery Photos</label>
+                                <p style="font-size:12px; color:var(--color-text-muted); margin-bottom:10px;">
+                                    Select multiple photos for the gallery. All images are auto-compressed on upload &mdash; great quality, much smaller files.
+                                </p>
+
+                                <?php if (!empty($edit_event['gallery'])): ?>
+                                <div style="margin-bottom:14px;">
+                                    <span style="font-size:12px; font-weight:600; color:var(--color-text-muted); text-transform:uppercase; letter-spacing:.5px;">Current Gallery (<?php echo count($edit_event['gallery']); ?> photos)</span>
+                                    <div id="existing-gallery-strip" style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;">
+                                        <?php foreach ($edit_event['gallery'] as $gPath):
+                                            $gUrl = asmara_event_image_url(['image' => $gPath]);
+                                            if (!$gUrl) continue;
+                                        ?>
+                                        <div class="gallery-thumb-wrapper" style="position:relative; width:110px; height:80px; border-radius:8px; overflow:hidden; border:1px solid var(--color-border);">
+                                            <img src="<?php echo htmlspecialchars($gUrl); ?>" alt="Gallery photo" style="width:100%; height:100%; object-fit:cover; display:block;" loading="lazy" fetchpriority="low">
+                                            <label style="position:absolute; top:4px; right:4px; background:rgba(239,68,68,.85); border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; cursor:pointer; color:#fff; font-size:11px; font-weight:700;" title="Remove photo">
+                                                <input type="checkbox" name="remove_gallery[]" value="<?php echo htmlspecialchars($gPath); ?>" style="display:none;" onchange="toggleRemoveThumb(this)">
+                                                &#x2715;
+                                            </label>
+                                        </div>
+                                        <?php endforeach; ?>
+                                    </div>
+                                    <p style="font-size:11px; color:var(--color-text-muted); margin-top:6px;">Click &#x2715; on any photo to remove it on save.</p>
+                                </div>
+                                <?php endif; ?>
+
+                                <input type="file" name="gallery_images[]" id="gallery-images-input" accept="image/*" multiple style="display:block; margin-bottom:10px;">
+                                <div id="gallery-preview-strip" style="display:flex; flex-wrap:wrap; gap:10px; min-height:0;"></div>
+                            </div>
+
                             <div class="action-buttons" style="gap: 12px; margin-top: 24px;">
                                 <button type="submit" class="action-btn">
                                     <?php echo $action === 'create' ? '+ Create Event' : '✓ Update Event'; ?>
@@ -323,7 +410,14 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                 <option value="catering">Catering Services</option>
                                 <option value="wedding">Weddings</option>
                             </select>
-                        </div>
+
+                            <select id="event-branch-filter" class="filter-select" onchange="filterEvents()">
+                                <option value="">All Branches</option>
+                                <option value="pangani">Pangani</option>
+                                <option value="westlands">Westlands</option>
+                                <option value="karen">Karen</option>
+                                <option value="lavington">Lavington</option>
+                            </select>
 
                         <div class="view-toggle-container">
                             <button class="view-toggle-btn active" id="btnEventCardView" title="Card View" onclick="setEventViewMode('card')">
@@ -346,11 +440,16 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                     <?php $eventImageUrl = asmara_event_image_url($event); ?>
                                     <div class="event-card-premium" 
                                          data-category="<?php echo htmlspecialchars($event['category']); ?>"
+                                         data-branch="<?php echo htmlspecialchars(strtolower($event['venue'] ?? '')); ?>"
                                          data-title="<?php echo htmlspecialchars(strtolower($event['title'])); ?>">
                                         <div class="event-card-header">
                                             <?php if (!empty($eventImageUrl)): ?>
-                                                <div style="width:100%; height:180px; overflow:hidden; border-radius:12px; margin-bottom:12px; background:#f8fafc;">
+                                                <div style="width:100%; height:180px; overflow:hidden; border-radius:12px; margin-bottom:12px; background:#f8fafc; position:relative;">
                                                     <img src="<?php echo htmlspecialchars($eventImageUrl); ?>" alt="<?php echo htmlspecialchars($event['title'] ?? 'Event image'); ?>" style="width:100%; height:100%; object-fit:cover; display:block;">
+                                                    <?php $galleryCount = count($event['gallery'] ?? []); ?>
+                                                    <?php if ($galleryCount > 1): ?>
+                                                    <span style="position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,.6); color:#fff; font-size:11px; padding:3px 8px; border-radius:99px;">&#128247; <?php echo $galleryCount; ?> photos</span>
+                                                    <?php endif; ?>
                                                 </div>
                                             <?php endif; ?>
                                             <div class="event-card-icon">
@@ -411,27 +510,26 @@ if ($action === 'edit' && isset($_GET['id'])) {
 
                     <script>
                         function filterEvents() {
-                            const searchVal = document.getElementById('event-search-input').value.toLowerCase();
+                            const searchVal   = document.getElementById('event-search-input').value.toLowerCase();
                             const categoryVal = document.getElementById('event-category-filter').value;
-                            const cards = document.querySelectorAll('.event-card-premium');
+                            const branchVal   = document.getElementById('event-branch-filter') ? document.getElementById('event-branch-filter').value : '';
+                            const cards       = document.querySelectorAll('.event-card-premium');
 
                             cards.forEach(card => {
-                                const title = card.getAttribute('data-title');
+                                const title    = card.getAttribute('data-title');
                                 const category = card.getAttribute('data-category');
+                                const branch   = card.getAttribute('data-branch') || '';
 
-                                const matchesSearch = title.includes(searchVal);
-                                const matchesCategory = categoryVal === '' || category === categoryVal;
+                                const ok = title.includes(searchVal)
+                                    && (categoryVal === '' || category === categoryVal)
+                                    && (branchVal   === '' || branch   === branchVal);
 
-                                if (matchesSearch && matchesCategory) {
-                                    card.style.display = '';
-                                } else {
-                                    card.style.display = 'none';
-                                }
+                                card.style.display = ok ? '' : 'none';
                             });
                         }
 
                         function setEventViewMode(mode) {
-                            const grid = document.getElementById('eventsDisplayGrid');
+                            const grid    = document.getElementById('eventsDisplayGrid');
                             const btnCard = document.getElementById('btnEventCardView');
                             const btnList = document.getElementById('btnEventListView');
 
@@ -445,32 +543,58 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                 btnList.classList.remove('active');
                             }
                         }
+
+                        function toggleRemoveThumb(checkbox) {
+                            const wrapper = checkbox.closest('.gallery-thumb-wrapper');
+                            if (wrapper) {
+                                wrapper.style.opacity = checkbox.checked ? '0.35' : '1';
+                                wrapper.style.outline = checkbox.checked ? '2px solid #ef4444' : '';
+                            }
+                        }
                     </script>
 
                     <script>
                         document.addEventListener('DOMContentLoaded', function() {
-                            const input = document.getElementById('event-image-input');
-                            const preview = document.getElementById('event-image-preview');
-                            if (!input || !preview) return;
+                            // Cover image preview
+                            const coverInput   = document.getElementById('event-image-input');
+                            const coverPreview = document.getElementById('event-image-preview');
+                            if (coverInput && coverPreview) {
+                                coverInput.addEventListener('change', function() {
+                                    const file = this.files && this.files[0];
+                                    if (!file) return;
+                                    const reader = new FileReader();
+                                    reader.onload = e => {
+                                        coverPreview.innerHTML = '';
+                                        const img = document.createElement('img');
+                                        img.src = e.target.result;
+                                        img.alt = 'Cover preview';
+                                        Object.assign(img.style, { width:'100%', height:'100%', objectFit:'cover', display:'block' });
+                                        coverPreview.appendChild(img);
+                                    };
+                                    reader.readAsDataURL(file);
+                                });
+                            }
 
-                            input.addEventListener('change', function() {
-                                const file = this.files && this.files[0];
-                                if (!file) return;
-
-                                const reader = new FileReader();
-                                reader.onload = function(e) {
-                                    preview.innerHTML = '';
-                                    const img = document.createElement('img');
-                                    img.src = e.target.result;
-                                    img.alt = 'Selected event image preview';
-                                    img.style.width = '100%';
-                                    img.style.height = '100%';
-                                    img.style.objectFit = 'cover';
-                                    img.style.display = 'block';
-                                    preview.appendChild(img);
-                                };
-                                reader.readAsDataURL(file);
-                            });
+                            // Gallery multi-image preview strip
+                            const galleryInput = document.getElementById('gallery-images-input');
+                            const galleryStrip = document.getElementById('gallery-preview-strip');
+                            if (galleryInput && galleryStrip) {
+                                galleryInput.addEventListener('change', function() {
+                                    galleryStrip.innerHTML = '';
+                                    Array.from(this.files).forEach(file => {
+                                        const thumb = document.createElement('div');
+                                        thumb.style.cssText = 'width:110px;height:80px;border-radius:8px;overflow:hidden;border:1px solid #e2e8f0;flex-shrink:0;';
+                                        const img = document.createElement('img');
+                                        img.alt = file.name;
+                                        img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
+                                        const reader = new FileReader();
+                                        reader.onload = e => { img.src = e.target.result; };
+                                        reader.readAsDataURL(file);
+                                        thumb.appendChild(img);
+                                        galleryStrip.appendChild(thumb);
+                                    });
+                                });
+                            }
                         });
                     </script>
 

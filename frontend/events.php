@@ -18,7 +18,21 @@ require_once __DIR__ . '/../backend/database/BranchRepository.php';
 require_once __DIR__ . '/../backend/data/event_helpers.php';
 $events = asmara_filter_upcoming_events($events);
 $branchRepo = new BranchRepository();
-$allBranches = $branchRepo->getAll();
+$allBranches = [];
+try {
+    $allBranches = $branchRepo->getAll();
+} catch (\Throwable $e) {
+    $allBranches = [];
+}
+if (!is_array($allBranches) || empty($allBranches)) {
+    $allBranches = [
+        ['name' => 'Karen'],
+        ['name' => 'Lavington'],
+        ['name' => 'Pangani'],
+        ['name' => 'Westlands']
+    ];
+}
+
 
 $schemaEvents = [];
 foreach ($events as $event) {
@@ -115,13 +129,37 @@ include 'header.php';
           ?>
           <div class="<?php echo $classNames; ?>" style="overflow: hidden; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); transition: all 0.3s ease;">
             
-            <!-- Event Header Card -->
-          <?php $eventImageUrl = asmara_event_image_url($event); ?>
-          <?php if (!empty($eventImageUrl)): ?>
-          <div style="height: 220px; overflow: hidden; background: #f5f5f5;">
-            <img src="<?php echo htmlspecialchars($eventImageUrl); ?>" alt="<?php echo htmlspecialchars($event['title'] ?? 'Event image'); ?>" style="width: 100%; height: 100%; object-fit: cover; display: block;">
+          <!-- Event Header Card -->
+          <?php
+            $galleryUrls  = asmara_event_gallery_urls($event);
+            $hasCover     = !empty($galleryUrls);
+            $galleryCount = count($galleryUrls);
+          ?>
+          <?php if ($hasCover): ?>
+          <div class="event-gallery-strip" aria-label="Event photo gallery">
+            <?php foreach ($galleryUrls as $gi => $gUrl): ?>
+            <div class="event-gallery-slide">
+              <img
+                src="<?php echo htmlspecialchars($gUrl); ?>"
+                alt="<?php echo htmlspecialchars(($event['title'] ?? 'Event') . ' photo ' . ($gi + 1)); ?>"
+                style="width:100%; height:100%; object-fit:cover; display:block; cursor:<?php echo $galleryCount > 1 ? 'zoom-in' : 'default'; ?>;"
+                <?php echo $gi === 0 ? 'fetchpriority="high"' : 'loading="lazy" fetchpriority="low"'; ?>
+                <?php if ($galleryCount > 1): ?>
+                onclick="openGalleryLightbox(<?php echo htmlspecialchars(json_encode($galleryUrls)); ?>, <?php echo $gi; ?>, <?php echo htmlspecialchars(json_encode($event['title'] ?? 'Event')); ?>)"
+                <?php endif; ?>
+              >
+            </div>
+            <?php endforeach; ?>
+          </div>
+          <?php if ($galleryCount > 1): ?>
+          <div class="event-gallery-dots" aria-hidden="true">
+            <?php for ($d = 0; $d < $galleryCount; $d++): ?>
+            <span class="gallery-dot<?php echo $d === 0 ? ' active' : ''; ?>"></span>
+            <?php endfor; ?>
           </div>
           <?php endif; ?>
+          <?php endif; ?>
+
             <div style="background: linear-gradient(135deg, #ed174b 0%, #c41140 100%); color: white; padding: var(--space-md); position: relative; overflow: hidden;">
               <div style="position: absolute; top: -20px; right: -20px; font-size: 80px; opacity: 0.1;">✨</div>
               <h3 class="font-heading-h3" style="color: white; margin: 0 0 var(--space-xs) 0; font-size: 1.5rem;">
@@ -237,31 +275,164 @@ include 'header.php';
 
 <?php include 'footer.php'; ?>
 
+<!-- ===== Gallery Lightbox (native <dialog>) ===== -->
+<dialog id="gallery-lightbox" aria-label="Event photo gallery lightbox" style="
+  padding:0; border:none; border-radius:16px; max-width:min(94vw,1100px); width:100%;
+  background:#0a0a0a; overflow:hidden; box-shadow:0 30px 80px rgba(0,0,0,.8);
+">
+  <div style="position:relative; user-select:none;">
+    <!-- Close -->
+    <button id="lb-close" aria-label="Close gallery" style="
+      position:absolute; top:14px; right:14px; z-index:10;
+      background:rgba(255,255,255,.15); border:none; color:#fff;
+      border-radius:50%; width:40px; height:40px; font-size:22px; cursor:pointer;
+      display:flex; align-items:center; justify-content:center; backdrop-filter:blur(4px);
+    ">&times;</button>
+    <!-- Prev / Next -->
+    <button id="lb-prev" aria-label="Previous photo" style="
+      position:absolute; left:12px; top:50%; transform:translateY(-50%); z-index:10;
+      background:rgba(255,255,255,.15); border:none; color:#fff; border-radius:50%;
+      width:44px; height:44px; font-size:24px; cursor:pointer; backdrop-filter:blur(4px);
+    ">&#8249;</button>
+    <button id="lb-next" aria-label="Next photo" style="
+      position:absolute; right:12px; top:50%; transform:translateY(-50%); z-index:10;
+      background:rgba(255,255,255,.15); border:none; color:#fff; border-radius:50%;
+      width:44px; height:44px; font-size:24px; cursor:pointer; backdrop-filter:blur(4px);
+    ">&#8250;</button>
+    <!-- Main image -->
+    <div style="aspect-ratio:16/9; background:#111; display:flex; align-items:center; justify-content:center;">
+      <img id="lb-img" src="" alt="" style="max-width:100%; max-height:90vh; object-fit:contain; display:block; transition:opacity .2s ease;">
+    </div>
+    <!-- Caption & counter -->
+    <div style="padding:14px 20px; display:flex; justify-content:space-between; align-items:center;">
+      <span id="lb-caption" style="color:#e5e7eb; font-size:15px; font-weight:600;"></span>
+      <span id="lb-counter" style="color:#9ca3af; font-size:13px;"></span>
+    </div>
+    <!-- Thumbnail strip -->
+    <div id="lb-thumbs" style="display:flex; gap:6px; padding:0 16px 16px; overflow-x:auto; scrollbar-width:thin;"></div>
+  </div>
+</dialog>
+
+<style>
+/* ===== Gallery Carousel Strip ===== */
+.event-gallery-strip {
+  height: 220px;
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;        /* Firefox */
+  -webkit-overflow-scrolling: touch;
+  background: #111;
+}
+.event-gallery-strip::-webkit-scrollbar { display: none; }
+
+.event-gallery-slide {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  height: 220px;
+  overflow: hidden;
+}
+
+/* Dot indicators */
+.event-gallery-dots {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 0 4px;
+  background: #fff;
+}
+.gallery-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #d1d5db;
+  transition: background .25s, transform .25s;
+}
+.gallery-dot.active {
+  background: #ed174b;
+  transform: scale(1.3);
+}
+
+/* Photo count badge on cards */
+.gallery-photo-count {
+  position: absolute;
+  bottom: 10px;
+  right: 10px;
+  background: rgba(0,0,0,.6);
+  color: #fff;
+  font-size: 11px;
+  padding: 3px 9px;
+  border-radius: 99px;
+  backdrop-filter: blur(4px);
+  pointer-events: none;
+}
+
+/* Lightbox */
+#gallery-lightbox::backdrop {
+  background: rgba(0,0,0,.88);
+  backdrop-filter: blur(6px);
+}
+#lb-thumbs img {
+  width: 68px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  opacity: .65;
+  transition: opacity .2s, border-color .2s;
+  flex-shrink: 0;
+}
+#lb-thumbs img.lb-thumb-active {
+  border-color: #ed174b;
+  opacity: 1;
+}
+</style>
+
 <script>
+  /* ===== Dot-sync for every gallery strip ===== */
   document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.event-gallery-strip').forEach(strip => {
+      const dotsContainer = strip.nextElementSibling;
+      if (!dotsContainer || !dotsContainer.classList.contains('event-gallery-dots')) return;
+      const dots  = dotsContainer.querySelectorAll('.gallery-dot');
+      const slides = strip.querySelectorAll('.event-gallery-slide');
+
+      // Use IntersectionObserver per slide for accurate snap detection
+      const observer = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const idx = Array.from(slides).indexOf(entry.target);
+            dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+          }
+        });
+      }, { root: strip, threshold: 0.6 });
+
+      slides.forEach(s => observer.observe(s));
+    });
+
+    /* ===== Filter ===== */
     const categoryButtons = document.querySelectorAll('.category-btn');
-    const branchButtons = document.querySelectorAll('.branch-btn');
-    const eventCards = document.querySelectorAll('.event-card');
+    const branchButtons   = document.querySelectorAll('.branch-btn');
+    const eventCards      = document.querySelectorAll('.event-card');
 
     function filterEvents() {
-      const activeCategoryBtn = document.querySelector('.category-btn.active');
-      const activeBranchBtn = document.querySelector('.branch-btn.active');
-      
-      const activeCategory = activeCategoryBtn ? activeCategoryBtn.getAttribute('data-category') : 'all';
-      const activeBranch = activeBranchBtn ? activeBranchBtn.getAttribute('data-branch') : 'all';
+      const activeCat    = document.querySelector('.category-btn.active');
+      const activeBranch = document.querySelector('.branch-btn.active');
+      const selCat    = activeCat    ? activeCat.getAttribute('data-category')    : 'all';
+      const selBranch = activeBranch ? activeBranch.getAttribute('data-branch') : 'all';
 
       eventCards.forEach(card => {
-        const matchCategory = (activeCategory === 'all' || card.classList.contains(activeCategory));
-        const matchBranch = (activeBranch === 'all' || card.classList.contains(activeBranch));
-
-        if (matchCategory && matchBranch) {
-          card.style.display = '';
-          card.style.opacity = '0';
+        const okCat    = selCat    === 'all' || card.classList.contains(selCat);
+        const okBranch = selBranch === 'all' || card.classList.contains(selBranch);
+        if (okCat && okBranch) {
+          card.style.display   = '';
+          card.style.opacity   = '0';
           card.style.transform = 'scale(0.97)';
           setTimeout(() => {
             card.style.transition = 'opacity 300ms ease, transform 300ms ease';
-            card.style.opacity = '1';
-            card.style.transform = 'scale(1)';
+            card.style.opacity    = '1';
+            card.style.transform  = 'scale(1)';
           }, 50);
         } else {
           card.style.display = 'none';
@@ -269,32 +440,126 @@ include 'header.php';
       });
     }
 
-    categoryButtons.forEach(btn => {
-      btn.addEventListener('click', function() {
-        categoryButtons.forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        filterEvents();
-      });
+    categoryButtons.forEach(btn => btn.addEventListener('click', function() {
+      categoryButtons.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      filterEvents();
+    }));
+
+    branchButtons.forEach(btn => btn.addEventListener('click', function() {
+      branchButtons.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      filterEvents();
+    }));
+  });
+
+  /* ===== Lightbox ===== */
+  let _lb_images = [];
+  let _lb_index  = 0;
+  let _lb_title  = '';
+
+  function openGalleryLightbox(images, startIndex, title) {
+    _lb_images = images;
+    _lb_index  = startIndex;
+    _lb_title  = title;
+
+    const dlg   = document.getElementById('gallery-lightbox');
+    const strip = document.getElementById('lb-thumbs');
+
+    // Build thumbnail strip
+    strip.innerHTML = '';
+    images.forEach((src, i) => {
+      const t = document.createElement('img');
+      t.src        = src;
+      t.alt        = title + ' photo ' + (i + 1);
+      t.loading    = 'lazy';
+      t.fetchPriority = 'low';
+      t.dataset.idx = i;
+      t.addEventListener('click', () => lbGoto(i));
+      strip.appendChild(t);
     });
 
-    branchButtons.forEach(btn => {
-      btn.addEventListener('click', function() {
-        branchButtons.forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        filterEvents();
-      });
-    });
+    lbRender(startIndex);
+    dlg.showModal();
+  }
+
+  function lbRender(idx) {
+    if (!_lb_images || _lb_images.length === 0) return;
+    _lb_index = (idx + _lb_images.length) % _lb_images.length;
+    const img     = document.getElementById('lb-img');
+    const caption = document.getElementById('lb-caption');
+    const counter = document.getElementById('lb-counter');
+    const thumbs  = document.querySelectorAll('#lb-thumbs img');
+
+    if (img) {
+      img.style.opacity = '0';
+      setTimeout(() => {
+        img.src           = _lb_images[_lb_index];
+        img.alt           = _lb_title + ' photo ' + (_lb_index + 1);
+        img.style.opacity = '1';
+      }, 100);
+    }
+
+    if (caption) caption.textContent = _lb_title;
+    if (counter) counter.textContent = (_lb_index + 1) + ' / ' + _lb_images.length;
+
+    thumbs.forEach((t, i) => t.classList.toggle('lb-thumb-active', i === _lb_index));
+
+    // Scroll active thumb into view
+    if (thumbs[_lb_index]) {
+      thumbs[_lb_index].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+    }
+  }
+
+  function lbGoto(idx)  { lbRender(idx); }
+  function lbNext()     { lbRender(_lb_index + 1); }
+  function lbPrev()     { lbRender(_lb_index - 1); }
+
+  const lbCloseBtn = document.getElementById('lb-close');
+  if (lbCloseBtn) lbCloseBtn.addEventListener('click', () => {
+    const dlg = document.getElementById('gallery-lightbox');
+    if (dlg) dlg.close();
   });
+
+  const lbNextBtn = document.getElementById('lb-next');
+  if (lbNextBtn) lbNextBtn.addEventListener('click', lbNext);
+
+  const lbPrevBtn = document.getElementById('lb-prev');
+  if (lbPrevBtn) lbPrevBtn.addEventListener('click', lbPrev);
+
+  // Keyboard navigation
+  document.addEventListener('keydown', e => {
+    const dlg = document.getElementById('gallery-lightbox');
+    if (!dlg || !dlg.open) return;
+    if (e.key === 'ArrowRight') lbNext();
+    if (e.key === 'ArrowLeft')  lbPrev();
+    if (e.key === 'Escape')     dlg.close();
+  });
+
+  // Touch swipe support
+  let _touch_start = 0;
+  const lbDialog = document.getElementById('gallery-lightbox');
+  if (lbDialog) {
+    lbDialog.addEventListener('touchstart', e => {
+      _touch_start = e.touches[0].clientX;
+    }, { passive: true });
+
+    lbDialog.addEventListener('touchend', e => {
+      const delta = _touch_start - e.changedTouches[0].clientX;
+      if (Math.abs(delta) > 40) delta > 0 ? lbNext() : lbPrev();
+    });
+
+    // Close on backdrop click
+    lbDialog.addEventListener('click', e => {
+      if (e.target === lbDialog) lbDialog.close();
+    });
+  }
 
   // Share function
   function shareEvent(title, description) {
     const text = `Check out this event at Asmara Restaurant: ${title} - ${description}`;
     if (navigator.share) {
-      navigator.share({
-        title: 'Asmara Event',
-        text: text,
-        url: window.location.href
-      });
+      navigator.share({ title: 'Asmara Event', text: text, url: window.location.href });
     } else {
       alert('Event:\n' + title + '\n\n' + description);
     }
