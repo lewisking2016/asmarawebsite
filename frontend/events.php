@@ -113,7 +113,8 @@ include 'header.php';
           <div style="border-top: 1px solid var(--color-border-light, #eaeaea); padding-top: 15px;">
             <span style="display: block; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-text-muted-dark, #666); margin-bottom: 10px; font-weight: 700;">Filter by Location</span>
             <div class="tab-nav branch-filter-row" style="gap: 8px; flex-wrap: wrap; margin: 0; justify-content: flex-start;">
-              <button class="tab-btn branch-btn active" data-branch="all" style="padding: 10px 20px; font-size: 0.9rem;">All Branches</button>
+              <button class="tab-btn branch-btn active" data-branch="all" style="padding: 10px 20px; font-size: 0.9rem;">View All</button>
+              <button class="tab-btn branch-btn" data-branch="branch-all" style="padding: 10px 20px; font-size: 0.9rem;">All Branches</button>
               <?php foreach ($allBranches as $b): ?>
                 <button class="tab-btn branch-btn" data-branch="branch-<?php echo htmlspecialchars(strtolower($b['name'])); ?>" style="padding: 10px 20px; font-size: 0.9rem;"><?php echo htmlspecialchars($b['name']); ?></button>
               <?php endforeach; ?>
@@ -457,7 +458,14 @@ include 'header.php';
 
       eventCards.forEach(card => {
         const okCat    = selCat    === 'all' || card.classList.contains(selCat);
-        const okBranch = selBranch === 'all' || card.classList.contains(selBranch) || card.classList.contains('branch-all');
+        let okBranch = false;
+        if (selBranch === 'all') {
+          okBranch = true;
+        } else if (selBranch === 'branch-all') {
+          okBranch = card.classList.contains('branch-all');
+        } else {
+          okBranch = card.classList.contains(selBranch) || card.classList.contains('branch-all');
+        }
         if (okCat && okBranch) {
           card.style.display   = '';
           card.style.opacity   = '0';

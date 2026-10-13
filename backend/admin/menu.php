@@ -284,7 +284,8 @@ function admin_preview_src($url) {
                             </select>
 
                             <select id="branch-filter" class="filter-select" onchange="filterItems()">
-                                <option value="">All Branches</option>
+                                <option value="">View All Locations</option>
+                                <option value="all">All Branches Only</option>
                                 <?php foreach ($all_branches as $branch): ?>
                                     <option value="<?php echo htmlspecialchars($branch['id']); ?>"><?php echo htmlspecialchars($branch['name']); ?></option>
                                 <?php endforeach; ?>
@@ -410,7 +411,11 @@ function admin_preview_src($url) {
                         const matchesCategory = categoryVal === '' || category === categoryVal;
                         
                         let matchesBranch = true;
-                        if (branchVal !== '') {
+                        if (branchVal === '') {
+                            matchesBranch = true;
+                        } else if (branchVal === 'all') {
+                            matchesBranch = (rawBranches === 'all');
+                        } else {
                             if (rawBranches === 'all') {
                                 matchesBranch = true;
                             } else {

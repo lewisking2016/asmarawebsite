@@ -630,7 +630,8 @@ if ($action === 'edit' && isset($_GET['id'])) {
                             </select>
 
                             <select id="event-branch-filter" onchange="filterEvents()">
-                                <option value="">All Branches</option>
+                                <option value="">View All Locations</option>
+                                <option value="all">All Branches Only</option>
                                 <option value="pangani">Pangani</option>
                                 <option value="westlands">Westlands</option>
                                 <option value="karen">Karen</option>
@@ -766,9 +767,18 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                 const category = card.getAttribute('data-category');
                                 const branch   = card.getAttribute('data-branch') || '';
 
+                                let okBranch = true;
+                                if (branchVal === '') {
+                                    okBranch = true;
+                                } else if (branchVal === 'all') {
+                                    okBranch = (branch === 'all');
+                                } else {
+                                    okBranch = (branch === branchVal || branch === 'all');
+                                }
+
                                 const ok = title.includes(searchVal)
                                     && (categoryVal === '' || category === categoryVal)
-                                    && (branchVal   === '' || branch   === branchVal || branch === 'all');
+                                    && okBranch;
 
                                 card.style.display = ok ? '' : 'none';
                             });

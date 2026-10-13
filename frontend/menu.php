@@ -104,7 +104,8 @@ include 'header.php';
         <div style="border-top: 1px solid var(--color-border-light, #eaeaea); padding-top: 15px;">
           <span style="display: block; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: var(--color-text-muted-dark, #666); margin-bottom: 10px; font-weight: 700;">Filter by Location</span>
           <div class="tab-nav branch-filter-row" style="gap: 8px; flex-wrap: wrap; margin: 0; justify-content: flex-start;">
-            <button class="tab-btn branch-btn active" data-branch="all" style="padding: 10px 20px; font-size: 0.9rem;">All Branches</button>
+            <button class="tab-btn branch-btn active" data-branch="all" style="padding: 10px 20px; font-size: 0.9rem;">View All</button>
+            <button class="tab-btn branch-btn" data-branch="branch-all" style="padding: 10px 20px; font-size: 0.9rem;">All Branches</button>
             <?php foreach ($allBranches as $b): ?>
               <button class="tab-btn branch-btn" data-branch="branch-<?php echo htmlspecialchars($b['id']); ?>" style="padding: 10px 20px; font-size: 0.9rem;"><?php echo htmlspecialchars($b['name']); ?></button>
             <?php endforeach; ?>
@@ -148,7 +149,7 @@ include 'header.php';
             }
           }
           
-          $classNames = 'card dish-card category-' . htmlspecialchars($item['category']) . ' ' . implode(' ', $itemBranchIds);
+          $classNames = 'card dish-card category-' . htmlspecialchars($item['category']) . ' ' . implode(' ', $itemBranchIds) . ($isUniversal ? ' branch-all' : '');
           $imgUrl = $item['image_url'];
           $publicImgUrl = asmara_menu_image_url($imgUrl);
         ?>
@@ -215,7 +216,15 @@ include 'header.php';
 
         dishCards.forEach(card => {
           const matchCategory = (activeCategory === 'all' || card.classList.contains(activeCategory));
-          const matchBranch = (activeBranch === 'all' || card.classList.contains(activeBranch));
+          
+          let matchBranch = false;
+          if (activeBranch === 'all') {
+            matchBranch = true;
+          } else if (activeBranch === 'branch-all') {
+            matchBranch = card.classList.contains('branch-all');
+          } else {
+            matchBranch = card.classList.contains(activeBranch) || card.classList.contains('branch-all');
+          }
 
           if (matchCategory && matchBranch) {
             card.style.display = '';
