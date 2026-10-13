@@ -8,6 +8,7 @@ $eventsFile = __DIR__ . '/../backend/data/events.json';
 $events = [];
 
 if (file_exists($eventsFile)) {
+    clearstatcache(true, $eventsFile);
     $eventsData = json_decode(file_get_contents($eventsFile), true);
     if (is_array($eventsData)) {
         $events = $eventsData;

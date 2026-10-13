@@ -49,11 +49,51 @@ if (!function_exists('asmara_event_is_upcoming')) {
 
 if (!function_exists('asmara_filter_upcoming_events')) {
     function asmara_filter_upcoming_events(array $events) {
-        $filtered = array_filter($events, function ($event) {
-            return asmara_event_is_upcoming($event);
+        // Exclude only explicitly inactive events
+        $activeEvents = array_values(array_filter($events, function ($event) {
+            return ($event['status'] ?? 'active') !== 'inactive';
+        }));
+
+        if (empty($activeEvents)) {
+            return [];
+        }
+
+        // Split into upcoming and past/ongoing
+        $upcoming = [];
+        $past = [];
+        $today = new DateTimeImmutable('today', asmara_nairobi_timezone());
+
+        foreach ($activeEvents as $event) {
+            $eventDate = asmara_event_date_object($event);
+            if (!$eventDate || $eventDate >= $today) {
+                $upcoming[] = $event;
+            } else {
+                $past[] = $event;
+            }
+        }
+
+        // Sort upcoming ascending by date
+        usort($upcoming, function ($a, $b) {
+            $da = asmara_event_date_object($a);
+            $db = asmara_event_date_object($b);
+            if (!$da && !$db) return 0;
+            if (!$da) return 1;
+            if (!$db) return -1;
+            return $da <=> $db;
         });
 
-        return array_values($filtered);
+        // Sort past descending (most recent first)
+        usort($past, function ($a, $b) {
+            $da = asmara_event_date_object($a);
+            $db = asmara_event_date_object($b);
+            if (!$da && !$db) return 0;
+            if (!$da) return 1;
+            if (!$db) return -1;
+            return $db <=> $da;
+        });
+
+        // Return upcoming first, followed by other active events so nothing disappears
+        return array_merge($upcoming, $past);
     }
 }
 
