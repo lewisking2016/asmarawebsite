@@ -211,7 +211,13 @@ function admin_preview_src($url) {
                             </div>
 
                             <div class="form-group" style="margin-bottom: 24px;">
-                                <label style="display:block; margin-bottom:8px; font-weight:600;">Available Locations / Branches *</label>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                                    <label style="margin:0; font-weight:600;">Available Branches *</label>
+                                    <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; cursor:pointer; color:var(--color-primary);">
+                                        <input type="checkbox" id="selectAllBranches" onchange="toggleAllBranches(this)" style="width:16px; height:16px; accent-color:var(--color-primary);">
+                                        <span>All Branches</span>
+                                    </label>
+                                </div>
                                 <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 16px; background: #f8fafc; border: 1.5px solid var(--color-border); border-radius: 12px;">
                                     <?php 
                                     $current_branches = [];
@@ -222,7 +228,7 @@ function admin_preview_src($url) {
                                         $is_checked = in_array((string)$branch['id'], array_map('strval', $current_branches));
                                     ?>
                                         <label style="display:flex; align-items:center; gap:8px; font-weight:500; cursor:pointer;">
-                                            <input type="checkbox" name="branches[]" value="<?php echo $branch['id']; ?>" <?php echo $is_checked ? 'checked' : ''; ?> style="width:18px; height:18px; accent-color:var(--color-primary);">
+                                            <input type="checkbox" name="branches[]" class="branch-checkbox" value="<?php echo $branch['id']; ?>" <?php echo $is_checked ? 'checked' : ''; ?> style="width:18px; height:18px; accent-color:var(--color-primary);" onchange="updateSelectAllState()">
                                             <span><?php echo htmlspecialchars($branch['name']); ?></span>
                                         </label>
                                     <?php endforeach; ?>
@@ -276,6 +282,13 @@ function admin_preview_src($url) {
                                     <option value="<?php echo htmlspecialchars($cat['name']); ?>"><?php echo htmlspecialchars($cat['display_name']); ?></option>
                                 <?php endforeach; ?>
                             </select>
+
+                            <select id="branch-filter" class="filter-select" onchange="filterItems()">
+                                <option value="">All Branches</option>
+                                <?php foreach ($all_branches as $branch): ?>
+                                    <option value="<?php echo htmlspecialchars($branch['id']); ?>"><?php echo htmlspecialchars($branch['name']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
                         </div>
 
                         <div class="view-toggle-container">
@@ -292,7 +305,23 @@ function admin_preview_src($url) {
                         <div class="items-display-wrapper">
                             <div class="items-grid card-view-mode" id="itemsDisplayGrid">
                                 <?php foreach ($items as $item): ?>
-                                    <div class="item-card" data-category="<?php echo htmlspecialchars($item['category']); ?>" data-name="<?php echo htmlspecialchars(strtolower($item['name'])); ?>">
+                                    <?php 
+                                    $item_branches = [];
+                                    $branch_ids = [];
+                                    if (!empty($item['available_branches'])) {
+                                        $branch_ids = json_decode($item['available_branches'], true) ?: [];
+                                        foreach ($all_branches as $b) {
+                                            if (in_array((string)$b['id'], array_map('strval', $branch_ids))) {
+                                                $item_branches[] = $b['name'];
+                                            }
+                                        }
+                                    }
+                                    $is_all_branches = empty($item['available_branches']) || count($branch_ids) >= count($all_branches);
+                                    ?>
+                                    <div class="item-card" 
+                                         data-category="<?php echo htmlspecialchars($item['category']); ?>" 
+                                         data-name="<?php echo htmlspecialchars(strtolower($item['name'])); ?>"
+                                         data-branches="<?php echo $is_all_branches ? 'all' : htmlspecialchars(json_encode(array_map('strval', $branch_ids))); ?>">
                                         <div class="item-media-container">
                                             <?php if (!empty($item['image_url'])): ?>
                                                 <img src="<?php echo htmlspecialchars(admin_preview_src($item['image_url'])); ?>" alt="<?php echo htmlspecialchars($item['name']); ?>">
@@ -313,18 +342,8 @@ function admin_preview_src($url) {
                                             <div class="item-name"><?php echo htmlspecialchars($item['name']); ?></div>
                                             <p class="item-description"><?php echo htmlspecialchars($item['description'] ?? 'No description provided.'); ?></p>
                                             <div class="item-price">KES <?php echo number_format($item['price'], 2); ?></div>
-                                            <?php 
-                                            $item_branches = [];
-                                            if (!empty($item['available_branches'])) {
-                                                $branch_ids = json_decode($item['available_branches'], true) ?: [];
-                                                foreach ($all_branches as $b) {
-                                                    if (in_array((string)$b['id'], array_map('strval', $branch_ids))) {
-                                                        $item_branches[] = $b['name'];
-                                                    }
-                                                }
-                                            }
-                                            ?>
-                                            <?php if (!empty($item_branches)): ?>
+                                            
+                                            <?php if (!$is_all_branches && !empty($item_branches)): ?>
                                                 <div class="item-branches-row" style="display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;">
                                                     <?php foreach ($item_branches as $bname): ?>
                                                         <span style="display:inline-flex; align-items:center; gap:4px; background:rgba(237,23,75,0.06); color:var(--color-primary); padding:3px 10px; border-radius:99px; font-size:11px; font-weight:600;">
@@ -335,7 +354,10 @@ function admin_preview_src($url) {
                                                 </div>
                                             <?php else: ?>
                                                 <div style="margin-top:4px;">
-                                                    <span style="font-size:11px; color:var(--color-text-muted); font-style:italic;">All locations</span>
+                                                    <span style="display:inline-flex; align-items:center; gap:4px; background:rgba(40,167,69,0.08); color:#28a745; padding:3px 10px; border-radius:99px; font-size:11px; font-weight:600;">
+                                                        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                                        All Branches
+                                                    </span>
                                                 </div>
                                             <?php endif; ?>
                                         </div>
@@ -376,22 +398,54 @@ function admin_preview_src($url) {
                 function filterItems() {
                     const searchVal = document.getElementById('menu-search-input').value.toLowerCase();
                     const categoryVal = document.getElementById('category-filter').value;
+                    const branchVal = document.getElementById('branch-filter') ? document.getElementById('branch-filter').value : '';
                     const items = document.querySelectorAll('.item-card');
 
                     items.forEach(item => {
                         const name = item.getAttribute('data-name');
                         const category = item.getAttribute('data-category');
+                        const rawBranches = item.getAttribute('data-branches') || 'all';
 
                         const matchesSearch = name.includes(searchVal);
                         const matchesCategory = categoryVal === '' || category === categoryVal;
+                        
+                        let matchesBranch = true;
+                        if (branchVal !== '') {
+                            if (rawBranches === 'all') {
+                                matchesBranch = true;
+                            } else {
+                                try {
+                                    const bArr = JSON.parse(rawBranches);
+                                    matchesBranch = Array.isArray(bArr) && bArr.map(String).includes(String(branchVal));
+                                } catch (e) {
+                                    matchesBranch = true;
+                                }
+                            }
+                        }
 
-                        if (matchesSearch && matchesCategory) {
+                        if (matchesSearch && matchesCategory && matchesBranch) {
                             item.style.display = '';
                         } else {
                             item.style.display = 'none';
                         }
                     });
                 }
+
+                function toggleAllBranches(master) {
+                    document.querySelectorAll('.branch-checkbox').forEach(cb => {
+                        cb.checked = master.checked;
+                    });
+                }
+
+                function updateSelectAllState() {
+                    const cbs = document.querySelectorAll('.branch-checkbox');
+                    const master = document.getElementById('selectAllBranches');
+                    if (master && cbs.length) {
+                        master.checked = Array.from(cbs).every(cb => cb.checked);
+                    }
+                }
+
+                document.addEventListener('DOMContentLoaded', updateSelectAllState);
 
                 function setViewMode(mode) {
                     const grid = document.getElementById('itemsDisplayGrid');
