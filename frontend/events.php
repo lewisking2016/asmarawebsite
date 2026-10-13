@@ -161,52 +161,62 @@ include 'header.php';
           <?php endif; ?>
           <?php endif; ?>
 
-            <div style="background: linear-gradient(135deg, #ed174b 0%, #c41140 100%); color: white; padding: var(--space-md); position: relative; overflow: hidden;">
-              <div style="position: absolute; top: -20px; right: -20px; font-size: 80px; opacity: 0.1;">✨</div>
-              <h3 class="font-heading-h3" style="color: white; margin: 0 0 var(--space-xs) 0; font-size: 1.5rem;">
+            <div style="background: linear-gradient(135deg, #ed174b 0%, #c41140 100%); color: white; padding: 12px 16px; position: relative; overflow: hidden;">
+              <div style="position: absolute; top: -15px; right: -15px; font-size: 60px; opacity: 0.1;">✨</div>
+              <?php if (($event['status'] ?? 'active') === 'expired'): ?>
+              <span style="position:absolute; top:10px; right:12px; background:rgba(245,158,11,0.9); color:#fff; font-size:0.68rem; font-weight:700; padding:2px 8px; border-radius:99px; text-transform:uppercase; letter-spacing:0.05em;">Past Event</span>
+              <?php endif; ?>
+              <h3 class="font-heading-h3" style="color: white; margin: 0 0 6px 0; font-size: 1.2rem; line-height: 1.3;">
                 <?php echo htmlspecialchars($event['title'] ?? 'Event'); ?>
               </h3>
-              <div style="display: flex; gap: var(--space-sm); flex-wrap: wrap;">
-                <span class="badge" style="background: rgba(255,255,255,0.3); color: white; font-size: 0.8rem; display:flex; align-items:center; gap:6px;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 3h18v2H3V3zm2 4h14v12H5V7zm2 2v8h10V9H7z"/></svg>
+              <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <span class="badge" style="background: rgba(255,255,255,0.3); color: white; font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; display:flex; align-items:center; gap:4px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M3 3h18v2H3V3zm2 4h14v12H5V7zm2 2v8h10V9H7z"/></svg>
                   <?php echo htmlspecialchars(ucfirst($event['category'] ?? 'Event')); ?>
                 </span>
-                <span class="badge" style="background: rgba(255,255,255,0.3); color: white; font-size: 0.8rem; display:flex; align-items:center; gap:6px;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>
+                <span class="badge" style="background: rgba(255,255,255,0.3); color: white; font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; display:flex; align-items:center; gap:4px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>
                   <?php echo htmlspecialchars(ucfirst($event['venue'] ?? 'TBA')); ?>
                 </span>
-                <span class="badge" style="background: rgba(255,255,255,0.3); color: white; font-size: 0.8rem; display:flex; align-items:center; gap:6px;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm12 8H5v10h14V10z"/></svg>
+                <span class="badge" style="background: rgba(255,255,255,0.3); color: white; font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; display:flex; align-items:center; gap:4px;">
+                  <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm12 8H5v10h14V10z"/></svg>
                   <?php echo htmlspecialchars(asmara_event_date_label($event)); ?>
                 </span>
               </div>
             </div>
 
             <!-- Event Details -->
-            <div style="padding: var(--space-md);">
+            <div style="padding: 14px 16px;">
               <?php if (!empty($event['description'])): ?>
-              <p class="event-description" style="color: var(--color-text-muted); font-size: 0.95rem; margin-bottom: var(--space-md); line-height: 1.6;">
+              <p class="event-description" style="color: var(--color-text-muted); font-size: 0.88rem; margin-bottom: 10px; line-height: 1.5;">
                 <?php echo htmlspecialchars($event['description']); ?>
               </p>
               <?php endif; ?>
 
+              <?php if (empty($event['gallery']) || count($event['gallery']) <= 1): ?>
+              <div class="event-no-gallery-note" style="font-size: 0.78rem; color: #64748b; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 6px 10px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; color:#94a3b8;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                <span>This event description has no gallery</span>
+              </div>
+              <?php endif; ?>
+
               <!-- Event Specs Grid -->
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-md); margin-bottom: var(--space-md);">
-                <div style="background: #f5f5f5; padding: var(--space-sm); border-radius: 8px; text-align: center;">
-                  <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 4px; display:flex; align-items:center; gap:6px;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zM8 11c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zM8 13c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zM16 13c-.29 0-.62.02-.97.05C15.7 13.7 16 14.33 16 15v2h6v-2.5C22 14.17 17.33 13 16 13z"/></svg>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                <div style="background: #f8fafc; padding: 8px 10px; border-radius: 8px; text-align: center; border: 1px solid #f1f5f9;">
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 2px; display:flex; align-items:center; justify-content:center; gap:4px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zM8 11c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zM8 13c-2.33 0-7 1.17-7 3.5V19h14v-2.5C15 14.17 10.33 13 8 13zM16 13c-.29 0-.62.02-.97.05C15.7 13.7 16 14.33 16 15v2h6v-2.5C22 14.17 17.33 13 16 13z"/></svg>
                     Capacity
                   </div>
-                  <div style="font-size: 1.3rem; font-weight: 700; color: #ed174b;">
+                  <div style="font-size: 1.05rem; font-weight: 700; color: #ed174b;">
                     <?php echo (int)($event['capacity'] ?? 0); ?> guests
                   </div>
                 </div>
-                <div style="background: #f5f5f5; padding: var(--space-sm); border-radius: 8px; text-align: center;">
-                  <div style="font-size: 0.8rem; color: var(--color-text-muted); margin-bottom: 4px; display:flex; align-items:center; gap:6px;"> 
-                    <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zM12 17a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/></svg>
+                <div style="background: #f8fafc; padding: 8px 10px; border-radius: 8px; text-align: center; border: 1px solid #f1f5f9;">
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 2px; display:flex; align-items:center; justify-content:center; gap:4px;"> 
+                    <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zM12 17a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/></svg>
                     Per Person
                   </div>
-                  <div style="font-size: 1.3rem; font-weight: 700; color: #ed174b;">
+                  <div style="font-size: 1.05rem; font-weight: 700; color: #ed174b;">
                     KES <?php echo number_format($event['price_per_person'] ?? 0); ?>
                   </div>
                 </div>
@@ -214,14 +224,14 @@ include 'header.php';
 
               <!-- Services -->
               <?php if (!empty($event['services'])): ?>
-              <div style="margin-bottom: var(--space-md);">
-                <p style="font-size: 0.85rem; font-weight: 600; color: var(--color-text-muted); margin-bottom: 8px; display:flex; align-items:center; gap:8px;"><svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/></svg> Services Included:</p>
-                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+              <div style="margin-bottom: 12px;">
+                <p style="font-size: 0.78rem; font-weight: 600; color: var(--color-text-muted); margin-bottom: 6px; display:flex; align-items:center; gap:6px;"><svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2l1.5 4.5L18 8l-4.5 1.5L12 14l-1.5-4.5L6 8l4.5-1.5L12 2z"/></svg> Services Included:</p>
+                <div style="display: flex; flex-wrap: wrap; gap: 6px;">
                   <?php 
                     $serviceList = is_array($event['services']) ? $event['services'] : explode(',', $event['services']);
                     foreach (array_slice($serviceList, 0, 3) as $service): 
                   ?>
-                  <span class="badge" style="background: #f0f0f0; color: #333; font-size: 0.8rem; padding: 6px 14px; border-radius: 8px; border: 1px solid #e5e5e5;">
+                  <span class="badge" style="background: #f1f5f9; color: #334155; font-size: 0.75rem; padding: 4px 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
                     <?php echo trim($service); ?>
                   </span>
                   <?php endforeach; ?>
@@ -231,13 +241,20 @@ include 'header.php';
             </div>
 
             <!-- Event Footer -->
-            <div style="padding: var(--space-md); border-top: 1px solid #e5e5e5; display: flex; gap: var(--space-sm);">
-              <a href="/booking" class="btn btn-primary" style="flex: 1; text-align: center; text-decoration: none; padding: var(--space-sm) var(--space-md); background: #ed174b; color: white; border-radius: 6px; font-weight: 600; transition: all 0.3s ease;">
-                Reserve Now
+            <div style="padding: 10px 16px; border-top: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 8px; background: #fafafa;">
+              <?php if (!empty($event['registration_link'])): ?>
+              <a href="<?php echo htmlspecialchars($event['registration_link']); ?>" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="display: block; text-align: center; text-decoration: none; padding: 9px 12px; background: linear-gradient(135deg, #059669, #047857); color: white; border-radius: 6px; font-size: 0.88rem; font-weight: 700; transition: all 0.2s ease; letter-spacing: 0.02em;">
+                🔗 Register / Book Now
               </a>
-              <button class="btn btn-secondary" onclick="shareEvent('<?php echo htmlspecialchars($event['title']); ?>', '<?php echo htmlspecialchars($event['description']); ?>')" style="flex: 1; padding: var(--space-sm) var(--space-md); background: #f5f5f5; color: #333; border: 1px solid #e5e5e5; border-radius: 6px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
-                Share
-              </button>
+              <?php endif; ?>
+              <div style="display: flex; gap: 8px;">
+                <a href="/booking" class="btn btn-primary" style="flex: 1; text-align: center; text-decoration: none; padding: 8px 12px; background: #ed174b; color: white; border-radius: 6px; font-size: 0.88rem; font-weight: 600; transition: all 0.2s ease;">
+                  Reserve Now
+                </a>
+                <button class="btn btn-secondary" onclick="shareEvent('<?php echo htmlspecialchars($event['title']); ?>', '<?php echo htmlspecialchars($event['description']); ?>')" style="padding: 8px 14px; background: #fff; color: #333; border: 1px solid #e2e8f0; border-radius: 6px; font-size: 0.88rem; font-weight: 600; cursor: pointer; transition: all 0.2s ease;">
+                  Share
+                </button>
+              </div>
             </div>
 
           </div>
@@ -317,7 +334,7 @@ include 'header.php';
 <style>
 /* ===== Gallery Carousel Strip ===== */
 .event-gallery-strip {
-  height: 220px;
+  height: 160px;
   display: flex;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
@@ -330,7 +347,7 @@ include 'header.php';
 .event-gallery-slide {
   flex: 0 0 100%;
   scroll-snap-align: center;
-  height: 220px;
+  height: 160px;
   overflow: hidden;
 }
 

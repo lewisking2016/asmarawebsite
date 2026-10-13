@@ -124,19 +124,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $uploadedImage = $gallery[0];
         }
         $newEvent = [
-            'id'              => uniqid('evt_'),
-            'title'           => $_POST['title'] ?? '',
-            'description'     => $_POST['description'] ?? '',
-            'category'        => $_POST['category'] ?? '',
-            'capacity'        => (int)($_POST['capacity'] ?? 0),
-            'price_per_person'=> (float)($_POST['price_per_person'] ?? 0),
-            'venue'           => $_POST['venue'] ?? '',
-            'services'        => $_POST['services'] ?? '',
-            'event_date'      => $_POST['event_date'] ?? '',
-            'image'           => $uploadedImage,
-            'gallery'         => $gallery,
-            'created_at'      => date('Y-m-d H:i:s'),
-            'status'          => 'active'
+            'id'               => uniqid('evt_'),
+            'title'            => $_POST['title'] ?? '',
+            'description'      => $_POST['description'] ?? '',
+            'category'         => $_POST['category'] ?? '',
+            'capacity'         => (int)($_POST['capacity'] ?? 0),
+            'price_per_person' => (float)($_POST['price_per_person'] ?? 0),
+            'venue'            => $_POST['venue'] ?? '',
+            'services'         => $_POST['services'] ?? '',
+            'event_date'       => $_POST['event_date'] ?? '',
+            'image'            => $uploadedImage,
+            'gallery'          => $gallery,
+            'registration_link'=> trim($_POST['registration_link'] ?? ''),
+            'created_at'       => date('Y-m-d H:i:s'),
+            'status'           => in_array($_POST['status'] ?? 'active', ['active','inactive','expired'], true)
+                                    ? $_POST['status'] : 'active'
         ];
 
         $events[] = $newEvent;
@@ -166,17 +168,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $newImage = $newGallery[0];
                 }
 
-                $event['title']            = $_POST['title'] ?? $event['title'];
-                $event['description']      = $_POST['description'] ?? $event['description'];
-                $event['category']         = $_POST['category'] ?? $event['category'];
-                $event['capacity']         = (int)($_POST['capacity'] ?? $event['capacity']);
-                $event['price_per_person'] = (float)($_POST['price_per_person'] ?? $event['price_per_person']);
-                $event['venue']            = $_POST['venue'] ?? $event['venue'];
-                $event['services']         = $_POST['services'] ?? $event['services'];
-                $event['updated_at']       = date('Y-m-d H:i:s');
-                $event['event_date']       = $_POST['event_date'] ?? $event['event_date'];
-                $event['image']            = $newImage;
-                $event['gallery']          = $newGallery;
+                $event['title']             = $_POST['title'] ?? $event['title'];
+                $event['description']       = $_POST['description'] ?? $event['description'];
+                $event['category']          = $_POST['category'] ?? $event['category'];
+                $event['capacity']          = (int)($_POST['capacity'] ?? $event['capacity']);
+                $event['price_per_person']  = (float)($_POST['price_per_person'] ?? $event['price_per_person']);
+                $event['venue']             = $_POST['venue'] ?? $event['venue'];
+                $event['services']          = $_POST['services'] ?? $event['services'];
+                $event['updated_at']        = date('Y-m-d H:i:s');
+                $event['event_date']        = $_POST['event_date'] ?? $event['event_date'];
+                $event['image']             = $newImage;
+                $event['gallery']           = $newGallery;
+                $event['registration_link'] = trim($_POST['registration_link'] ?? ($event['registration_link'] ?? ''));
+                $newStatus = $_POST['status'] ?? '';
+                if (in_array($newStatus, ['active','inactive','expired'], true)) {
+                    $event['status'] = $newStatus;
+                }
                 break;
             }
         }
@@ -329,6 +336,7 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                 </div>
                             </div>
 
+                            <div class="form-row">
                             <div class="form-group">
                                 <label>Event Date *</label>
                                 <input 
@@ -337,6 +345,29 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                     value="<?php echo htmlspecialchars($edit_event['event_date'] ?? ''); ?>"
                                     required
                                 >
+                            </div>
+
+                            <div class="form-group">
+                                <label>Event Status</label>
+                                <select name="status">
+                                    <?php $curStatus = $edit_event['status'] ?? 'active'; ?>
+                                    <option value="active"   <?php echo $curStatus === 'active'   ? 'selected' : ''; ?>>🟢 Active (visible on website)</option>
+                                    <option value="expired"  <?php echo $curStatus === 'expired'  ? 'selected' : ''; ?>>🕐 Expired (past event, still visible)</option>
+                                    <option value="inactive" <?php echo $curStatus === 'inactive' ? 'selected' : ''; ?>>🔴 Inactive (hidden from website)</option>
+                                </select>
+                                <p style="font-size:11px; color:var(--color-text-muted); margin-top:5px;">Inactive events are hidden from visitors. Expired events remain visible as past events.</p>
+                            </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Registration / Booking Link</label>
+                                <input 
+                                    type="url" 
+                                    name="registration_link" 
+                                    placeholder="https://forms.google.com/... or any registration URL"
+                                    value="<?php echo htmlspecialchars($edit_event['registration_link'] ?? ''); ?>"
+                                >
+                                <p style="font-size:11px; color:var(--color-text-muted); margin-top:5px;">Optional. A &ldquo;Register / Book Now&rdquo; button will appear on the event card on the website.</p>
                             </div>
 
                             <div class="form-group">
@@ -445,29 +476,29 @@ if ($action === 'edit' && isset($_GET['id'])) {
                            =============================== */
                         .events-grid.card-view-mode {
                             display: grid;
-                            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-                            gap: 24px;
+                            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+                            gap: 18px;
                             width: 100%;
                         }
                         .events-grid.card-view-mode .event-card-premium {
                             background: var(--color-surface, #ffffff);
                             border: 1px solid var(--color-border, #e2e8f0);
-                            border-radius: 18px;
-                            padding: 18px;
+                            border-radius: 14px;
+                            padding: 14px;
                             display: flex;
                             flex-direction: column;
-                            box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+                            box-shadow: 0 1px 4px rgba(0,0,0,0.04);
                             transition: transform 0.2s ease, box-shadow 0.2s ease;
                         }
                         .events-grid.card-view-mode .event-card-premium:hover {
-                            transform: translateY(-3px);
-                            box-shadow: 0 10px 24px rgba(0,0,0,0.08);
+                            transform: translateY(-2px);
+                            box-shadow: 0 6px 16px rgba(0,0,0,0.08);
                             border-color: var(--color-primary-border, #fca5a5);
                         }
                         .events-grid.card-view-mode .event-card-media {
                             width: 100%;
-                            height: 185px;
-                            border-radius: 12px;
+                            height: 150px;
+                            border-radius: 10px;
                             overflow: hidden;
                             background: #f1f5f9;
                             position: relative;
@@ -659,7 +690,12 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                             </div>
                                             <div style="display:flex; gap:6px; align-items:center;">
                                                 <span class="status-badge" style="background:rgba(0,0,0,0.05); color:var(--color-text); padding:4px 10px; font-size:11px; font-weight:600;"><?php echo ucfirst($event['category']); ?></span>
-                                                <span class="status-badge status-completed" style="padding:4px 10px; font-size:11px; font-weight:600;"><?php echo ucfirst($event['status'] ?? 'active'); ?></span>
+                                                <?php
+                                                $st = $event['status'] ?? 'active';
+                                                $stColor = $st === 'inactive' ? '#ef4444' : ($st === 'expired' ? '#f59e0b' : '#22c55e');
+                                                $stBg    = $st === 'inactive' ? 'rgba(239,68,68,0.1)' : ($st === 'expired' ? 'rgba(245,158,11,0.1)' : 'rgba(34,197,94,0.1)');
+                                                ?>
+                                                <span class="status-badge" style="background:<?php echo $stBg; ?>; color:<?php echo $stColor; ?>; padding:4px 10px; font-size:11px; font-weight:600; border:1px solid <?php echo $stColor; ?>40;"><?php echo ucfirst($st); ?></span>
                                             </div>
                                         </div>
 
@@ -667,6 +703,19 @@ if ($action === 'edit' && isset($_GET['id'])) {
                                         <div class="event-card-body">
                                             <div class="event-card-title" style="font-size:1.15rem; font-weight:700; color:var(--color-text); line-height:1.3; margin-top:2px;"><?php echo htmlspecialchars($event['title']); ?></div>
                                             <p class="event-card-description" style="font-size:0.87rem; color:var(--color-text-muted); line-height:1.5; margin:0;"><?php echo htmlspecialchars(substr($event['description'] ?? '', 0, 100)); ?><?php echo strlen($event['description'] ?? '') > 100 ? '...' : ''; ?></p>
+
+                                            <?php if (empty($event['gallery']) || count($event['gallery'] ?? []) < 1): ?>
+                                            <div style="font-size:0.75rem; color:#94a3b8; background:#f8fafc; border:1px dashed #cbd5e1; border-radius:6px; padding:5px 8px; display:inline-flex; align-items:center; gap:5px;">
+                                                📷 <span>This event description has no gallery</span>
+                                            </div>
+                                            <?php endif; ?>
+
+                                            <?php if (!empty($event['registration_link'])): ?>
+                                            <div style="font-size:0.75rem; color:#0f766e; background:#f0fdfa; border:1px solid #99f6e4; border-radius:6px; padding:5px 8px; display:inline-flex; align-items:center; gap:5px; margin-top:2px;">
+                                                🔗 <span style="font-weight:600;">Has registration link</span>
+                                            </div>
+                                            <?php endif; ?>
+
                                             
                                             <div class="event-card-details">
                                                 <div class="event-detail-row" style="display:flex; align-items:center; gap:8px; font-size:0.82rem; color:var(--color-text);">
