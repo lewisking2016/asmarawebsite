@@ -72,9 +72,10 @@ if ($view_id && $action === 'view') {
 ?>
 <?php include 'header.php'; ?>
 
-            <div class="page-header">
-                <h1 class="page-title">Bookings Management</h1>
-                <p class="page-subtitle">Manage restaurant reservations</p>
+            <div class="ad-page-header">
+                <span class="ad-page-eyebrow">✦ Reservations</span>
+                <h1>Bookings Management</h1>
+                <p>Manage restaurant reservations &mdash; confirm, cancel, or follow up on guest bookings.</p>
             </div>
 
             <div class="page-content">

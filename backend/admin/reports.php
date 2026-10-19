@@ -68,9 +68,10 @@ $recent_bookings = $bookingRepo->getAll();
 ?>
 <?php include 'header.php'; ?>
 
-            <div class="page-header">
-                <h1 class="page-title">Reports & Analytics</h1>
-                <p class="page-subtitle">Business statistics and performance metrics</p>
+            <div class="ad-page-header">
+                <span class="ad-page-eyebrow">✦ Insights</span>
+                <h1>Reports &amp; Analytics</h1>
+                <p>Business statistics and performance metrics across bookings, menu and reservations.</p>
             </div>
 
             <div class="page-content">

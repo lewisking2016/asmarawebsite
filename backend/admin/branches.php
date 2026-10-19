@@ -174,9 +174,10 @@ function admin_preview_src($url) {
 }
 ?>
 
-            <div class="page-header">
-                <h1 class="page-title">Branches Management</h1>
-                <p class="page-subtitle">Manage all restaurant locations</p>
+            <div class="ad-page-header">
+                <span class="ad-page-eyebrow">✦ Locations</span>
+                <h1>Branches Management</h1>
+                <p>Manage all restaurant locations &mdash; hours, contact info, hero images and ordering.</p>
             </div>
 
             <div class="page-content">
@@ -352,23 +353,20 @@ function admin_preview_src($url) {
                     </div>
                 <?php else: ?>
                     <!-- SEARCH & FILTER FOR BRANCHES -->
-                    <div class="filter-bar-premium">
-                        <div class="filter-left-actions">
-                            <input 
-                                type="text" 
-                                id="branch-search-input" 
-                                placeholder="Search branches..." 
-                                class="filter-search-input"
-                                onkeyup="filterBranches()"
-                            >
+                    <div class="ad-toolbar">
+                        <div class="ad-toolbar-section">
+                            <label for="branch-search-input" class="ad-search">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                                <input id="branch-search-input" type="text" placeholder="Search branches&hellip;" onkeyup="filterBranches()">
+                            </label>
                         </div>
-                        
-                        <div class="view-toggle-container">
-                            <button class="view-toggle-btn active" id="btnBranchCardView" title="Card View" onclick="setBranchViewMode('card')">
-                                <svg width="18" height="18" viewBox="0 0 256 256" fill="currentColor"><path d="M104 56v64a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8V56a8 8 0 0 1 8-8h56a8 8 0 0 1 8 8Zm112-8h-56a8 8 0 0 0-8 8v64a8 8 0 0 0 8 8h56a8 8 0 0 0 8-8V56a8 8 0 0 0-8-8ZM104 144v56a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8v-56a8 8 0 0 1 8-8h56a8 8 0 0 1 8 8Zm112-8h-56a8 8 0 0 0-8 8v56a8 8 0 0 0 8 8h56a8 8 0 0 0 8-8v-56a8 8 0 0 0-8-8Z"/></svg>
+
+                        <div class="ad-segmented" role="tablist" aria-label="View mode">
+                            <button id="btnBranchCardView" class="is-active" title="Card view" aria-label="Card view" onclick="setBranchViewMode('card')">
+                                <svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M104 56v64a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8V56a8 8 0 0 1 8-8h56a8 8 0 0 1 8 8Zm112-8h-56a8 8 0 0 0-8 8v64a8 8 0 0 0 8 8h56a8 8 0 0 0 8-8V56a8 8 0 0 0-8-8ZM104 144v56a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8v-56a8 8 0 0 1 8-8h56a8 8 0 0 1 8 8Zm112-8h-56a8 8 0 0 0-8 8v56a8 8 0 0 0 8 8h56a8 8 0 0 0 8-8v-56a8 8 0 0 0-8-8Z"/></svg>
                             </button>
-                            <button class="view-toggle-btn" id="btnBranchListView" title="List View" onclick="setBranchViewMode('list')">
-                                <svg width="18" height="18" viewBox="0 0 256 256" fill="currentColor"><path d="M80 64a8 8 0 0 1 8-8h120a8 8 0 0 1 0 16H88a8 8 0 0 1-8-8Zm120 48H88a8 8 0 0 0 0 16h120a8 8 0 0 0 0-16Zm0 56H88a8 8 0 0 0 0 16h120a8 8 0 0 0 0-16ZM44 52a12 12 0 1 0 12 12 12 12 0 0 0-12-12Zm0 48a12 12 0 1 0 12 12 12 12 0 0 0-12-12Zm0 48a12 12 0 1 0 12 12 12 12 0 0 0-12-12Z"/></svg>
+                            <button id="btnBranchListView" title="List view" aria-label="List view" onclick="setBranchViewMode('list')">
+                                <svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M80 64a8 8 0 0 1 8-8h120a8 8 0 0 1 0 16H88a8 8 0 0 1-8-8Zm120 48H88a8 8 0 0 0 0 16h120a8 8 0 0 0 0-16Zm0 56H88a8 8 0 0 0 0 16h120a8 8 0 0 0 0-16ZM44 52a12 12 0 1 0 12 12 12 12 0 0 0-12-12Zm0 48a12 12 0 1 0 12 12 12 12 0 0 0-12-12Zm0 48a12 12 0 1 0 12 12 12 12 0 0 0-12-12Z"/></svg>
                             </button>
                         </div>
                     </div>

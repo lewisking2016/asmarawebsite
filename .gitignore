@@ -23,3 +23,9 @@ check_current_db.php
 FIX_BRANCH_IMAGES_GUIDE.txt
 Clean State*.md
 .freebuff/
+
+# Local agent skills mirror (.agents/skills/) — duplicated from
+# C:\Users\lewis\.codex\skills via copy. Do not push; agents can
+# always re-copy if needed. AGENTS.md is committed separately so
+# the design system conventions travel with the repo.
+.agents/skills/

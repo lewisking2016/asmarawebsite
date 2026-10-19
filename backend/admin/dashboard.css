@@ -3554,3 +3554,37 @@ textarea:focus {
 }
 @media (max-width: 600px) { .ad-form-actions { flex-direction: column-reverse; } .ad-form-actions .ad-btn { width: 100%; justify-content: center; } }
 
+
+
+/* ============================================================
+   BRANCH SELECTION GRID (menu form)
+   ============================================================ */
+.ad-branch-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 10px;
+    padding: 14px;
+    background: var(--ad-cream);
+    border: 1px solid var(--ad-line);
+    border-radius: 12px;
+}
+.ad-branch-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 9px 12px;
+    border-radius: var(--ad-radius-pill);
+    background: #ffffff;
+    border: 1px solid var(--ad-line);
+    font-size: 13px; font-weight: 600; color: var(--ad-ink-2);
+    cursor: pointer;
+    transition: background 180ms var(--ad-ease), border-color 180ms var(--ad-ease), color 180ms var(--ad-ease);
+}
+.ad-branch-chip:hover { border-color: var(--ad-rose); color: var(--ad-rose); }
+.ad-branch-chip:has(input:checked) {
+    background: var(--ad-rose-tint);
+    border-color: var(--ad-rose);
+    color: var(--ad-rose);
+}
+.ad-branch-chip input[type=checkbox] { accent-color: var(--ad-rose); width: 16px; height: 16px; margin: 0; }
+.ad-branch-chip > svg { display: none; }
+.ad-branch-chip:has(input:checked) > svg { display: inline-block; color: var(--ad-rose); }
+

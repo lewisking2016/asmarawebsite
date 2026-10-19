@@ -73,9 +73,10 @@ if ($view_id && $action === 'view') {
 ?>
 <?php include 'header.php'; ?>
 
-            <div class="page-header">
-                <h1 class="page-title">Contact Messages</h1>
-                <p class="page-subtitle">Manage customer inquiries</p>
+            <div class="ad-page-header">
+                <span class="ad-page-eyebrow">✦ Inbox</span>
+                <h1>Contact Messages</h1>
+                <p>Manage customer inquiries &mdash; read, reply to, and resolve messages from the website.</p>
             </div>
 
             <div class="page-content">

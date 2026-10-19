@@ -78,9 +78,10 @@ if ($action === 'edit' && isset($_GET['id'])) {
 ?>
 <?php include 'header.php'; ?>
 
-            <div class="page-header">
-                <h1 class="page-title">Users Management</h1>
-                <p class="page-subtitle">Manage admin staff and permissions</p>
+            <div class="ad-page-header">
+                <span class="ad-page-eyebrow">✦ Team</span>
+                <h1>Users Management</h1>
+                <p>Manage admin staff and permissions &mdash; invite new team members and assign roles.</p>
             </div>
 
             <div class="page-content">

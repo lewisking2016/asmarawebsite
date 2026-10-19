@@ -81,9 +81,10 @@ if ($action === 'edit' && isset($_GET['id'])) {
 
 <?php include 'header.php'; ?>
 
-<div class="page-header">
-    <h1 class="page-title">Menu Categories</h1>
-    <p class="page-subtitle">Manage menu categories for food and drinks</p>
+<div class="ad-page-header">
+    <span class="ad-page-eyebrow">✦ Categories</span>
+    <h1>Menu Categories</h1>
+    <p>Manage menu categories for food and drinks &mdash; the sections that visitors browse in the menu.</p>
 </div>
 
 <div class="page-content">

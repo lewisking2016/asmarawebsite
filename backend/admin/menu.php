@@ -139,9 +139,10 @@ function admin_preview_src($url) {
 }
 ?>
 
-            <div class="page-header">
-                <h1 class="page-title">Menu Management</h1>
-                <p class="page-subtitle">Add, edit, or remove menu items</p>
+            <div class="ad-page-header">
+                <span class="ad-page-eyebrow">✦ Menu</span>
+                <h1>Menu Management</h1>
+                <p>Add, edit, or remove menu items &mdash; and pick which branches serve each dish.</p>
             </div>
 
             <div class="page-content">
@@ -155,148 +156,157 @@ function admin_preview_src($url) {
 
                 <?php if ($action === 'create' || $action === 'edit'): ?>
                     <!-- ADD/EDIT FORM -->
-                    <div class="form-container">
-                        <h3><?php echo $action === 'create' ? 'Add New Menu Item' : 'Edit Menu Item'; ?></h3>
-                        
+                    <div class="ad-card ad-card-tinted ad-card-padded-lg" style="max-width: 880px; margin: 0 auto;">
+                        <a href="?action=list" class="back-link" style="display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; color:var(--ad-rose); text-decoration:none; margin-bottom:16px;">&larr; Back to menu</a>
+
+                        <div class="ad-card-header" style="border:0; padding: 4px 0 22px;">
+                            <div>
+                                <span class="ad-page-eyebrow" style="margin-bottom:8px;"><?php echo $action === 'edit' ? 'Editing' : 'New item'; ?></span>
+                                <h3 style="font-family:'Playfair Display', Georgia, serif; font-size:26px; line-height:1.15; color:var(--ad-ink); margin:0;">
+                                    <?php echo $action === 'create' ? 'Add a Menu Item' : 'Edit Menu Item'; ?>
+                                </h3>
+                            </div>
+                        </div>
+
                         <form method="POST" class="menu-form" enctype="multipart/form-data">
                             <input type="hidden" name="action_type" value="<?php echo $action === 'edit' ? 'update' : 'create'; ?>">
                             <?php if ($action === 'edit' && $edit_item): ?>
                                 <input type="hidden" name="id" value="<?php echo $edit_item['id']; ?>">
                             <?php endif; ?>
 
-                            <div class="form-group">
-                                <label>Item Name *</label>
-                                <input 
-                                    type="text" 
-                                    name="name" 
-                                    placeholder="e.g., Injera & Wat"
-                                    value="<?php echo $edit_item['name'] ?? ''; ?>"
-                                    required
-                                >
+                            <div class="ad-field">
+                                <label class="ad-label ad-required" for="menu-name">Item Name</label>
+                                <input id="menu-name" class="ad-input" type="text" name="name" placeholder="e.g., Injera & Wat" value="<?php echo htmlspecialchars($edit_item['name'] ?? ''); ?>" required>
                             </div>
 
-                            <div class="form-group">
-                                <label>Description</label>
-                                <textarea 
-                                    name="description" 
-                                    placeholder="Describe this menu item"
-                                    rows="4"
-                                ><?php echo $edit_item['description'] ?? ''; ?></textarea>
+                            <div class="ad-field">
+                                <label class="ad-label" for="menu-description">Description</label>
+                                <textarea id="menu-description" class="ad-textarea" name="description" placeholder="Describe this menu item&hellip;" rows="4"><?php echo htmlspecialchars($edit_item['description'] ?? ''); ?></textarea>
+                                <div class="ad-hint">Plain text. Keep it between 1&ndash;3 sentences.</div>
                             </div>
 
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Category *</label>
-                                    <select name="category" required>
-                                        <option value="">Select category</option>
-                                        <?php foreach ($categories_list as $cat): ?>
-                                            <option value="<?php echo htmlspecialchars($cat['name']); ?>" <?php echo ($edit_item['category'] ?? '') === $cat['name'] ? 'selected' : ''; ?>>
-                                                <?php echo htmlspecialchars($cat['display_name']); ?>
-                                            </option>
-                                        <?php endforeach; ?>
-                                    </select>
+                            <div class="ad-grid-2">
+                                <div class="ad-field">
+                                    <label class="ad-label ad-required" for="menu-category">Category</label>
+                                    <div class="ad-select-wrap">
+                                        <select id="menu-category" class="ad-select" name="category" required>
+                                            <option value="">Select category</option>
+                                            <?php foreach ($categories_list as $cat): ?>
+                                                <option value="<?php echo htmlspecialchars($cat['name']); ?>" <?php echo ($edit_item['category'] ?? '') === $cat['name'] ? 'selected' : ''; ?>>
+                                                    <?php echo htmlspecialchars($cat['display_name']); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
                                 </div>
 
-                                <div class="form-group">
-                                    <label>Price (KES) *</label>
-                                    <input 
-                                        type="number" 
-                                        name="price" 
-                                        placeholder="0.00"
-                                        step="0.01"
-                                        value="<?php echo $edit_item['price'] ?? ''; ?>"
-                                        required
-                                    >
+                                <div class="ad-field">
+                                    <label class="ad-label ad-required" for="menu-price">Price (KES)</label>
+                                    <div class="ad-input-group ad-with-leading">
+                                        <span class="ad-leading" style="font-size:13px; font-weight:700; color:var(--ad-ink-3);">KES</span>
+                                        <input id="menu-price" class="ad-input" type="number" name="price" placeholder="0.00" step="0.01" value="<?php echo $edit_item['price'] ?? ''; ?>" required>
+                                    </div>
                                 </div>
                             </div>
 
-                            <div class="form-group" style="margin-bottom: 24px;">
+                            <div class="ad-field">
                                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-                                    <label style="margin:0; font-weight:600;">Available Branches *</label>
-                                    <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; cursor:pointer; color:var(--color-primary);">
-                                        <input type="checkbox" id="selectAllBranches" onchange="toggleAllBranches(this)" style="width:16px; height:16px; accent-color:var(--color-primary);">
+                                    <label class="ad-label" style="margin:0;">Available Branches</label>
+                                    <label style="display:flex; align-items:center; gap:6px; font-size:12px; font-weight:600; cursor:pointer; color:var(--ad-rose);">
+                                        <input type="checkbox" id="selectAllBranches" onchange="toggleAllBranches(this)" style="width:16px; height:16px; accent-color:var(--ad-rose);">
                                         <span>All Branches</span>
                                     </label>
                                 </div>
-                                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; padding: 16px; background: #f8fafc; border: 1.5px solid var(--color-border); border-radius: 12px;">
-                                    <?php 
+                                <div class="ad-branch-grid">
+                                    <?php
                                     $current_branches = [];
                                     if (!empty($edit_item['available_branches'])) {
                                         $current_branches = json_decode($edit_item['available_branches'], true) ?: [];
                                     }
-                                    foreach ($all_branches as $branch): 
+                                    foreach ($all_branches as $branch):
                                         $is_checked = in_array((string)$branch['id'], array_map('strval', $current_branches));
                                     ?>
-                                        <label style="display:flex; align-items:center; gap:8px; font-weight:500; cursor:pointer;">
-                                            <input type="checkbox" name="branches[]" class="branch-checkbox" value="<?php echo $branch['id']; ?>" <?php echo $is_checked ? 'checked' : ''; ?> style="width:18px; height:18px; accent-color:var(--color-primary);" onchange="updateSelectAllState()">
+                                        <label class="ad-branch-chip">
+                                            <input type="checkbox" name="branches[]" class="branch-checkbox" value="<?php echo $branch['id']; ?>" <?php echo $is_checked ? 'checked' : ''; ?> onchange="updateSelectAllState()">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
                                             <span><?php echo htmlspecialchars($branch['name']); ?></span>
                                         </label>
                                     <?php endforeach; ?>
                                 </div>
-                                <small style="color:var(--color-text-muted); display:block; margin-top:4px;">Select which restaurant branches offer this menu item.</small>
+                                <div class="ad-hint">Select which restaurant branches offer this menu item.</div>
                             </div>
 
-                            <div class="form-group">
-                                <label>Image</label>
-                                <div class="upload-dropzone">
-                                    <div class="thumbnail-preview" id="menu-image-preview">
+                            <div class="ad-field">
+                                <label class="ad-label" for="menu-image-input">Item Image</label>
+                                <div class="ad-cover-uploader">
+                                    <div id="menu-image-preview" class="ad-cover-preview">
                                         <?php if (!empty($edit_item['image_url'])): ?>
                                             <img src="<?php echo htmlspecialchars(admin_preview_src($edit_item['image_url'])); ?>" alt="current">
                                         <?php else: ?>
-                                            <svg width="48" height="36" viewBox="0 0 24 24" fill="none"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" stroke="#e2e8f0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 15l-5-5-4 4-7-7" stroke="#e2e8f0" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                                            <div class="ad-cover-empty">
+                                                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z" stroke="currentColor" stroke-width="1.5"/><path d="M21 15l-5-5-4 4-7-7" stroke="currentColor" stroke-width="1.5"/></svg>
+                                                <strong>Upload an item photo</strong>
+                                                <span>Drag &amp; drop or click to browse &mdash; 800x600 recommended</span>
+                                            </div>
                                         <?php endif; ?>
                                     </div>
-                                    <div>
-                                        <div class="upload-instructions">Click to choose or drag & drop an image. Recommended: 800x600 JPG/PNG.</div>
-                                        <input type="file" name="image" id="menu-image-input" accept="image/*" style="margin-top:8px;">
+                                    <div class="ad-cover-actions">
+                                        <label for="menu-image-input" class="ad-btn ad-btn-ghost" style="cursor:pointer;">
+                                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                                            <?php echo !empty($edit_item['image_url']) ? 'Replace image' : 'Choose image'; ?>
+                                        </label>
+                                        <input type="file" name="image" id="menu-image-input" accept="image/*" class="ad-cover-file">
                                     </div>
+                                    <div class="ad-hint">Recommended 800x600 JPG/PNG. Images are auto-compressed on upload.</div>
                                 </div>
                             </div>
 
-                            <div class="form-actions">
-                                <button type="submit" class="btn btn-primary">
-                                    <?php echo $action === 'edit' ? 'Update Item' : 'Add Item'; ?>
-                                </button>
-                                <a href="?action=list" class="btn btn-secondary">Cancel</a>
+                            <div class="ad-form-actions">
+                                <button type="submit" class="ad-btn ad-btn-primary ad-btn-lg"><?php echo $action === 'edit' ? 'Update Item' : 'Add Item'; ?></button>
+                                <a href="?action=list" class="ad-btn ad-btn-ghost ad-btn-lg">Cancel</a>
                             </div>
                         </form>
                     </div>
 
                 <?php else: ?>
                     <!-- MENU ITEMS LIST WITH SAAS CONTROLS -->
-                    <div class="filter-bar-premium">
-                        <div class="filter-left-actions">
-                            <a href="?action=create" class="action-btn">+ Add New Item</a>
-                            
-                            <input 
-                                type="text" 
-                                id="menu-search-input" 
-                                placeholder="Search menu items..." 
-                                class="filter-search-input"
-                                onkeyup="filterItems()"
-                            >
+                    <div class="ad-toolbar">
+                        <div class="ad-toolbar-section">
+                            <a href="?action=create" class="ad-btn ad-btn-primary">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+                                New Menu Item
+                            </a>
 
-                            <select id="category-filter" class="filter-select" onchange="filterItems()">
-                                <option value="">All Categories</option>
-                                <?php foreach ($categories_list as $cat): ?>
-                                    <option value="<?php echo htmlspecialchars($cat['name']); ?>"><?php echo htmlspecialchars($cat['display_name']); ?></option>
-                                <?php endforeach; ?>
-                            </select>
+                            <label for="menu-search-input" class="ad-search">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                                <input id="menu-search-input" type="text" placeholder="Search menu items&hellip;" onkeyup="filterItems()">
+                            </label>
 
-                            <select id="branch-filter" class="filter-select" onchange="filterItems()">
-                                <option value="">View All Locations</option>
-                                <option value="all">All Branches Only</option>
-                                <?php foreach ($all_branches as $branch): ?>
-                                    <option value="<?php echo htmlspecialchars($branch['id']); ?>"><?php echo htmlspecialchars($branch['name']); ?></option>
-                                <?php endforeach; ?>
-                            </select>
+                            <div class="ad-select-wrap">
+                                <select id="category-filter" class="ad-select ad-trigger" onchange="filterItems()">
+                                    <option value="">All Categories</option>
+                                    <?php foreach ($categories_list as $cat): ?>
+                                        <option value="<?php echo htmlspecialchars($cat['name']); ?>"><?php echo htmlspecialchars($cat['display_name']); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+
+                            <div class="ad-select-wrap">
+                                <select id="branch-filter" class="ad-select ad-trigger" onchange="filterItems()">
+                                    <option value="">View All Locations</option>
+                                    <option value="all">All Branches Only</option>
+                                    <?php foreach ($all_branches as $branch): ?>
+                                        <option value="<?php echo htmlspecialchars($branch['id']); ?>"><?php echo htmlspecialchars($branch['name']); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
                         </div>
 
-                        <div class="view-toggle-container">
-                            <button class="view-toggle-btn active" id="btnCardView" title="Card View" onclick="setViewMode('card')">
-                                <svg width="18" height="18" viewBox="0 0 256 256" fill="currentColor"><path d="M104 56v64a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8V56a8 8 0 0 1 8-8h56a8 8 0 0 1 8 8Zm112-8h-56a8 8 0 0 0-8 8v64a8 8 0 0 0 8 8h56a8 8 0 0 0 8-8V56a8 8 0 0 0-8-8ZM104 144v56a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8v-56a8 8 0 0 1 8-8h56a8 8 0 0 1 8 8Zm112-8h-56a8 8 0 0 0-8 8v56a8 8 0 0 0 8 8h56a8 8 0 0 0 8-8v-56a8 8 0 0 0-8-8Z"/></svg>
+                        <div class="ad-segmented" role="tablist" aria-label="View mode">
+                            <button id="btnCardView" class="is-active" title="Card view" aria-label="Card view" onclick="setViewMode('card')">
+                                <svg width="16" height="16" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M104 56v64a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8V56a8 8 0 0 1 8-8h56a8 8 0 0 1 8 8Zm112-8h-56a8 8 0 0 0-8 8v64a8 8 0 0 0 8 8h56a8 8 0 0 0 8-8V56a8 8 0 0 0-8-8ZM104 144v56a8 8 0 0 1-8 8H40a8 8 0 0 1-8-8v-56a8 8 0 0 1 8-8h56a8 8 0 0 1 8 8Zm112-8h-56a8 8 0 0 0-8 8v56a8 8 0 0 0 8 8h56a8 8 0 0 0 8-8v-56a8 8 0 0 0-8-8Z"/></svg>
                             </button>
-                            <button class="view-toggle-btn" id="btnListView" title="List View" onclick="setViewMode('list')">
+                            <button id="btnListView" title="List view" aria-label="List view" onclick="setViewMode('list')">
                                 <svg width="18" height="18" viewBox="0 0 256 256" fill="currentColor"><path d="M80 64a8 8 0 0 1 8-8h120a8 8 0 0 1 0 16H88a8 8 0 0 1-8-8Zm120 48H88a8 8 0 0 0 0 16h120a8 8 0 0 0 0-16Zm0 56H88a8 8 0 0 0 0 16h120a8 8 0 0 0 0-16ZM44 52a12 12 0 1 0 12 12 12 12 0 0 0-12-12Zm0 48a12 12 0 1 0 12 12 12 12 0 0 0-12-12Zm0 48a12 12 0 1 0 12 12 12 12 0 0 0-12-12Z"/></svg>
                             </button>
                         </div>

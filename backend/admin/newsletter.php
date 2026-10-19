@@ -319,18 +319,13 @@ include 'header.php';
 </style>
 
 <div class="dashboard-container">
-    <div class="page-header">
-        <h1 class="page-title">
-            <svg width="24" height="24" viewBox="0 0 256 256" fill="none" style="display: inline-block; margin-right: 12px; vertical-align: middle;">
-                <path d="M224 48H32a8 8 0 0 0-8 8v136a16 16 0 0 0 16 16h176a16 16 0 0 0 16-16V56a8 8 0 0 0-8-8Zm-96 85.15L52.57 64h150.86ZM98.71 128 40 181.81V74.19Zm11.84 10.85 12.58 11a8 8 0 0 0 10.74 0l12.58-11L210.39 192H45.61ZM157.29 128 216 74.19v107.62Z" fill="currentColor"/>
-            </svg>
-            Newsletter Subscribers
-        </h1>
-        <div class="header-actions">
-            <a href="?export=csv" class="btn btn-secondary">
-                <svg width="16" height="16" viewBox="0 0 256 256" fill="none" style="display: inline-block; margin-right: 8px; vertical-align: middle;">
-                    <path d="M216 120v96a16 16 0 0 1-16 16H56a16 16 0 0 1-16-16v-96a8 8 0 0 1 16 0v96h144v-96a8 8 0 0 1 16 0Zm-61.66-34.34a8 8 0 0 1 0 11.32l-40 40a8 8 0 0 1-11.32-11.32L132.69 104H40a8 8 0 0 1 0-16h92.69l-29.17-29.17a8 8 0 0 1 11.32-11.32Z" fill="currentColor"/>
-                </svg>
+    <div class="ad-page-header">
+        <span class="ad-page-eyebrow">✦ Newsletter</span>
+        <h1>Newsletter Subscribers</h1>
+        <p>People who&rsquo;ve opted in to receive updates from Asmara. Export the list as CSV any time.</p>
+        <div style="margin-top:14px;">
+            <a href="?export=csv" class="ad-btn ad-btn-ghost">
+                <svg width="16" height="16" viewBox="0 0 256 256" fill="none" aria-hidden="true"><path d="M216 120v96a16 16 0 0 1-16 16H56a16 16 0 0 1-16-16v-96a8 8 0 0 1 16 0v96h144v-96a8 8 0 0 1 16 0Zm-61.66-34.34a8 8 0 0 1 0 11.32l-40 40a8 8 0 0 1-11.32-11.32L132.69 104H40a8 8 0 0 1 0-16h92.69l-29.17-29.17a8 8 0 0 1 11.32-11.32Z" fill="currentColor"/></svg>
                 Export CSV
             </a>
         </div>

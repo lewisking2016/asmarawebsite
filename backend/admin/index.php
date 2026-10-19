@@ -37,93 +37,116 @@ $upcoming_bookings = $bookingRepo->getUpcomingBookings(7);
 ?>
 <?php include 'header.php'; ?>
 
-            <div class="page-header">
-                <h1 class="page-title">Dashboard</h1>
-                <p class="page-subtitle">Welcome to Asmara Restaurant Management System</p>
+            <div class="ad-page-header">
+                <span class="ad-page-eyebrow">✦ Overview</span>
+                <h1>Dashboard</h1>
+                <p>Welcome back, <?php echo htmlspecialchars($current_user['username']); ?>. Here&rsquo;s what&rsquo;s happening across your restaurants right now.</p>
             </div>
 
             <div class="page-content">
-                <!-- STATISTICS CARDS -->
-                <div class="stats-grid">
-                    <a href="bookings.php" class="stat-card" style="text-decoration:none;color:inherit;">
-                        <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 256 256" fill="none"><path d="M208 32h-24V24a8 8 0 0 0-16 0v8H88V24a8 8 0 0 0-16 0v8H48a16 16 0 0 0-16 16v160a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16Zm0 176H48V48h24v8a8 8 0 0 0 16 0v-8h80v8a8 8 0 0 0 16 0v-8h24Zm-68-76a12 12 0 1 1-12-12 12 12 0 0 1 12 12Zm44 0a12 12 0 1 1-12-12 12 12 0 0 1 12 12Zm-88 40a12 12 0 1 1-12-12 12 12 0 0 1 12 12Zm44 0a12 12 0 1 1-12-12 12 12 0 0 1 12 12Zm44 0a12 12 0 1 1-12-12 12 12 0 0 1 12 12Z" fill="currentColor"/></svg></div>
-                        <div class="stat-content">
-                            <div class="stat-value"><?php echo $total_bookings; ?></div>
-                            <div class="stat-label">Total Bookings</div>
+                <!-- STATISTICS TILES -->
+                <div class="ad-stat-row" role="list">
+                    <a href="bookings.php" class="ad-stat-tile" role="listitem" style="text-decoration:none;color:inherit;">
+                        <div class="ad-stat-icon">
+                            <svg width="22" height="22" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M208 32h-24V24a8 8 0 0 0-16 0v8H88V24a8 8 0 0 0-16 0v8H48a16 16 0 0 0-16 16v160a16 16 0 0 0 16 16h160a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16Zm0 176H48V48h24v8a8 8 0 0 0 16 0v-8h80v8a8 8 0 0 0 16 0v-8h24Z"/></svg>
+                        </div>
+                        <div>
+                            <div class="ad-stat-value"><?php echo (int)$total_bookings; ?></div>
+                            <div class="ad-stat-label">Total Bookings</div>
                         </div>
                     </a>
 
-                    <a href="bookings.php?filter=completed" class="stat-card" style="text-decoration:none;color:inherit;">
-                        <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M9 16.2l-3.5-3.5L4 14.2 9 19.2 20 8.2 18.6 6.8z" fill="currentColor"/></svg></div>
-                        <div class="stat-content">
-                            <div class="stat-value" style="color: #10b981;"><?php echo $completed_bookings; ?></div>
-                            <div class="stat-label">Completed (<?php echo $booking_completion_rate; ?>%)</div>
+                    <a href="bookings.php?filter=completed" class="ad-stat-tile is-emerald" role="listitem" style="text-decoration:none;color:inherit;">
+                        <div class="ad-stat-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                        <div>
+                            <div class="ad-stat-value"><?php echo (int)$completed_bookings; ?></div>
+                            <div class="ad-stat-label">Completed &middot; <?php echo $booking_completion_rate; ?>%</div>
                         </div>
                     </a>
 
-                    <a href="bookings.php?filter=confirmed" class="stat-card" style="text-decoration:none;color:inherit;">
-                        <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M21.65 2.34a1 1 0 0 0-1.42 0l-16 16a1 1 0 0 0 0 1.42l.71.71a1 1 0 0 0 1.42 0l16-16a1 1 0 0 0 0-1.42zM7.34 17.34 5 15l10-10 2.34 2.34z" fill="currentColor"/><path d="M9.88 5.88l8.24 8.24a1 1 0 0 1 0 1.42l-.7.7-8.24-8.24a1 1 0 0 1 0-1.42l.7-.7a1 1 0 0 1 1.42 0z" fill="currentColor"/><path d="M5 15l-1.5 1.5a1 1 0 0 0 0 1.42l.71.71a1 1 0 0 0 1.42 0L7.34 17.34z" fill="currentColor"/></svg></div>
-                        <div class="stat-content">
-                            <div class="stat-value" style="color: #3b82f6;"><?php echo $confirmed_bookings; ?></div>
-                            <div class="stat-label">Confirmed (<?php echo $booking_confirmation_rate; ?>%)</div>
+                    <a href="bookings.php?filter=confirmed" class="ad-stat-tile is-cobalt" role="listitem" style="text-decoration:none;color:inherit;">
+                        <div class="ad-stat-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5 12l4 4L19 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        </div>
+                        <div>
+                            <div class="ad-stat-value"><?php echo (int)$confirmed_bookings; ?></div>
+                            <div class="ad-stat-label">Confirmed &middot; <?php echo $booking_confirmation_rate; ?>%</div>
                         </div>
                     </a>
 
-                    <a href="bookings.php?filter=pending" class="stat-card" style="text-decoration:none;color:inherit;">
-                        <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M12 8v5l3 3 .7-.7-2.7-2.3V8z" fill="currentColor"/><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM12 20a8 8 0 1 1 0-16 8 8 0 0 1 0 16z" fill="currentColor"/></svg></div>
-                        <div class="stat-content">
-                            <div class="stat-value" style="color: #ffd200;"><?php echo $pending_bookings; ?></div>
-                            <div class="stat-label">Pending (<?php echo $booking_pending_rate; ?>%)</div>
+                    <a href="bookings.php?filter=pending" class="ad-stat-tile is-amber" role="listitem" style="text-decoration:none;color:inherit;">
+                        <div class="ad-stat-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 7v6l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        </div>
+                        <div>
+                            <div class="ad-stat-value"><?php echo (int)$pending_bookings; ?></div>
+                            <div class="ad-stat-label">Pending &middot; <?php echo $booking_pending_rate; ?>%</div>
                         </div>
                     </a>
 
-                    <a href="bookings.php?filter=cancelled" class="stat-card" style="text-decoration:none;color:inherit;">
-                        <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M18.3 5.7l-1-1L12 9l-5.3-4.3-1 1L11 10l-5 5 1 1L12 11l5.3 5.7 1-1-5-5z" fill="currentColor"/></svg></div>
-                        <div class="stat-content">
-                            <div class="stat-value" style="color: #ef4444;"><?php echo $cancelled_bookings; ?></div>
-                            <div class="stat-label">Cancelled (<?php echo $booking_cancellation_rate; ?>%)</div>
+                    <a href="bookings.php?filter=cancelled" class="ad-stat-tile is-rose" role="listitem" style="text-decoration:none;color:inherit;">
+                        <div class="ad-stat-icon">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+                        </div>
+                        <div>
+                            <div class="ad-stat-value"><?php echo (int)$cancelled_bookings; ?></div>
+                            <div class="ad-stat-label">Cancelled &middot; <?php echo $booking_cancellation_rate; ?>%</div>
                         </div>
                     </a>
 
-                    <div class="stat-card">
-                        <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 256 256" fill="none"><path d="M200 32H56a16 16 0 0 0-16 16v160a16 16 0 0 0 16 16h144a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16Zm0 176H56V48h144ZM80 80h96a8 8 0 0 1 0 16H80a8 8 0 0 1 0-16Zm0 40h96a8 8 0 0 1 0 16H80a8 8 0 0 1 0-16Zm0 40h64a8 8 0 0 1 0 16H80a8 8 0 0 1 0-16Z" fill="currentColor"/></svg></div>
-                        <div class="stat-content">
-                            <div class="stat-value"><?php echo $total_menu_items; ?></div>
-                            <div class="stat-label">Menu Items</div>
+                    <a href="menu.php" class="ad-stat-tile is-rose" role="listitem" style="text-decoration:none;color:inherit;">
+                        <div class="ad-stat-icon">
+                            <svg width="22" height="22" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M200 32H56a16 16 0 0 0-16 16v160a16 16 0 0 0 16 16h144a16 16 0 0 0 16-16V48a16 16 0 0 0-16-16Zm0 176H56V48h144Z"/></svg>
                         </div>
-                    </div>
+                        <div>
+                            <div class="ad-stat-value"><?php echo (int)$total_menu_items; ?></div>
+                            <div class="ad-stat-label">Menu Items</div>
+                        </div>
+                    </a>
 
-                    <div class="stat-card">
-                        <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 256 256" fill="none"><path d="M224 48H32a8 8 0 0 0-8 8v136a16 16 0 0 0 16 16h176a16 16 0 0 0 16-16V56a8 8 0 0 0-8-8Zm-96 85.15L52.57 64h150.86ZM98.71 128 40 181.81V74.19Zm11.84 10.85 12.58 11a8 8 0 0 0 10.74 0l12.58-11L210.39 192H45.61ZM157.29 128 216 74.19v107.62Z" fill="currentColor"/></svg></div>
-                        <div class="stat-content">
-                            <div class="stat-value" style="color: #ed174b;"><?php echo $new_messages; ?></div>
-                            <div class="stat-label">New Messages</div>
+                    <a href="contact.php" class="ad-stat-tile is-cobalt" role="listitem" style="text-decoration:none;color:inherit;">
+                        <div class="ad-stat-icon">
+                            <svg width="22" height="22" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224 48H32a8 8 0 0 0-8 8v136a16 16 0 0 0 16 16h176a16 16 0 0 0 16-16V56a8 8 0 0 0-8-8Z"/></svg>
                         </div>
-                    </div>
+                        <div>
+                            <div class="ad-stat-value"><?php echo (int)$new_messages; ?></div>
+                            <div class="ad-stat-label">New Messages</div>
+                        </div>
+                    </a>
 
-                    <div class="stat-card">
-                        <div class="stat-icon"><svg width="24" height="24" viewBox="0 0 256 256" fill="none"><path d="M232 224h-24V72a8 8 0 0 0-8-8h-56V32a8 8 0 0 0-12.27-6.74l-80 52A8 8 0 0 0 48 84v140H24a8 8 0 0 0 0 16h208a8 8 0 0 0 0-16ZM64 224V89.34L136 42v182Zm128 0h-40V80h40ZM96 120h16a8 8 0 0 1 0 16H96a8 8 0 0 1 0-16Zm-16 56a8 8 0 0 1 8-8h16a8 8 0 0 1 0 16H88a8 8 0 0 1-8-8Z" fill="currentColor"/></svg></div>
-                        <div class="stat-content">
-                            <div class="stat-value"><?php echo $total_branches; ?></div>
-                            <div class="stat-label">Branches</div>
+                    <a href="branches.php" class="ad-stat-tile is-emerald" role="listitem" style="text-decoration:none;color:inherit;">
+                        <div class="ad-stat-icon">
+                            <svg width="22" height="22" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M232 224h-24V72a8 8 0 0 0-8-8h-56V32a8 8 0 0 0-12.27-6.74l-80 52A8 8 0 0 0 48 84v140H24a8 8 0 0 0 0 16h208a8 8 0 0 0 0-16Z"/></svg>
                         </div>
-                    </div>
+                        <div>
+                            <div class="ad-stat-value"><?php echo (int)$total_branches; ?></div>
+                            <div class="ad-stat-label">Branches</div>
+                        </div>
+                    </a>
                 </div>
 
                 <!-- QUICK ACTIONS -->
-                <div class="quick-actions">
-                    <h3>Quick Actions</h3>
-                    <div class="action-buttons">
-                        <a href="menu.php" class="action-btn">+ Add Menu Item</a>
-                        <a href="bookings.php" class="action-btn">View Bookings</a>
-                        <a href="branches.php" class="action-btn">Manage Branches</a>
-                        <a href="contact.php" class="action-btn">View Messages</a>
+                <div class="ad-card ad-card-padded" style="margin-bottom:24px;">
+                    <div class="ad-card-header" style="border:0; padding:0 0 16px;">
+                        <h3>Quick Actions</h3>
+                        <span class="ad-chip ad-chip-ink"><span class="ad-chip-dot"></span>Shortcuts</span>
+                    </div>
+                    <div class="action-buttons" style="display:flex; flex-wrap:wrap; gap:10px;">
+                        <a href="menu.php" class="ad-btn ad-btn-primary">+ Add Menu Item</a>
+                        <a href="bookings.php" class="ad-btn ad-btn-ghost">View Bookings</a>
+                        <a href="branches.php" class="ad-btn ad-btn-ghost">Manage Branches</a>
+                        <a href="contact.php" class="ad-btn ad-btn-ghost">View Messages</a>
                     </div>
                 </div>
 
                 <!-- TODAY'S BOOKINGS -->
-                <div class="section">
-                    <h3>Today's Bookings</h3>
+                <div class="ad-card ad-card-padded" style="margin-bottom:24px;">
+                    <div class="ad-card-header" style="border:0; padding:0 0 16px;">
+                        <h3>Today&rsquo;s Bookings</h3>
+                        <a href="bookings.php" class="ad-btn ad-btn-soft" style="padding:6px 12px; font-size:12px;">View all</a>
+                    </div>
                     <?php if (!empty($today_bookings)): ?>
                         <table class="data-table">
                             <thead>
@@ -136,31 +159,41 @@ $upcoming_bookings = $bookingRepo->getUpcomingBookings(7);
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php foreach (array_slice($today_bookings, 0, 5) as $booking): ?>
+                                <?php foreach (array_slice($today_bookings, 0, 5) as $booking):
+                                    $st = $booking['status'] ?? 'pending';
+                                    $chipClass = $st === 'completed' ? 'ad-chip-emerald'
+                                                : ($st === 'confirmed' ? 'ad-chip-cobalt'
+                                                : ($st === 'cancelled' ? 'ad-chip-crimson' : 'ad-chip-amber'));
+                                ?>
                                 <tr>
                                     <td><?php echo htmlspecialchars($booking['guest_name']); ?></td>
                                     <td><?php echo htmlspecialchars($booking['booking_time']); ?></td>
                                     <td><?php echo htmlspecialchars($booking['guest_count']); ?></td>
                                     <td><?php echo htmlspecialchars($booking['branch_name']); ?></td>
                                     <td>
-                                        <span class="status-badge status-<?php echo $booking['status']; ?>">
-                                            <?php echo ucfirst($booking['status']); ?>
-                                        </span>
+                                        <span class="ad-chip <?php echo $chipClass; ?>"><span class="ad-chip-dot"></span><?php echo ucfirst($st); ?></span>
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
                     <?php else: ?>
-                        <div class="empty-state">
-                            <p>No bookings for today</p>
+                        <div class="ad-empty">
+                            <div class="ad-empty-icon">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M12 8v5l3 2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            </div>
+                            <h4>No bookings for today</h4>
+                            <p>When guests reserve a table for today it will show up here in real time.</p>
                         </div>
                     <?php endif; ?>
                 </div>
 
                 <!-- RECENT MESSAGES -->
-                <div class="section">
-                    <h3>Recent Messages</h3>
+                <div class="ad-card ad-card-padded">
+                    <div class="ad-card-header" style="border:0; padding:0 0 16px;">
+                        <h3>Recent Messages</h3>
+                        <a href="contact.php" class="ad-btn ad-btn-soft" style="padding:6px 12px; font-size:12px;">View inbox</a>
+                    </div>
                     <?php if (!empty($recent_messages)): ?>
                         <div class="messages-list">
                             <?php foreach ($recent_messages as $message): ?>
@@ -176,8 +209,12 @@ $upcoming_bookings = $bookingRepo->getUpcomingBookings(7);
                             <?php endforeach; ?>
                         </div>
                     <?php else: ?>
-                        <div class="empty-state">
-                            <p>No messages yet</p>
+                        <div class="ad-empty">
+                            <div class="ad-empty-icon">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16v12H4z M4 6l8 6 8-6" stroke="currentColor" stroke-width="2"/></svg>
+                            </div>
+                            <h4>No messages yet</h4>
+                            <p>Customer messages from the contact form will appear here.</p>
                         </div>
                     <?php endif; ?>
                 </div>
