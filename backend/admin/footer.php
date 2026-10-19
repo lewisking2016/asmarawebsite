@@ -147,5 +147,144 @@
             applyViewControls(); setupViewControls(); initAvailabilityToggles();
         })();
     </script>
+    <script>
+        // Robust PDF export handler. Replaces raw anchor navigation so we can
+        // surface server errors as a styled toast instead of an HTML response.
+        (function(){
+            function ensureToastContainer() {
+                let host = document.getElementById('ad-toast-host');
+                if (host) return host;
+                host = document.createElement('div');
+                host.id = 'ad-toast-host';
+                host.style.cssText = [
+                    'position:fixed', 'top:24px', 'right:24px', 'z-index:9999',
+                    'display:flex', 'flex-direction:column', 'gap:10px',
+                    'max-width:380px', 'pointer-events:none'
+                ].join(';');
+                document.body.appendChild(host);
+                return host;
+            }
+            function showToast(kind, title, body) {
+                const host = ensureToastContainer();
+                const t = document.createElement('div');
+                const palette = {
+                    error: { bg: '#fff1f4', border: '#ed174b', icon: '!' },
+                    success: { bg: '#ecfdf5', border: '#0f8a5f', icon: '\u2713' },
+                    info: { bg: '#fbf8f5', border: '#d9cfc4', icon: 'i' }
+                }[kind] || { bg: '#fff1f4', border: '#ed174b', icon: '!' };
+                t.style.cssText = [
+                    'pointer-events:auto',
+                    'background:' + palette.bg,
+                    'border:1px solid ' + palette.border,
+                    'border-left:4px solid ' + palette.border,
+                    'border-radius:14px',
+                    'padding:14px 16px',
+                    'box-shadow:0 12px 32px rgba(21,18,26,0.12)',
+                    'font:500 13.5px/1.45 "Plus Jakarta Sans", system-ui, sans-serif',
+                    'color:#15121a',
+                    'display:flex', 'gap:12px', 'align-items:flex-start',
+                    'animation:adToastIn .25s cubic-bezier(.22,1,.36,1)'
+                ].join(';');
+                t.innerHTML = ''
+                    + '<span style="flex:0 0 22px;height:22px;border-radius:50%;background:' + palette.border + ';color:#fff;'
+                    + 'display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;line-height:1">' + palette.icon + '</span>'
+                    + '<div style="min-width:0;flex:1">'
+                    +   '<div style="font-weight:700;font-size:13.5px;margin-bottom:2px">' + (title || '') + '</div>'
+                    +   '<div style="color:#554f5e;font-size:12.5px">' + (body || '') + '</div>'
+                    + '</div>';
+                host.appendChild(t);
+                setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity .25s'; }, kind === 'error' ? 7000 : 4500);
+                setTimeout(() => { t.remove(); if (!host.children.length) host.remove(); }, 8000);
+            }
+
+            function timestamp() {
+                const d = new Date();
+                const pad = (n) => String(n).padStart(2, '0');
+                return d.getFullYear() + pad(d.getMonth()+1) + pad(d.getDate())
+                    + '-' + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
+            }
+
+            function bindExport() {
+                const link = document.querySelector('.js-export-pdf');
+                if (!link || link.dataset.bound === '1') return;
+                link.dataset.bound = '1';
+                link.addEventListener('click', async function(ev){
+                    ev.preventDefault();
+                    const label = link.querySelector('.js-export-label');
+                    const originalLabel = label ? label.textContent : '';
+                    if (label) label.textContent = 'Generating\u2026';
+                    link.classList.add('is-loading');
+                    link.style.pointerEvents = 'none';
+                    try {
+                        const url = link.getAttribute('href');
+                        const resp = await fetch(url, {
+                            method: 'GET',
+                            credentials: 'same-origin',
+                            redirect: 'follow',
+                            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/pdf, application/json' }
+                        });
+                        const finalUrl = resp.url || url;
+                        const ct = (resp.headers.get('Content-Type') || '').toLowerCase();
+                        if (finalUrl.indexOf('/login') !== -1) {
+                            throw { error: 'session_expired',
+                                message: 'Your admin session expired or you are not logged in. Please log in and try again.' };
+                        }
+                        if (!resp.ok) {
+                            // Try to parse JSON error from server
+                            let err = { error: 'http_' + resp.status, message: 'Server returned ' + resp.status };
+                            try { if (ct.indexOf('application/json') !== -1) err = await resp.json(); }
+                            catch(e){ err.message = err.message + ' (response was not JSON)'; }
+                            throw err;
+                        }
+                        if (ct.indexOf('application/json') !== -1) {
+                            const err = await resp.json();
+                            throw err;
+                        }
+                        if (ct.indexOf('application/pdf') === -1) {
+                            throw { error: 'wrong_content_type',
+                                message: 'Server returned ' + ct + ' instead of a PDF. The PDF generator may be missing on this host.' };
+                        }
+                        const blob = await resp.blob();
+                        if (blob.size < 500) {
+                            throw { error: 'tiny_pdf', message: 'PDF was empty (' + blob.size + ' bytes). Generator may have failed silently.' };
+                        }
+                        const prefix = link.dataset.filenamePrefix || 'report';
+                        const filename = prefix + '-' + timestamp() + '.pdf';
+                        const objUrl = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = objUrl;
+                        a.download = filename;
+                        a.style.display = 'none';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        setTimeout(() => URL.revokeObjectURL(objUrl), 4000);
+                        showToast('success', 'Report downloaded', 'Saved as ' + filename + ' (' + Math.round(blob.size/1024) + ' KB).');
+                    } catch (err) {
+                        const msg = (err && err.message) ? err.message : (typeof err === 'string' ? err : 'Could not generate the PDF.');
+                        showToast('error', 'PDF export failed', msg);
+                        // eslint-disable-next-line no-console
+                        console.error('[asmara-export]', err);
+                    } finally {
+                        if (label) label.textContent = originalLabel || 'Export PDF';
+                        link.classList.remove('is-loading');
+                        link.style.pointerEvents = '';
+                    }
+                });
+            }
+
+            // Inject the toast animation once
+            if (!document.getElementById('ad-toast-style')) {
+                const s = document.createElement('style');
+                s.id = 'ad-toast-style';
+                s.textContent = '@keyframes adToastIn { from { transform: translateY(-6px); opacity:0 } to { transform: translateY(0); opacity:1 } }'
+                    + '.js-export-pdf.is-loading { opacity: .7; cursor: progress !important; }';
+                document.head.appendChild(s);
+            }
+
+            document.addEventListener('DOMContentLoaded', bindExport);
+            bindExport();
+        })();
+    </script>
 </body>
 </html>

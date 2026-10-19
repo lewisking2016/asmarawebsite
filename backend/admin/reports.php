@@ -14,11 +14,82 @@ require_once __DIR__ . '/../database/ContactRepository.php';
 // ---------------------------------------------------------------------------
 // PDF export endpoint (?action=export_pdf)
 // Streams a branded A4 PDF generated via build_doc.py + reportlab.
+//
+// Returns application/pdf when successful.
+// Returns application/json when ?format=json OR when an error occurs so the
+// client-side JS can show a friendly admin toast instead of HTML soup.
 // ---------------------------------------------------------------------------
 if (($_GET['action'] ?? '') === 'export_pdf') {
     require_once __DIR__ . '/../database/BranchRepository.php';
     require_once __DIR__ . '/../security/Auth.php';
     Auth::requireLogin();
+
+    $wants_json = (($_GET['format'] ?? '') === 'json')
+        || (isset($_SERVER['HTTP_ACCEPT']) && strpos($_SERVER['HTTP_ACCEPT'], 'application/json') !== false)
+        || (isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) === 'xmlhttprequest');
+
+    $send_json_error = function (int $status, string $code, string $message, array $detail = []) use ($wants_json) {
+        // If the request was made by JS (X-Requested-With) or ?format=json, always JSON.
+        // For a plain click, fall back to a tiny HTML page so the user still sees *something*
+        // meaningful rather than a stack trace.
+        if ($wants_json) {
+            header('Content-Type: application/json; charset=UTF-8');
+            http_response_code($status);
+            echo json_encode(['ok' => false, 'error' => $code, 'message' => $message, 'detail' => $detail]);
+            return;
+        }
+        header('Content-Type: text/html; charset=UTF-8');
+        http_response_code($status);
+        $safe = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
+        echo "<!doctype html><meta charset=\"utf-8\"><title>PDF export failed</title>"
+           . "<style>body{font:14px/1.5 system-ui,sans-serif;color:#15121a;background:#fbf8f5;"
+           . "padding:48px;margin:0}h1{color:#ed174b;margin:0 0 12px;font-family:Georgia,serif}"
+           . "p{max-width:560px}code{background:#fbe6ec;padding:2px 6px;border-radius:6px}</style>"
+           . "<h1>PDF export failed</h1><p>{$safe}</p>"
+           . ($detail ? "<p><strong>Details:</strong> <code>" . htmlspecialchars(implode(' / ', $detail), ENT_QUOTES, 'UTF-8') . "</code></p>" : '')
+           . "<p>Try again from the Reports page, or contact the site admin if the problem persists.</p>";
+    };
+
+    // ---- Pre-flight: is exec() even usable? ------------------------------
+    if (!function_exists('exec')) {
+        $send_json_error(501, 'exec_disabled',
+            'PDF export is unavailable on this server (PHP exec() is disabled). '
+            . 'Ask the host to enable exec() or to run build_doc.py via a queue/cron.');
+        exit;
+    }
+
+    // ---- Resolve build_doc.py location ----------------------------------
+    $build_script = realpath(__DIR__ . '/../../build_doc.py');
+    if (!$build_script) {
+        $candidates = [
+            realpath(__DIR__ . '/../../build_doc.py'),
+            realpath(__DIR__ . '/../build_doc.py'),
+            realpath(dirname(__DIR__, 2) . '/build_doc.py'),
+        ];
+        $build_script = false;
+        foreach ($candidates as $c) { if ($c && is_file($c)) { $build_script = $c; break; } }
+    }
+    if (!$build_script) {
+        $send_json_error(500, 'script_missing',
+            'build_doc.py was not found on the server. Make sure it is deployed alongside the admin folder.');
+        exit;
+    }
+
+    // ---- Resolve a Python interpreter -----------------------------------
+    $python_candidates = ['python3', 'python', 'py'];
+    $python = null;
+    foreach ($python_candidates as $cand) {
+        // -V is a cheap, silent check that the binary exists and runs.
+        $out = []; $rc = 0;
+        @exec(escapeshellcmd($cand) . ' -V 2>&1', $out, $rc);
+        if ($rc === 0) { $python = $cand; break; }
+    }
+    if ($python === null) {
+        $send_json_error(501, 'python_missing',
+            'No Python interpreter (python3 / python / py) was found on the server PATH. '
+            . 'Install Python 3 + reportlab on the production host.');
+        exit;
+    }
 
     $bookingRepo  = new BookingRepository();
     $menuRepo     = new MenuRepository();
@@ -177,7 +248,11 @@ MD;
     ];
 
     $workdir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'asmara-report-' . bin2hex(random_bytes(6));
-    mkdir($workdir, 0700, true);
+    if (!@mkdir($workdir, 0700, true) && !is_dir($workdir)) {
+        $send_json_error(500, 'tmpdir_failed',
+            'Could not create a working directory for the PDF. Check filesystem permissions on the server temp dir.');
+        exit;
+    }
     $md_path   = $workdir . DIRECTORY_SEPARATOR . 'content.md';
     $cfg_path  = $workdir . DIRECTORY_SEPARATOR . 'config.json';
     $pdf_path  = $workdir . DIRECTORY_SEPARATOR . 'report.pdf';
@@ -185,15 +260,9 @@ MD;
     file_put_contents($md_path, $content);
     file_put_contents($cfg_path, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-    $python = 'python'; // adjust if needed
-    $build_script = realpath(__DIR__ . '/../../build_doc.py');
-    if (!$build_script) {
-        header('HTTP/1.1 500 Internal Server Error');
-        echo "build_doc.py not found at project root.";
-        exit;
-    }
     $cmd = escapeshellcmd($python)
-        . ' ' . escapeshellarg($build_script)
+        . ' -u ' // unbuffered for nicer logs
+        . escapeshellarg($build_script)
         . ' ' . escapeshellarg($md_path)
         . ' ' . escapeshellarg($cfg_path)
         . ' ' . escapeshellarg($pdf_path)
@@ -201,24 +270,44 @@ MD;
 
     $output = [];
     $rc = 0;
-    exec($cmd, $output, $rc);
+    @exec($cmd, $output, $rc);
 
-    if ($rc !== 0 || !is_file($pdf_path)) {
-        header('HTTP/1.1 500 Internal Server Error');
-        echo "PDF generation failed (exit $rc).\n";
-        foreach ($output as $line) echo htmlspecialchars($line) . "\n";
-        // Cleanup
+    if ($rc !== 0 || !is_file($pdf_path) || filesize($pdf_path) < 200) {
+        // Best-effort: log the Python trace to a known file for the admin.
+        $logdir = __DIR__ . '/../logs';
+        @mkdir($logdir, 0755, true);
+        $logline = sprintf(
+            "[%s] export_pdf failed rc=%d python=%s script=%s\n  command: %s\n  output:\n    %s\n",
+            date('c'),
+            $rc,
+            $python,
+            $build_script,
+            $cmd,
+            implode("\n    ", array_map('strval', $output))
+        );
+        @file_put_contents($logdir . '/pdf-export.log', $logline, FILE_APPEND);
+
+        // Clean up
         @unlink($md_path);
         @unlink($cfg_path);
+        @unlink($pdf_path);
         @rmdir($workdir);
+
+        $detail = array_slice(array_map('strval', $output), 0, 6);
+        $send_json_error(500, 'python_failed',
+            'PDF generation failed. The Python process exited with a non-zero status. '
+            . 'Check that reportlab is installed in the active Python environment.',
+            $detail);
         exit;
     }
 
-    // Stream the PDF inline so the browser downloads it
+    // Stream the PDF so the browser triggers a download
+    $filename = 'asmara-report-' . date('Ymd-His') . '.pdf';
     header('Content-Type: application/pdf');
-    header('Content-Disposition: attachment; filename="asmara-report-' . date('Ymd-His') . '.pdf"');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
     header('Content-Length: ' . filesize($pdf_path));
     header('Cache-Control: no-store');
+    header('X-Content-Type-Options: nosniff');
     readfile($pdf_path);
 
     @unlink($md_path);
@@ -373,9 +462,9 @@ foreach ($status_breakdown as $slice) {
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16v12H4z M4 6l8 6 8-6" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
                         Messages
                     </a>
-                    <a href="?action=export_pdf" class="ad-btn ad-btn-primary" download>
+                    <a href="?action=export_pdf&amp;format=json" class="ad-btn ad-btn-primary js-export-pdf" data-filename-prefix="asmara-report">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7h-2M6 14h12v7H6z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
-                        Export PDF
+                        <span class="js-export-label">Export PDF</span>
                     </a>
                 </div>
             </div>
