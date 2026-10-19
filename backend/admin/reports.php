@@ -50,45 +50,34 @@ if (($_GET['action'] ?? '') === 'export_pdf') {
            . "<p>Try again from the Reports page, or contact the site admin if the problem persists.</p>";
     };
 
-    // ---- Pre-flight: is exec() even usable? ------------------------------
-    if (!function_exists('exec')) {
-        $send_json_error(501, 'exec_disabled',
-            'PDF export is unavailable on this server (PHP exec() is disabled). '
-            . 'Ask the host to enable exec() or to run build_doc.py via a queue/cron.');
-        exit;
-    }
-
-    // ---- Resolve build_doc.py location ----------------------------------
-    $build_script = realpath(__DIR__ . '/../../build_doc.py');
-    if (!$build_script) {
-        $candidates = [
-            realpath(__DIR__ . '/../../build_doc.py'),
-            realpath(__DIR__ . '/../build_doc.py'),
-            realpath(dirname(__DIR__, 2) . '/build_doc.py'),
-        ];
-        $build_script = false;
-        foreach ($candidates as $c) { if ($c && is_file($c)) { $build_script = $c; break; } }
-    }
-    if (!$build_script) {
-        $send_json_error(500, 'script_missing',
-            'build_doc.py was not found on the server. Make sure it is deployed alongside the admin folder.');
-        exit;
-    }
-
-    // ---- Resolve a Python interpreter -----------------------------------
-    $python_candidates = ['python3', 'python', 'py'];
+    // ---- Pre-flight: which generation path can we use? -------------------
+    // 1) If PHP exec() works AND python3 + build_doc.py are available AND
+    //    the script runs cleanly, use the reportlab path (nicer output).
+    // 2) Otherwise fall back to the bundled pure-PHP PDF writer.
+    // 3) If even the PHP writer can't run (write permissions etc.), surface a
+    //    structured JSON error for the JS toast.
+    $can_use_python = function_exists('exec');
     $python = null;
-    foreach ($python_candidates as $cand) {
-        // -V is a cheap, silent check that the binary exists and runs.
-        $out = []; $rc = 0;
-        @exec(escapeshellcmd($cand) . ' -V 2>&1', $out, $rc);
-        if ($rc === 0) { $python = $cand; break; }
-    }
-    if ($python === null) {
-        $send_json_error(501, 'python_missing',
-            'No Python interpreter (python3 / python / py) was found on the server PATH. '
-            . 'Install Python 3 + reportlab on the production host.');
-        exit;
+    $build_script = null;
+    if ($can_use_python) {
+        $build_script = realpath(__DIR__ . '/../../build_doc.py');
+        if (!$build_script) {
+            $candidates = [
+                realpath(__DIR__ . '/../../build_doc.py'),
+                realpath(__DIR__ . '/../build_doc.py'),
+                realpath(dirname(__DIR__, 2) . '/build_doc.py'),
+            ];
+            foreach ($candidates as $c) { if ($c && is_file($c)) { $build_script = $c; break; } }
+        }
+        if ($build_script) {
+            foreach (['python3', 'python', 'py'] as $cand) {
+                $out = []; $rc = 0;
+                @exec(escapeshellcmd($cand) . ' -V 2>&1', $out, $rc);
+                if ($rc === 0) { $python = $cand; break; }
+            }
+            if ($python === null) { $build_script = null; }
+        }
+        if (!$build_script) { $can_use_python = false; }
     }
 
     $bookingRepo  = new BookingRepository();
@@ -257,47 +246,118 @@ MD;
     $cfg_path  = $workdir . DIRECTORY_SEPARATOR . 'config.json';
     $pdf_path  = $workdir . DIRECTORY_SEPARATOR . 'report.pdf';
 
+    // Always populate the source files so the PHP fallback can reuse them.
     file_put_contents($md_path, $content);
     file_put_contents($cfg_path, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-    $cmd = escapeshellcmd($python)
-        . ' -u ' // unbuffered for nicer logs
-        . escapeshellarg($build_script)
-        . ' ' . escapeshellarg($md_path)
-        . ' ' . escapeshellarg($cfg_path)
-        . ' ' . escapeshellarg($pdf_path)
-        . ' 2>&1';
+    $generation_error = null;
 
-    $output = [];
-    $rc = 0;
-    @exec($cmd, $output, $rc);
+    if ($can_use_python) {
+        $cmd = escapeshellcmd($python)
+            . ' -u ' // unbuffered for nicer logs
+            . escapeshellarg($build_script)
+            . ' ' . escapeshellarg($md_path)
+            . ' ' . escapeshellarg($cfg_path)
+            . ' ' . escapeshellarg($pdf_path)
+            . ' 2>&1';
 
-    if ($rc !== 0 || !is_file($pdf_path) || filesize($pdf_path) < 200) {
-        // Best-effort: log the Python trace to a known file for the admin.
-        $logdir = __DIR__ . '/../logs';
-        @mkdir($logdir, 0755, true);
-        $logline = sprintf(
-            "[%s] export_pdf failed rc=%d python=%s script=%s\n  command: %s\n  output:\n    %s\n",
-            date('c'),
-            $rc,
-            $python,
-            $build_script,
-            $cmd,
-            implode("\n    ", array_map('strval', $output))
-        );
-        @file_put_contents($logdir . '/pdf-export.log', $logline, FILE_APPEND);
+        $output = [];
+        $rc = 0;
+        @exec($cmd, $output, $rc);
 
-        // Clean up
-        @unlink($md_path);
-        @unlink($cfg_path);
-        @unlink($pdf_path);
-        @rmdir($workdir);
+        if ($rc !== 0 || !is_file($pdf_path) || filesize($pdf_path) < 200) {
+            // Log the Python trace and try the pure-PHP fallback.
+            $logdir = __DIR__ . '/../logs';
+            @mkdir($logdir, 0755, true);
+            $logline = sprintf(
+                "[%s] export_pdf python failed rc=%d python=%s script=%s\n  command: %s\n  output:\n    %s\n",
+                date('c'),
+                $rc,
+                $python,
+                $build_script,
+                $cmd,
+                implode("\n    ", array_map('strval', $output))
+            );
+            @file_put_contents($logdir . '/pdf-export.log', $logline, FILE_APPEND);
+            $generation_error = [
+                'phase'  => 'python',
+                'rc'     => $rc,
+                'output' => array_slice(array_map('strval', $output), 0, 6),
+            ];
+            @unlink($pdf_path);
+        }
+    }
 
-        $detail = array_slice(array_map('strval', $output), 0, 6);
-        $send_json_error(500, 'python_failed',
-            'PDF generation failed. The Python process exited with a non-zero status. '
-            . 'Check that reportlab is installed in the active Python environment.',
-            $detail);
+    // Fall back to the pure-PHP writer if Python didn't produce a valid PDF.
+    if (!is_file($pdf_path) || filesize($pdf_path) < 200) {
+        try {
+            require_once __DIR__ . '/../reports/PhpPdfWriter.php';
+            $reportData = [
+                'title'         => $config['title'] ?? 'Reports & Analytics',
+                'subtitle'      => $config['subtitle'] ?? '',
+                'company'       => $config['company'] ?? 'Asmara Restaurant',
+                'company_tagline'=> $config['company_tagline'] ?? '',
+                'stamp'         => $config['stamp'] ?? 'CONFIDENTIAL',
+                'doc_id'        => $config['doc_id'] ?? '',
+                'meta'          => $config['meta'] ?? [],
+                'header_right'  => $config['header_right'] ?? '',
+                'page_footer'   => $config['page_footer'] ?? '',
+                'cover_footer'  => $config['cover_footer'] ?? '',
+                'summary_rows'  => [],
+                'timeline'      => array_combine($timeline_labels, $timeline_values),
+                'branches'      => array_values($by_branch),
+                'utilisation'   => [],
+                'inquiries'     => [
+                    'total'      => $total_inquiries,
+                    'new'        => $new_inquiries,
+                    'replied'    => $replied_inquiries,
+                    'rate'       => $inquiry_response_rate,
+                ],
+            ];
+            // Build utilisation rows from util_rows (parsed from existing strings)
+            $util = [];
+            foreach ($util_rows as $r) {
+                // Re-parse "- **Name** · 132 / 160 seats booked · 75% utilization"
+                if (preg_match('/\*\*(.+?)\*\*.+?(\d+) \/ (\d+).+?(\d+)%/', $r, $m)) {
+                    $util[] = ['name' => $m[1], 'booked' => (int)$m[2], 'capacity' => (int)$m[3], 'pct' => (int)$m[4]];
+                }
+            }
+            $reportData['utilisation'] = $util;
+
+            // Build summary rows from the same numbers used in the markdown body
+            $reportData['summary_rows'] = [
+                ['Total bookings',  (string)$total_bookings],
+                ['Confirmed',       $confirmed_bookings . ' (' . $booking_confirmation_rate . '%)'],
+                ['Pending',         (string)$pending_bookings],
+                ['Completed',       $completed_bookings . ' (' . $booking_completion_rate . '%)'],
+                ['Cancelled',       $cancelled_bookings . ' (' . $booking_cancellation_rate . '%)'],
+                ['Menu items',      (string)$total_menu_items],
+                ['Total inquiries', (string)$total_inquiries],
+                ['Response rate',   $inquiry_response_rate . '%'],
+            ];
+
+            \Asmara\Reports\PhpPdfWriter::buildReport($pdf_path, $reportData);
+        } catch (\Throwable $e) {
+            $logdir = __DIR__ . '/../logs';
+            @mkdir($logdir, 0755, true);
+            @file_put_contents(
+                $logdir . '/pdf-export.log',
+                sprintf("[%s] export_pdf php fallback failed: %s\n  trace: %s\n", date('c'), $e->getMessage(), $e->getTraceAsString()),
+                FILE_APPEND
+            );
+            @unlink($md_path); @unlink($cfg_path); @unlink($pdf_path); @rmdir($workdir);
+            $send_json_error(500, 'php_failed',
+                'PDF generation failed on both the Python and PHP paths.',
+                array_merge($generation_error['output'] ?? [], [$e->getMessage()]));
+            exit;
+        }
+    }
+
+    if (!is_file($pdf_path) || filesize($pdf_path) < 200) {
+        @unlink($md_path); @unlink($cfg_path); @unlink($pdf_path); @rmdir($workdir);
+        $send_json_error(500, 'generation_failed',
+            'PDF generation produced no output.',
+            $generation_error['output'] ?? []);
         exit;
     }
 

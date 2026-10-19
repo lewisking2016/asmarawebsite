@@ -148,6 +148,70 @@
         })();
     </script>
     <script>
+        // Mobile sidebar toggle: hamburger button slides in the nav, backdrop
+        // catches outside clicks, ESC closes, viewport resize to desktop closes.
+        (function(){
+            function ensureBackdrop() {
+                let bd = document.querySelector('.mobile-menu-backdrop');
+                if (bd) return bd;
+                bd = document.createElement('div');
+                bd.className = 'mobile-menu-backdrop';
+                bd.setAttribute('aria-hidden', 'true');
+                document.body.appendChild(bd);
+                bd.addEventListener('click', close);
+                return bd;
+            }
+            function open() {
+                const sb = document.getElementById('admin-sidebar');
+                if (!sb) return;
+                sb.classList.add('is-mobile-open');
+                sb.setAttribute('aria-hidden', 'false');
+                ensureBackdrop().classList.add('is-open');
+                document.body.style.overflow = 'hidden';
+            }
+            function close() {
+                const sb = document.getElementById('admin-sidebar');
+                if (!sb) return;
+                sb.classList.remove('is-mobile-open');
+                sb.setAttribute('aria-hidden', 'true');
+                const bd = document.querySelector('.mobile-menu-backdrop');
+                if (bd) bd.classList.remove('is-open');
+                document.body.style.overflow = '';
+            }
+            function bind() {
+                const toggle = document.getElementById('mobile-menu-toggle');
+                if (toggle && toggle.dataset.bound !== '1') {
+                    toggle.dataset.bound = '1';
+                    toggle.addEventListener('click', open);
+                }
+                // ESC closes
+                document.addEventListener('keydown', function(ev){
+                    if (ev.key === 'Escape') close();
+                });
+                // Resize past breakpoint closes drawer
+                let lastWide = window.innerWidth > 768;
+                window.addEventListener('resize', function(){
+                    const wide = window.innerWidth > 768;
+                    if (wide && !lastWide) { close(); }
+                    lastWide = wide;
+                });
+                // Close on link tap inside the drawer
+                const sb = document.getElementById('admin-sidebar');
+                if (sb && sb.dataset.linkBound !== '1') {
+                    sb.dataset.linkBound = '1';
+                    sb.addEventListener('click', function(ev){
+                        if (ev.target.closest('a')) {
+                            // small delay so the navigation can fire first
+                            setTimeout(close, 50);
+                        }
+                    });
+                }
+            }
+            document.addEventListener('DOMContentLoaded', bind);
+            bind();
+        })();
+    </script>
+    <script>
         // Robust PDF export handler. Replaces raw anchor navigation so we can
         // surface server errors as a styled toast instead of an HTML response.
         (function(){
