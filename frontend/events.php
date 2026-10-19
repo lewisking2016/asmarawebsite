@@ -37,21 +37,28 @@ if (!is_array($allBranches) || empty($allBranches)) {
 
 $schemaEvents = [];
 foreach ($events as $event) {
-    $schemaEvents[] = [
+    $schemaEvent = [
         "@type" => "Event",
         "name" => $event['title'],
         "description" => $event['description'] ?? '',
         "location" => [
             "@type" => "Place",
-            "name" => "Asmara Restaurant " . ($event['venue'] ?? 'Nairobi'),
+            "name" => "Asmara Restaurant " . (($event['venue'] ?? '') ?: 'Nairobi'),
             "address" => "Nairobi, Kenya"
-        ],
-        "offers" => [
-            "@type" => "Offer",
-            "price" => (float)($event['price_per_person'] ?? 0),
-            "priceCurrency" => "KES"
         ]
     ];
+    $startDateObj = asmara_event_start_date_object($event);
+    $endDateObj   = asmara_event_end_date_object($event);
+    if ($startDateObj) $schemaEvent['startDate'] = $startDateObj->format('Y-m-d');
+    if ($endDateObj)   $schemaEvent['endDate']   = $endDateObj->format('Y-m-d');
+    if (!empty($event['price_per_person']) && (float)$event['price_per_person'] > 0) {
+        $schemaEvent['offers'] = [
+            "@type" => "Offer",
+            "price" => (float)$event['price_per_person'],
+            "priceCurrency" => "KES"
+        ];
+    }
+    $schemaEvents[] = $schemaEvent;
 }
 
 $pageTitle = "Events & Celebrations";
@@ -177,11 +184,16 @@ include 'header.php';
                 </span>
                 <span class="badge" style="background: rgba(255,255,255,0.3); color: white; font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; display:flex; align-items:center; gap:4px;">
                   <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>
-                  <?php echo htmlspecialchars(($event['venue'] ?? '') === 'all' ? 'All Branches' : ucfirst($event['venue'] ?? 'TBA')); ?>
+                  <?php
+                    $v = $event['venue'] ?? '';
+                    if ($v === 'all') echo 'All Branches';
+                    elseif ($v === '') echo 'Venue TBA';
+                    else echo htmlspecialchars(ucfirst($v));
+                  ?>
                 </span>
                 <span class="badge" style="background: rgba(255,255,255,0.3); color: white; font-size: 0.75rem; padding: 2px 8px; border-radius: 99px; display:flex; align-items:center; gap:4px;">
                   <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M7 2v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2V2h-2v2H9V2H7zm12 8H5v10h14V10z"/></svg>
-                  <?php echo htmlspecialchars(asmara_event_date_label($event)); ?>
+                  <?php echo htmlspecialchars(asmara_event_date_range_label($event)); ?>
                 </span>
               </div>
             </div>
@@ -194,10 +206,10 @@ include 'header.php';
               </p>
               <?php endif; ?>
 
-              <?php if (empty($event['gallery']) || count($event['gallery']) <= 1): ?>
+              <?php if ($galleryCount <= 1): ?>
               <div class="event-no-gallery-note" style="font-size: 0.78rem; color: #64748b; background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 6px; padding: 6px 10px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0; color:#94a3b8;"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                <span>This event description has no gallery</span>
+                <span>This event has only a single photo — add more to the gallery for richer viewing.</span>
               </div>
               <?php endif; ?>
 
@@ -209,16 +221,22 @@ include 'header.php';
                     Capacity
                   </div>
                   <div style="font-size: 1.05rem; font-weight: 700; color: #ed174b;">
-                    <?php echo (int)($event['capacity'] ?? 0); ?> guests
+                    <?php
+                      $capF = $event['capacity'] ?? null;
+                      echo ($capF === null || $capF === '' || (int)$capF === 0) ? 'TBA' : ((int)$capF . ' guests');
+                    ?>
                   </div>
                 </div>
                 <div style="background: #f8fafc; padding: 8px 10px; border-radius: 8px; text-align: center; border: 1px solid #f1f5f9;">
-                  <div style="font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 2px; display:flex; align-items:center; justify-content:center; gap:4px;"> 
+                  <div style="font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 2px; display:flex; align-items:center; justify-content:center; gap:4px;">
                     <svg width="12" height="12" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zM12 17a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/></svg>
                     Per Person
                   </div>
                   <div style="font-size: 1.05rem; font-weight: 700; color: #ed174b;">
-                    KES <?php echo number_format($event['price_per_person'] ?? 0); ?>
+                    <?php
+                      $ppF = $event['price_per_person'] ?? null;
+                      echo ($ppF === null || $ppF === '' || (float)$ppF === 0.0) ? 'TBA' : ('KES ' . number_format((float)$ppF));
+                    ?>
                   </div>
                 </div>
               </div>

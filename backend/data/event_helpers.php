@@ -7,9 +7,17 @@ if (!function_exists('asmara_nairobi_timezone')) {
 }
 
 if (!function_exists('asmara_event_date_string')) {
+    /**
+     * Backwards-compatible date accessor. Prefers end_date (the "event date"),
+     * falls back to start_date, then to the legacy event_date field.
+     */
     function asmara_event_date_string(array $event) {
-        $value = $event['event_date'] ?? ($event['date'] ?? '');
-        return trim((string) $value);
+        foreach (['end_date', 'start_date', 'event_date', 'date'] as $key) {
+            if (!empty($event[$key])) {
+                return trim((string) $event[$key]);
+            }
+        }
+        return '';
     }
 }
 
@@ -32,6 +40,38 @@ if (!function_exists('asmara_event_date_object')) {
         }
 
         return (new DateTimeImmutable('@' . $timestamp))->setTimezone($timezone)->setTime(0, 0, 0);
+    }
+}
+
+if (!function_exists('asmara_event_start_date_object')) {
+    function asmara_event_start_date_object(array $event): ?DateTimeImmutable {
+        $value = trim((string)($event['start_date'] ?? ''));
+        if ($value === '') {
+            // Backwards compat — events without start_date fall back to event_date
+            $value = trim((string)($event['event_date'] ?? ''));
+            if ($value === '') return null;
+        }
+        $timezone = asmara_nairobi_timezone();
+        $date = DateTimeImmutable::createFromFormat('Y-m-d', $value, $timezone);
+        if ($date instanceof DateTimeImmutable) return $date->setTime(0, 0, 0);
+        $ts = strtotime($value);
+        if ($ts === false) return null;
+        return (new DateTimeImmutable('@' . $ts))->setTimezone($timezone)->setTime(0, 0, 0);
+    }
+}
+
+if (!function_exists('asmara_event_end_date_object')) {
+    function asmara_event_end_date_object(array $event): ?DateTimeImmutable {
+        $value = trim((string)($event['end_date'] ?? ''));
+        if ($value === '') {
+            return asmara_event_start_date_object($event);
+        }
+        $timezone = asmara_nairobi_timezone();
+        $date = DateTimeImmutable::createFromFormat('Y-m-d', $value, $timezone);
+        if ($date instanceof DateTimeImmutable) return $date->setTime(0, 0, 0);
+        $ts = strtotime($value);
+        if ($ts === false) return null;
+        return (new DateTimeImmutable('@' . $ts))->setTimezone($timezone)->setTime(0, 0, 0);
     }
 }
 
@@ -108,6 +148,44 @@ if (!function_exists('asmara_event_date_label')) {
     }
 }
 
+if (!function_exists('asmara_event_date_range_label')) {
+    /**
+     * Smart date-range label:
+     *   same day          → "February 14, 2026"
+     *   same month/year   → "Feb 14 – 18, 2026"
+     *   same year         → "Feb 28 – Mar 02, 2026"
+     *   different years   → "Dec 30, 2025 – Jan 02, 2026"
+     * Returns 'Date TBA' if no dates are set.
+     */
+    function asmara_event_date_range_label(array $event): string {
+        $start = asmara_event_start_date_object($event);
+        $end   = asmara_event_end_date_object($event);
+        if (!$start && !$end) return 'Date TBA';
+
+        $tz = asmara_nairobi_timezone();
+        $now = new DateTimeImmutable('now', $tz);
+
+        if ($start && !$end) {
+            return $start->format('F j, Y');
+        }
+        if (!$start && $end) {
+            return $end->format('F j, Y');
+        }
+
+        // Both set
+        if ($start->format('Y-m-d') === $end->format('Y-m-d')) {
+            return $start->format('F j, Y');
+        }
+        if ($start->format('Y-m') === $end->format('Y-m')) {
+            return $start->format('M j') . ' – ' . $end->format('j, Y');
+        }
+        if ($start->format('Y') === $end->format('Y')) {
+            return $start->format('M j') . ' – ' . $end->format('M j, Y');
+        }
+        return $start->format('M j, Y') . ' – ' . $end->format('M j, Y');
+    }
+}
+
 if (!function_exists('asmara_event_image_url')) {
     function asmara_event_image_url(array $event) {
         $url = trim((string)($event['image'] ?? ''));
@@ -132,30 +210,67 @@ if (!function_exists('asmara_event_image_url')) {
 }
 
 /**
+ * Normalise one stored gallery path to a public URL.
+ */
+if (!function_exists('asmara_normalise_event_path')) {
+    function asmara_normalise_event_path(string $path): string {
+        $path = trim($path);
+        if ($path === '') return '';
+        if (strpos($path, '/backend/uploads/events/') === 0 || strpos($path, '/frontend/images/') === 0) {
+            return $path;
+        }
+        if (strpos($path, '../backend/uploads/events/') === 0) {
+            return '/' . ltrim(substr($path, 3), '/');
+        }
+        if (strpos($path, 'backend/uploads/events/') === 0) {
+            return '/' . ltrim($path, '/');
+        }
+        return $path[0] === '/' ? $path : '/' . ltrim($path, '/');
+    }
+}
+
+/**
  * Return an array of public URLs for all gallery images of an event.
- * Falls back to the single cover image when no gallery array is present.
+ * The featured / cover image is always first; the remaining gallery photos
+ * follow (deduplicated). Falls back to the cover image when gallery is empty.
  */
 if (!function_exists('asmara_event_gallery_urls')) {
     function asmara_event_gallery_urls(array $event): array {
         $gallery = $event['gallery'] ?? [];
-        if (!is_array($gallery) || empty($gallery)) {
-            $cover = asmara_event_image_url($event);
-            return $cover !== '' ? [$cover] : [];
+        $cover   = asmara_event_image_url($event);
+
+        // Build candidate gallery list from stored array
+        $candidates = [];
+        if (is_array($gallery)) {
+            foreach ($gallery as $path) {
+                $path = trim((string)$path);
+                if ($path === '') continue;
+                $candidates[] = $path;
+            }
         }
 
+        // If no cover set, promote the first gallery item as cover
+        if ($cover === '' && !empty($candidates)) {
+            $cover = $candidates[0];
+            array_shift($candidates);
+        }
+
+        // Final ordered list starts with the cover (if any)
+        $ordered = [];
+        if ($cover !== '') $ordered[] = $cover;
+        foreach ($candidates as $path) {
+            $ordered[] = $path;
+        }
+
+        // De-duplicate while preserving order
+        $seen = [];
         $urls = [];
-        foreach ($gallery as $path) {
-            $path = trim((string)$path);
-            if ($path === '') continue;
-            if (strpos($path, '/backend/uploads/events/') === 0 || strpos($path, '/frontend/images/') === 0) {
-                $urls[] = $path;
-            } elseif (strpos($path, '../backend/uploads/events/') === 0) {
-                $urls[] = '/' . ltrim(substr($path, 3), '/');
-            } elseif (strpos($path, 'backend/uploads/events/') === 0) {
-                $urls[] = '/' . ltrim($path, '/');
-            } else {
-                $urls[] = $path[0] === '/' ? $path : '/' . ltrim($path, '/');
-            }
+        foreach ($ordered as $path) {
+            $url = asmara_normalise_event_path($path);
+            if ($url === '') continue;
+            if (isset($seen[$url])) continue;
+            $seen[$url] = true;
+            $urls[] = $url;
         }
         return $urls;
     }
