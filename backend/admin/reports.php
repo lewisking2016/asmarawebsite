@@ -10,6 +10,224 @@ require_once __DIR__ . '/../database/Connection.php';
 require_once __DIR__ . '/../database/BookingRepository.php';
 require_once __DIR__ . '/../database/MenuRepository.php';
 require_once __DIR__ . '/../database/ContactRepository.php';
+
+// ---------------------------------------------------------------------------
+// PDF export endpoint (?action=export_pdf)
+// Streams a branded A4 PDF generated via build_doc.py + reportlab.
+// ---------------------------------------------------------------------------
+if (($_GET['action'] ?? '') === 'export_pdf') {
+    require_once __DIR__ . '/../database/BranchRepository.php';
+    require_once __DIR__ . '/../security/Auth.php';
+    Auth::requireLogin();
+
+    $bookingRepo  = new BookingRepository();
+    $menuRepo     = new MenuRepository();
+    $contactRepo  = new ContactRepository();
+    $branchRepo   = new BranchRepository();
+
+    $total_bookings     = (int)$bookingRepo->count();
+    $confirmed_bookings = (int)$bookingRepo->countByStatus('confirmed');
+    $pending_bookings   = (int)$bookingRepo->countByStatus('pending');
+    $completed_bookings = (int)$bookingRepo->countByStatus('completed');
+    $cancelled_bookings = (int)$bookingRepo->countByStatus('cancelled');
+    $total_menu_items   = (int)$menuRepo->count();
+    $total_inquiries    = (int)$contactRepo->count();
+    $new_inquiries      = (int)$contactRepo->getNewCount();
+    $replied_inquiries  = count($contactRepo->getByStatus('replied'));
+    $branches           = $branchRepo->getAll() ?? [];
+    $booking_confirmation_rate = $total_bookings > 0 ? round(($confirmed_bookings / $total_bookings) * 100, 1) : 0;
+    $booking_completion_rate   = $total_bookings > 0 ? round(($completed_bookings / $total_bookings) * 100, 1) : 0;
+    $booking_cancellation_rate = $total_bookings > 0 ? round(($cancelled_bookings / $total_bookings) * 100, 1) : 0;
+    $inquiry_response_rate      = $total_inquiries > 0 ? round(($replied_inquiries / $total_inquiries) * 100, 1) : 0;
+
+    $all_bookings = $bookingRepo->getAll(null, 5000, 0) ?? [];
+
+    // Bookings per day, last 30 days
+    $today = new DateTimeImmutable('today');
+    $timeline_labels = [];
+    $timeline_values = [];
+    for ($i = 29; $i >= 0; $i--) {
+        $d = $today->modify("-{$i} days")->format('Y-m-d');
+        $timeline_labels[$d] = (int)substr($d, 8, 2);
+        $timeline_values[$d] = 0;
+    }
+    foreach ($all_bookings as $b) {
+        $d = substr((string)($b['booking_date'] ?? ''), 0, 10);
+        if (isset($timeline_values[$d])) $timeline_values[$d]++;
+    }
+    $timeline_values = array_values($timeline_values);
+    $timeline_labels = array_values($timeline_labels);
+
+    // Bookings by branch
+    $by_branch = [];
+    foreach ($all_bookings as $b) {
+        $name = $b['branch_name'] ?? ('Branch #' . ($b['branch_id'] ?? '0'));
+        $bid = (int)($b['branch_id'] ?? 0);
+        if (!isset($by_branch[$bid])) {
+            $by_branch[$bid] = ['name' => $name, 'count' => 0, 'guests' => 0];
+        }
+        $by_branch[$bid]['count']++;
+        $by_branch[$bid]['guests'] += (int)($b['guest_count'] ?? 0);
+    }
+
+    // Build the markdown body
+    $pct_total = max(1, $total_bookings);
+    $chart_lines = [];
+    foreach ($timeline_labels as $i => $day) {
+        $bar = str_repeat('█', (int)ceil(min(20, ($timeline_values[$i] / max(1, max($timeline_values))) * 20)));
+        $chart_lines[] = sprintf("%2s │ %3d  %s", $day, $timeline_values[$i], $bar);
+    }
+
+    $branch_rows = [];
+    foreach ($by_branch as $br) {
+        $branch_rows[] = sprintf("- **%s** &middot; %d bookings &middot; %d guests",
+                                 $br['name'], $br['count'], $br['guests']);
+    }
+
+    $util_rows = [];
+    foreach ($branches as $br) {
+        $bid = (int)$br['id'];
+        $cap = max(1, (int)$br['capacity']);
+        $booked = isset($by_branch[$bid]) ? $by_branch[$bid]['guests'] : 0;
+        $pct = min(100, round(($booked / $cap) * 100));
+        $util_rows[] = sprintf("- **%s** &middot; %d / %d seats booked &middot; %d%% utilization",
+                                $br['name'], $booked, (int)$br['capacity'], $pct);
+    }
+
+    $verifier = htmlspecialchars(Auth::getCurrentUser()['username'] ?? 'admin');
+
+    $today_str = date('Y-m-d');
+
+    $content = <<<MD
+## 1. Summary
+This document summarises bookings, customer inquiries, menu coverage and
+branch utilisation across all Asmara Restaurant locations. Numbers are
+drawn from the live database and reflect the state at the time of
+generation.
+
+| Metric | Value |
+|---|---|
+| Total bookings | {$total_bookings} |
+| Confirmed | {$confirmed_bookings} ({$booking_confirmation_rate}%) |
+| Pending | {$pending_bookings} |
+| Completed | {$completed_bookings} ({$booking_completion_rate}%) |
+| Cancelled | {$cancelled_bookings} ({$booking_cancellation_rate}%) |
+| Menu items | {$total_menu_items} |
+| Total inquiries | {$total_inquiries} |
+| Response rate | {$inquiry_response_rate}% |
+
+## 2. Bookings last 30 days
+| Day | Count | Visual |
+|---|---|---|
+MD . "\n";
+    foreach ($timeline_labels as $i => $day) {
+        $bar = str_repeat('█', (int)ceil(min(20, ($timeline_values[$i] / max(1, max($timeline_values))) * 20)));
+        $content .= sprintf("| %02d | %d | %s |\n", $day, $timeline_values[$i], $bar);
+    }
+
+    $content .= <<<MD
+
+## 3. Bookings by branch
+MD . "\n";
+    $content .= empty($branch_rows) ? "- No bookings recorded yet.\n" : implode("\n", $branch_rows) . "\n";
+
+    $content .= <<<MD
+
+## 4. Branch capacity utilisation
+MD . "\n";
+    $content .= empty($util_rows) ? "- No branch capacity data available.\n" : implode("\n", $util_rows) . "\n";
+
+    $content .= <<<MD
+
+## 5. Inquiry funnel
+1. **Total inquiries received:** {$total_inquiries}
+2. **New inquiries awaiting reply:** {$new_inquiries}
+3. **Replied by reporter:** {$replied_inquiries}
+4. **Response rate:** {$inquiry_response_rate}%
+
+## 6. Notes for management
+- Operational capacity: review branch utilisation numbers and rebalance
+  staffing where any branch exceeds 80% booked seats.
+- Customer funnel: the response rate figure should trend toward 95%+
+  within the same week; anything persistently lower than 70% needs a
+  reply policy review.
+- Booking completion: if completion-rate drops below 60%, audit no-show
+  policies and the booking confirmation reminder cadence.
+MD;
+
+    $config = [
+        'title'          => 'Reports & Analytics',
+        'subtitle'       => 'Asmara Restaurant — Bookings, Menu and Branches',
+        'doc_id'         => 'REP-' . date('Ymd'),
+        'stamp'          => 'CONFIDENTIAL',
+        'company'        => 'Asmara Restaurant',
+        'company_tagline'=> 'Authentic Eritrean & East African Dining',
+        'badge_text'     => 'A',
+        'meta'           => [
+            ['Prepared for', $verifier],
+            ['Document ID',   'REP-' . date('Ymd')],
+            ['Version',       '1.0 (auto-generated)'],
+            ['Status',        'Internal review'],
+            ['Date',          $today_str],
+            ['Issued',        $today_str],
+        ],
+        'header_right'    => 'REP-' . date('Ymd') . ' · Reports & Analytics',
+        'page_footer'    => 'Confidential — for Asmara Restaurant admin only. Not for onward distribution without permission.',
+        'cover_footer'   => 'Prepared by the Asmara Restaurant admin team. Generated from live data at ' . $today_str . '.',
+    ];
+
+    $workdir = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'asmara-report-' . bin2hex(random_bytes(6));
+    mkdir($workdir, 0700, true);
+    $md_path   = $workdir . DIRECTORY_SEPARATOR . 'content.md';
+    $cfg_path  = $workdir . DIRECTORY_SEPARATOR . 'config.json';
+    $pdf_path  = $workdir . DIRECTORY_SEPARATOR . 'report.pdf';
+
+    file_put_contents($md_path, $content);
+    file_put_contents($cfg_path, json_encode($config, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+
+    $python = 'python'; // adjust if needed
+    $build_script = realpath(__DIR__ . '/../../build_doc.py');
+    if (!$build_script) {
+        header('HTTP/1.1 500 Internal Server Error');
+        echo "build_doc.py not found at project root.";
+        exit;
+    }
+    $cmd = escapeshellcmd($python)
+        . ' ' . escapeshellarg($build_script)
+        . ' ' . escapeshellarg($md_path)
+        . ' ' . escapeshellarg($cfg_path)
+        . ' ' . escapeshellarg($pdf_path)
+        . ' 2>&1';
+
+    $output = [];
+    $rc = 0;
+    exec($cmd, $output, $rc);
+
+    if ($rc !== 0 || !is_file($pdf_path)) {
+        header('HTTP/1.1 500 Internal Server Error');
+        echo "PDF generation failed (exit $rc).\n";
+        foreach ($output as $line) echo htmlspecialchars($line) . "\n";
+        // Cleanup
+        @unlink($md_path);
+        @unlink($cfg_path);
+        @rmdir($workdir);
+        exit;
+    }
+
+    // Stream the PDF inline so the browser downloads it
+    header('Content-Type: application/pdf');
+    header('Content-Disposition: attachment; filename="asmara-report-' . date('Ymd-His') . '.pdf"');
+    header('Content-Length: ' . filesize($pdf_path));
+    header('Cache-Control: no-store');
+    readfile($pdf_path);
+
+    @unlink($md_path);
+    @unlink($cfg_path);
+    @unlink($pdf_path);
+    @rmdir($workdir);
+    exit;
+}
+
 require_once __DIR__ . '/../database/BranchRepository.php';
 require_once __DIR__ . '/../data/GoogleAnalyticsService.php';
 require_once __DIR__ . '/../security/Auth.php';
@@ -155,10 +373,10 @@ foreach ($status_breakdown as $slice) {
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 6h16v12H4z M4 6l8 6 8-6" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
                         Messages
                     </a>
-                    <button type="button" class="ad-btn ad-btn-primary" onclick="window.print()">
+                    <a href="?action=export_pdf" class="ad-btn ad-btn-primary" download>
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6 9V3h12v6M6 18H4v-7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v7h-2M6 14h12v7H6z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
                         Export PDF
-                    </button>
+                    </a>
                 </div>
             </div>
 
