@@ -6,22 +6,6 @@
 
 $page_title = 'Events Management | Asmara Admin';
 
-/* --- Status & summary stats for the listing view --------------- */
-$totalEvents         = is_array($events) ? count($events) : 0;
-$activeEventsCount   = 0;
-$inactiveEventsCount = 0;
-$expiredEventsCount  = 0;
-$featuredEventsCount = 0;
-if (is_array($events)) {
-    foreach ($events as $e) {
-        $st = $e['status'] ?? 'active';
-        if ($st === 'active') $activeEventsCount++;
-        elseif ($st === 'inactive') $inactiveEventsCount++;
-        elseif ($st === 'expired') $expiredEventsCount++;
-        if (!empty($e['image'])) $featuredEventsCount++;
-    }
-}
-
 require_once __DIR__ . '/../database/Connection.php';
 require_once __DIR__ . '/../security/Auth.php';
 require_once __DIR__ . '/../security/Validator.php';
@@ -125,6 +109,22 @@ if (!is_dir(__DIR__ . '/../data')) {
 if (file_exists($eventsFile)) {
     $eventsJson = json_decode(file_get_contents($eventsFile), true);
     $events = $eventsJson ?? [];
+}
+
+/* --- Status & summary stats for the listing view --------------- */
+$totalEvents         = is_array($events) ? count($events) : 0;
+$activeEventsCount   = 0;
+$inactiveEventsCount = 0;
+$expiredEventsCount  = 0;
+$featuredEventsCount = 0;
+if (is_array($events)) {
+    foreach ($events as $e) {
+        $st = $e['status'] ?? 'active';
+        if ($st === 'active') $activeEventsCount++;
+        elseif ($st === 'inactive') $inactiveEventsCount++;
+        elseif ($st === 'expired') $expiredEventsCount++;
+        if (!empty($e['image'])) $featuredEventsCount++;
+    }
 }
 
 // Handle form submissions

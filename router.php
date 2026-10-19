@@ -4,15 +4,16 @@
  * This routes requests to the correct files
  */
 
-$requested_file = $_SERVER["SCRIPT_FILENAME"];
-
-// If the requested file exists and is a real file (static files, images, css, js), serve it
-if (is_file($requested_file)) {
-    return false;
-}
-
-// Get the request URI
-$request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+// When this router is invoked by `php -S host:port router.php`, the
+// `SCRIPT_FILENAME` server var points at router.php itself (it's the
+// always-executed entry point), NOT at the requested URL. Earlier
+// versions of this router mistakenly used SCRIPT_FILENAME to decide
+// whether to defer to the built-in static-file handler — that check
+// was always true in router mode and effectively skipped all
+// application routing. We now drive every decision from REQUEST_URI
+// and let the dev server return false at the very end for genuine
+// static files that actually exist on disk.
+$request_uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 
 // Remove leading slash
 $request_uri = ltrim($request_uri, '/');
@@ -28,14 +29,52 @@ if (strpos($request_uri, 'asmaraadmin') === 0) {
         include __DIR__ . '/backend/admin/login.php';
         return true;
     }
-    
+
+    // Static assets under /asmaraadmin/ — mirror the .htaccess rewrite rule
+    // (^asmaraadmin/(.+)\.(css|js|jpg|jpeg|png|gif|svg|webp|ico|woff|woff2|ttf|eot)$
+    // -> backend/admin/$1) so dev (php -S router.php) matches production
+    // behaviour on Apache.
+    $admin_assets = array('css','js','jpg','jpeg','png','gif','svg','webp','ico','woff','woff2','ttf','eot');
+    $admin_ext    = strtolower(pathinfo($request_uri, PATHINFO_EXTENSION));
+    if (in_array($admin_ext, $admin_assets, true)) {
+        $relative = substr($request_uri, strlen('asmaraadmin/'));
+        $assetPath = __DIR__ . '/backend/admin/' . $relative;
+        if (is_file($assetPath)) {
+            // Set a sensible Content-Type for CSS/JS; default octet-stream otherwise.
+            $mimeByExt = array(
+                'css'  => 'text/css',
+                'js'   => 'application/javascript',
+                'jpg'  => 'image/jpeg',
+                'jpeg' => 'image/jpeg',
+                'png'  => 'image/png',
+                'gif'  => 'image/gif',
+                'svg'  => 'image/svg+xml',
+                'webp' => 'image/webp',
+                'ico'  => 'image/x-icon',
+                'woff' => 'font/woff',
+                'woff2'=> 'font/woff2',
+                'ttf'  => 'font/ttf',
+                'eot'  => 'application/vnd.ms-fontobject',
+            );
+            if (isset($mimeByExt[$admin_ext])) {
+                header('Content-Type: ' . $mimeByExt[$admin_ext]);
+            }
+            header('Content-Length: ' . filesize($assetPath));
+            readfile($assetPath);
+            return true;
+        }
+        // Asset not found — let the request bubble to 404 below.
+        http_response_code(404);
+        return true;
+    }
+
     // /asmaraadmin/menu -> /backend/admin/menu.php
     // /asmaraadmin/bookings -> /backend/admin/bookings.php
     // etc.
     $admin_page = str_replace('asmaraadmin/', '', $request_uri);
     $admin_page = str_replace('asmaraadmin', '', $admin_page);
     $admin_page = ltrim($admin_page, '/');
-    
+
     // If no page specified, show login
     if (empty($admin_page)) {
         include __DIR__ . '/backend/admin/login.php';
