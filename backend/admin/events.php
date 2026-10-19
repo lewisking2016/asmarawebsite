@@ -324,13 +324,25 @@ if ($action === 'edit' && isset($_GET['id'])) {
                             <div class="ad-grid-2">
                                 <div class="ad-field">
                                     <label class="ad-label" for="event-start-date">Start Date</label>
-                                    <input id="event-start-date" class="ad-input" type="date" name="start_date" value="<?php echo htmlspecialchars($currentStartDate); ?>">
+                                    <label class="ad-date-picker" for="event-start-date">
+                                        <input id="event-start-date" class="ad-input" type="date" name="start_date" value="<?php echo htmlspecialchars($currentStartDate); ?>">
+                                        <svg class="ad-date-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/>
+                                            <path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                        </svg>
+                                    </label>
                                     <div class="ad-hint">When the event begins. For single-day events, leave blank and just set an End Date.</div>
                                 </div>
 
                                 <div class="ad-field">
                                     <label class="ad-label" for="event-end-date">End Date</label>
-                                    <input id="event-end-date" class="ad-input" type="date" name="end_date" value="<?php echo htmlspecialchars($currentEndDate); ?>">
+                                    <label class="ad-date-picker" for="event-end-date">
+                                        <input id="event-end-date" class="ad-input" type="date" name="end_date" value="<?php echo htmlspecialchars($currentEndDate); ?>">
+                                        <svg class="ad-date-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                            <rect x="3" y="5" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/>
+                                            <path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+                                        </svg>
+                                    </label>
                                     <div class="ad-hint">When the event finishes. Set the same as Start for a one-day event.</div>
                                 </div>
                             </div>
