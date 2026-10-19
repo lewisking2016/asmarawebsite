@@ -3772,3 +3772,71 @@ textarea:focus {
     margin: 0;
 }
 .ad-input[type="number"] { -moz-appearance: textfield; }
+
+
+/* ============================================================
+   ANALYTICS / CHARTS (Reports page)
+   ============================================================ */
+.ad-page-header-actions {
+    margin-top: 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+.ad-charts-row {
+    display: grid;
+    gap: 18px;
+    margin-top: 24px;
+}
+.ad-charts-row-2 { grid-template-columns: 1fr 1fr; }
+@media (max-width: 1024px) {
+    .ad-charts-row-2 { grid-template-columns: 1fr; }
+}
+.ad-chart-card { display: flex; flex-direction: column; gap: 14px; }
+.ad-chart-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; }
+.ad-chart-head h3 { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 15px; color: var(--ad-ink); margin: 0; }
+.ad-chart-sub { font-size: 12.5px; color: var(--ad-ink-3); margin: 4px 0 0; }
+.ad-chart-sub strong { color: var(--ad-ink); font-weight: 700; }
+.ad-chart-svg { width: 100%; height: auto; display: block; border-radius: 12px; background: linear-gradient(180deg, transparent, rgba(237,23,75,0.02)); }
+
+/* Donut chart */
+.ad-donut-wrap { position: relative; width: 220px; margin: 8px auto 16px; aspect-ratio: 1 / 1; }
+.ad-donut-svg { width: 100%; height: 100%; display: block; }
+.ad-donut-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; pointer-events: none; }
+.ad-donut-center-value { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 30px; color: var(--ad-ink); line-height: 1; }
+.ad-donut-center-label { font-size: 10.5px; text-transform: uppercase; letter-spacing: 0.16em; color: var(--ad-ink-3); margin-top: 4px; font-weight: 700; }
+.ad-donut-legend { list-style: none; margin: 0; padding: 0; display: grid; gap: 9px; }
+.ad-donut-legend li { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--ad-ink); }
+.ad-legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.ad-legend-label { flex: 1; }
+.ad-legend-value { font-family: 'Space Grotesk', sans-serif; font-weight: 700; }
+.ad-legend-value small { font-weight: 500; color: var(--ad-ink-3); margin-left: 4px; }
+
+/* Horizontal bar list */
+.ad-bars { display: flex; flex-direction: column; gap: 14px; }
+.ad-bar-row { display: grid; grid-template-columns: 180px 1fr 90px; align-items: center; gap: 14px; }
+.ad-bar-label { display: flex; flex-direction: column; gap: 2px; font-size: 13px; color: var(--ad-ink-2); line-height: 1.2; }
+.ad-bar-label strong { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px; color: var(--ad-ink); }
+.ad-bar-label strong small { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 500; font-size: 11px; color: var(--ad-ink-3); margin-left: 4px; }
+.ad-bar-track { height: 12px; background: var(--ad-cream); border-radius: 999px; overflow: hidden; border: 1px solid var(--ad-line); }
+.ad-bar-fill { display: block; height: 100%; background: linear-gradient(90deg, #ed174b, #ed174b 70%, rgba(237,23,75,0.55)); border-radius: 999px; transition: width 600ms cubic-bezier(0.22, 1, 0.36, 1); }
+.ad-bar-fill.is-high { background: linear-gradient(90deg, #c97a16, #c97a16 70%, rgba(201,122,22,0.55)); }
+.ad-bar-fill.is-over { background: linear-gradient(90deg, #c81d3f, #c81d3f 70%, rgba(200,29,63,0.55)); }
+.ad-bar-meta { text-align: right; font-size: 12px; color: var(--ad-ink-3); font-weight: 600; }
+@media (max-width: 640px) {
+    .ad-bar-row { grid-template-columns: 1fr; gap: 6px; }
+    .ad-bar-meta { text-align: left; }
+    .ad-bar-track { width: 100%; }
+}
+
+/* Capacity utilization list */
+.ad-capacity-list { display: flex; flex-direction: column; gap: 16px; }
+.ad-capacity-row { display: flex; flex-direction: column; gap: 8px; padding: 14px 16px; background: var(--ad-cream); border: 1px solid var(--ad-line); border-radius: 14px; }
+.ad-capacity-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 13px; color: var(--ad-ink-2); }
+.ad-capacity-head strong { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; color: var(--ad-ink); }
+.ad-capacity-head span { font-family: 'Space Grotesk', sans-serif; font-weight: 700; color: var(--ad-ink); }
+.ad-capacity-foot { display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 12px; color: var(--ad-ink-3); font-weight: 600; }
+@media print {
+    .ad-page-header-actions, .action-buttons, .ad-stat-row { display: none !important; }
+}
+
